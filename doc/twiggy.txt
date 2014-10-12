@@ -1,0 +1,270 @@
+This plugin is only available if compatible is not set and requires that you
+have the |fugitive| plugin installed.
+
+
+INTRODUCTION                                    *twiggy*
+
+Maintain your bearings while working with git branches.
+
+
+COMMANDS                                        *twiggy-commands*
+
+:Twiggy [args]              With no arguments, open a split containing an
+                            interactive and decorated list of branches. See
+                            |twiggy-mappings| for a list of available
+                            buffer-local mappings.
+
+                            If [branch] is given, it will be checked-out -- If
+                            the branch does not exist, it will be created
+                            first.  In this regard, it acts like a cross between
+                            the `git branch` and `git checkout` commands.  You
+                            may also provide the starting point branch as a
+                            second argument.
+
+:TwigPush, :TwigFetch, :TwigMerge, :TwigRebase and :TwigPull are all vanilla
+wrappers to their respective git commands (with completion).  If you have
+|dispatch| installed, it will be used by default.  If you'd prefer not to use
+it, set:
+>
+  let g:twiggy_use_dispatch = 0
+<
+:TwigStash is also available and called through plain ol' |system()|.
+
+
+FUGITIVE COMPATIBILITY                         *twiggy-fugitive*
+Twiggy is aware of the |fugitive| commands |:Gstatus|, |:Gcommit| and |:Gblame|.
+Calling these within the twiggy buffer will first jump to the last used buffer
+before running the actual commands.  This avoids a surprisingly claustrophobic
+feeling while inside twiggy's buffer.  You may also opt to automatically close
+twiggy when running these commands by setting:
+>
+  let g:twiggy_close_on_fugitive_command = 1
+<
+
+
+ICONS                                           *twiggy-icons*
+
+Some branches have icons prepended to them.  For the most part, it means they
+are tracking branches.  Here is the legend:
+
+✓ =                 branch is in synch with its upstream
+↑ -                 branch is ahead of its upstream
+↓ +                 branch is behind of its upstream
+↕ ~                 branch is both ahead and behind its upstream
+∅ %                 branch is detached
+✗ x                 in merge/rebase state
+
+As per standard git output, * is used to denote the current branch.
+
+
+SORTING                                         *twiggy-sorting*
+
+Twiggy can sort your branches.
+
+Alpha-Numeric {alpha}       The standard one you are used to.
+
+Most Recently Used {mru}    Using the reflog, twiggy will sort descending
+                            in the order you checked out each branch.  This
+                            isn't truely mru since if the branch isn't in the
+                            reflog, it will sort near the bottom (new branches
+                            or recently renamed branches, for example).  This is
+                            the default sort for local branches and is not
+                            available for remote branches.
+
+Tracking {track}            This sort puts tracking branchs first followed by
+                            local branches.  The two groups are sorted alpha-
+                            numerically.  This is not available for remote
+                            branches.
+
+Committer Date {date}       Sort by the date of the last commit of each branch.
+                            This is the default sort for remote branches.
+
+
+SORTING OPTIONS                                 *twiggy-sorting-options*
+
+                                                *'local_branch_sort'*
+Default 'mru'
+The default/current sort for local branches.  Values can be 'aplha', 'mru',
+'date' or 'track'.
+>
+  let g:twiggy_local_branch_sort = 'aplha'
+<
+                                                *'local_branch_sorts'*
+This is the array of possible local branch sorts.  You can override it
+directly if you want to limit the number of options available.  For example:
+>
+  let g:twiggy_local_branch_sorts = ['mru', 'date']
+<
+Legal values are the same as for |local_branch_sort|.
+
+                                                *'remote_branch_sort'*
+
+Default 'date'
+The default/current sort for remote branches.  Values can be 'date' or
+'alpha'.
+>
+  let g:twiggy_remote_branch_sort = 'aplha'
+<
+                                                *'remote_branch_sorts'*
+As with |local_branch_sorts|, this an array of possible sorts to use.  This is
+really just here for completeness;  It's pretty useless as there are only two
+possible values.
+
+
+OTHER OPTIONS                                   *twiggy-options*
+
+                                                *'num_columns'*
+Default: 31
+The width of Twiggy's buffer
+
+                                                *'split_method'*
+Default: 'topleft'
+The split method used to show the twiggy buffer.  Can be |leftabove|,
+|rightbelow|, |topleft| or |botright|.
+>
+  let g:twiggy_split_method = 'botright'
+<
+Twiggy only allows a verticle split.
+
+
+MAPPINGS                                        *twiggy-mappings*
+
+                  Navigation~
+                                                *twiggy-<C-N>*
+<C-N>             Jump to the first branch of the next group
+
+                                                *twiggy-<C-P>*
+<C-P>             Jump to the first branch of the previous group
+
+                  Sorting~
+                                                *twiggy-i*
+i                 Cycle through sorts of local group
+
+
+                                                *twiggy-gi*
+gi                Cycle through sorts of remote groups
+
+                  Checkout~
+                                                *twiggy-c*
+c                 Checkout the branch under the cursor.  If the branch is a
+                  remote, create a tracking branch if one doesn't already
+                  exist.
+
+                                                *twiggy-C*
+C                 Checkout the remote branch under the cursor in detached
+                  HEAD.  If the branch is a local tracking branch, it will
+                  checkout its remote in detached HEAD.
+
+                                                *twiggy-<CR>*
+<CR>              Same as c
+
+                  ...and, for those of us used to the various plugins that use
+                  o to open (which is kinda sorta almost like a checkout):
+
+                                                *twiggy-o*
+o                 Same as c
+
+                                                *twiggy-O*
+O                 Same as C
+
+                  Fetching~
+                                                *twiggy-f*
+f                 Fetch the remote for the branch under the cursor.
+
+                                                *twiggy-F*
+F                 Fetch all branches from the remote of the local branch
+                  under the cursor.  If the branch under the cursor is a
+                  remote, it will fetch all branches its remote.
+
+                  Merging and Rebasing~
+                                                *twiggy-m*
+m                 Merge the branch under the cursor into the current branch.
+
+                                                *twiggy-M*
+M                 Merge the branch under the cursor's remote into the current
+                  branch.  This is useful in conjunction with f.  For
+                  example, place your cursor on a branch that isn't the
+                  current one, press f to update its remote, then press M to
+                  merge off the remote.
+
+                                                *twiggy-r*
+r                 Rebase the current branch off the branch under the cursor.
+
+                                                *twiggy-R*
+R                 Rebase the current branch off the branch under the
+                  cursor's remote (if it has one).
+
+                  Pushing~
+                                                *twiggy-^*
+^                 Push the local branch under the cursor.  Think of it as an
+                  upward arrow.
+
+                  Deleting~
+                                                *twiggy-dd*
+dd                Delete the branch under the cursor.  You will be prompted
+                  to confirm this.  If the branch isn't fully merged, the
+                  prompt will warn you of this.  Press <CR> of y to accept,
+                  press <Esc> or n to cancel.
+
+                                                *twiggy-d^*
+d^                If the branch under the cursor is remote, this will prompt
+                  you to delete the branch of the remote repo.
+                  MAKE SURE YOU KNOW WHAT YOU ARE DOING.
+
+                  Stashing~
+                                                *twiggy->>*
+<<                `git stash`
+
+                                                *twiggy-<<*
+>>                `git stash pop`
+
+                  The End~
+                                                *twiggy-q*
+q                 Quit
+
+                                                *twiggy-Q*
+Q                 Quit all twiggy buffers (including the error buffer)
+
+
+
+EXPERIMENTAL CODE BLOAT                        *twiggy-cmd*
+
+Pressing s while in the twiggy buffer will start a sort of command prompt that
+looks like this:
+>
+  git <cmd>
+<
+You can use this prompt to pass a limited set of options to merge, rebase and
+fetch mappings.
+
+You can construct options with the following mappings:
+>
+  a: all
+  f: ff
+  !: force
+  o: only
+  s: squash
+  t: tags
+  n: no (prefix)
+<
+To finish the command, you may use any of the mappings for |fetch|, |merge|,
+|rebase| and |push|.
+
+For example, pressing snf would bring up the following:
+>
+  git <cmd> --no-ff
+<
+You could then complete the command by pressing m which would merge the branch
+under the cursor into the current branch with the --no-ff option.
+
+<C-U> and <C-W> work as expected while in this mode.
+
+To abort, press any key that isn't a valid terminator mapping (r, R, m, M, f
+or F).  I'd suggest <ESC>.
+
+WARNING!  As implied by the header, this whole thing is more of a fun
+experiment; At least for the time-being.  I don't use this a whole lot myself.
+Also, IT DOES NO FORM OF VALIDATION.  So typing 'snor' is going to run 'git
+rebase --only' or `git fetch --no-force` which are just wrong.
+
+  vim:tw=78:et:ft=help:norl:
