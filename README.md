@@ -32,8 +32,7 @@ will checkout a remote branch in detached HEAD.  You can also use `o` and `O`.
 
 With your cursor on a branch, `m` merges it into the current branch.  With your
 cursor on a local branch, `M` will merge its tracking branch into the current
-branch.  Use `r` and `R` for rebasing.  `f` fetches the branch under the cursor
-whereas `F` performs a `git fetch --all`.
+branch.  Use `r` and `R` for rebasing.  `f` fetches the branch under the cursor.
 
 Hint: to pull on the current branch, move your cursor to it and press `f` then
 press `M`.

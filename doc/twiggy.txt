@@ -172,12 +172,7 @@ O                 Same as C
 
                   Fetching~
                                                 *twiggy-f*
-f                 Fetch the remote for the branch under the cursor.
-
-                                                *twiggy-F*
-F                 Fetch all branches from the remote of the local branch
-                  under the cursor.  If the branch under the cursor is a
-                  remote, it will fetch all branches its remote.
+F                 Fetch the remote for the branch under the cursor.
 
                   Merging and Rebasing~
                                                 *twiggy-m*

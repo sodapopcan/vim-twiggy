@@ -211,7 +211,7 @@ endfunction
 
 " {{{1 Option Parser
 function! s:OptionParser()
-  let terminators = ['m', 'M', 'r', 'R', 'f', 'F', '^']
+  let terminators = ['m', 'M', 'r', 'R', 'F', '^']
   let options = {
         \ 'a': 'all',
         \ 'f': 'ff',
@@ -655,8 +655,7 @@ function! s:Render()
   call s:mapping('O',    'Checkout',     [0])
   call s:mapping('dd',   'Delete',       [])
   call s:mapping('d^',   'DeleteRemote', [])
-  call s:mapping('f',    'Fetch',        [0])
-  call s:mapping('F',    'Fetch',        [1])
+  call s:mapping('F',    'Fetch',        [])
   call s:mapping('m',    'Merge',        [0])
   call s:mapping('M',    'Merge',        [1])
   call s:mapping('r',    'Rebase',       [0])
@@ -868,22 +867,17 @@ function! s:DeleteRemote()
 endfunction
 
 "     {{{3 Fetch
-function! s:Fetch(remote)
+function! s:Fetch()
   let branch = s:branch_under_cursor()
-  if a:remote !=# ''
-    call s:git_cmd('fetch ' . branch.remote, 1)
+  if branch.tracking !=# ''
+    let parts = split(branch.tracking, '/')
+    call s:git_cmd('fetch ' . s:git_flags . parts[0] . ' ' . join(parts[1:], '/') .
+          \ ':refs/remotes/' . parts[0] . '/' . branch.name, 1)
   else
-    if branch.tracking !=# ''
-      let parts = split(branch.tracking, '/')
-      call s:git_cmd('fetch ' . s:git_flags . parts[0] . ' ' . join(parts[1:], '/') .
-            \ ':refs/remotes/' . parts[0] . '/' . branch.name, 1)
-    else
-      redraw
-      echo branch.name . ' is not a tracking branch'
-      return 1
-    endif
+    redraw
+    echo branch.name . ' is not a tracking branch'
+    return 1
   endif
-
   return 0
 endfunction
 
