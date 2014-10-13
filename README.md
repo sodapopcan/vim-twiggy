@@ -14,9 +14,9 @@ It also has [dispatch](https://github.com/tpope/vim-dispatch) support!
 
 While I have been developing and using this plugin for quite some time, it's
 only been publicly available since Oct 11, 2014.  It was developed entirely on a
-2013 MacBook Air with Vim 7.3/7.4 and most git 1.8/1.9/2.x (I didn't update to
-2.x until very recently).  It hasn't been tested in any other context.  Also,
-this is my very first Vim plugin.
+2013 MacBook Air with Vim 7.3/7.4 and mostly git 1.8 and 1.9 (I didn't update to
+2 until very recently).  It hasn't been tested in any other context.  Also,
+this is my very first Vim plugin so... be warned!
 
 ## Basic Usage
 
@@ -29,7 +29,7 @@ the command prompt.
 
 To checkout a branch, hit `c`.  If the branch is remote and a tracking branch
 doesn't yet exist for it, one will be created.  `C` works the same way only it
-will checkout a remote branch in detached HEAD.  You can also `o` and `O`.
+will checkout a remote branch in detached HEAD.  You can also use `o` and `O`.
 `<C-R>` (Enter) is an alias for `c`.
 
 `m` merges the branch under the cursor into the current branch.  `M` merges the
