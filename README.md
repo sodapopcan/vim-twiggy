@@ -14,8 +14,8 @@ It also has [dispatch](https://github.com/tpope/vim-dispatch) support!
 
 While I have been developing and using this plugin for quite some time, it's
 only been publicly available since Oct 11, 2014.  It was developed entirely on a
-2013 MacBook Air with Vim 7.3/7.4 and most git 1.8/1.9/2 (I didn't update
-to 2 until very recently).  It hasn't been tested in any other context.  Also,
+2013 MacBook Air with Vim 7.3/7.4 and most git 1.8/1.9/2.x (I didn't update to
+2.x until very recently).  It hasn't been tested in any other context.  Also,
 this is my very first Vim plugin.
 
 ## Basic Usage
@@ -27,10 +27,10 @@ or jump between groups (locals/remotes) with `<C-N>` and `<C-P>`.  As your
 cursor moves, information about the branch under the cursor will be echoed to
 the command prompt.
 
-To checkout a local branch, or a remote branch in detached HEAD, hit `c`.  `C`
-works the same way only it will create and checkout a local tracking branch for
-a remote that doesn't already have one.  You can also `o` and `O` or `<C-R>`
-(Enter) which is an alias for `c`.
+To checkout a branch, hit `c`.  If the branch is remote and a tracking branch
+doesn't yet exist for it, one will be created.  `C` works the same way only it
+will checkout a remote branch in detached HEAD.  You can also `o` and `O`.
+`<C-R>` (Enter) is an alias for `c`.
 
 `m` merges the branch under the cursor into the current branch.  `M` merges the
 remote of the branch under the cursor into the current branch.  Use `r` and `R`
