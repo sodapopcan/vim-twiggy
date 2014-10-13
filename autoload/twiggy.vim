@@ -678,40 +678,40 @@ function! s:Render()
  " {{{ Syntax
   syntax clear
 
-  exec "syntax match TwiggyHeader '\\v(^[^\\ " . s:icons.current . "]+)'"
-  highlight link TwiggyHeader Type
+  exec "syntax match TwiggyGroup '\\v(^[^\\ " . s:icons.current . "]+)'"
+  highlight link TwiggyGroup Type
 
-  exec "syntax match TwiggyCurrentName '\\v" . s:get_current_branch() . "$'"
-  highlight link TwiggyCurrentName Identifier
+  exec "syntax match TwiggyCurrent '\\v" . s:get_current_branch() . "$'"
+  highlight link TwiggyCurrent Identifier
 
   exec "syntax match TwiggyCurrent '\\V\\%1c" . s:icons.current . "'"
   highlight link TwiggyCurrent Identifier
 
   exec "syntax match TwiggyTracking '\\V\\%2c" . s:icons.tracking . "'"
-  highlight TwiggyTracking ctermfg=3 guifg=#808000
+  highlight link TwiggyTracking DiffAdd
 
   exec "syntax match TwiggyAhead '\\V\\%2c" . s:icons.ahead . "'"
-  highlight TwiggyAhead ctermfg=2 guifg=#008000
+  highlight link TwiggyAhead DiffDelete
 
   exec "syntax match TwiggyAheadBehind '\\V\\%2c" . s:icons.behind . "'"
   exec "syntax match TwiggyAheadBehind '\\V\\%2c" . s:icons.both . "'"
-  highlight TwiggyAheadBehind ctermfg=1 guifg=#800000
+  highlight link TwiggyAheadBehind DiffDelete
 
   exec "syntax match TwiggyDetached '\\V\\%2c" . s:icons.detached . "'"
-  highlight TwiggyDetached ctermfg=1 guifg=#800000
+  highlight link TwiggyDetached DiffChange
 
   exec "syntax match TwiggyUnmerged '\\V\\%2c" . s:icons.unmerged . "'"
-  highlight TwiggyUnmerged ctermfg=5 guifg=#800000
+  highlight link TwiggyUnmerged DiffChange
 
-  syntax match TwiggySort '\v[[a-z]+]'
-  highlight link TwiggySort Comment
+  syntax match TwiggySortText '\v[[a-z]+]'
+  highlight link TwiggySortText Comment
 
   syntax match TwiggyBranchStatus "\v^(rebasing|merging)"
-  highlight TwiggyBranchStatus ctermfg=1 guifg=#800000
+  highlight link TwiggyBranchStatus DiffDelete
 
   if exists('s:branches_not_in_reflog') && len(s:branches_not_in_reflog)
-    exec "syntax match TwiggyBranchesNotInReflog '\\v" . join(s:branches_not_in_reflog) . "'"
-    highlight link TwiggyBranchesNotInReflog Comment
+    exec "syntax match TwiggyNotInReflog '\\v" . join(s:branches_not_in_reflog) . "'"
+    highlight link TwiggyNotInReflog Comment
   endif
 
   " }}}
