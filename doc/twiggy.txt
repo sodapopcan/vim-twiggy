@@ -138,11 +138,14 @@ MAPPINGS                                        *twiggy-mappings*
 
                   Sorting~
                                                 *twiggy-i*
-i                 Cycle through sorts of local group
+i                 Cycle through sorts of the group of the branch under the
+                  cursor.  If on a remote, all remote groups will be sorted.
 
 
                                                 *twiggy-gi*
-gi                Cycle through sorts of remote groups
+gi                Cycle through sorts of groups other than that of the branch
+                  under the cursor.  Useful for lazily resorting remote
+                  branches without having to jump down to them.
 
                   Checkout~
                                                 *twiggy-c*

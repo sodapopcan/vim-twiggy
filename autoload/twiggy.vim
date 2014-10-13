@@ -789,11 +789,13 @@ function s:sort_branches(type)
 endfunction
 
 "     {{{3 Cycle
-function! s:CycleSort(remote)
-  if a:remote
-    call s:sort_branches('remote')
+function! s:CycleSort(alt)
+  let local = s:branch_under_cursor().group ==# 'local'
+
+  if !a:alt
+    call s:sort_branches(local ? 'local' : 'remote')
   else
-    call s:sort_branches('local')
+    call s:sort_branches(local ? 'remote' : 'local')
   endif
 
   " This is a little bit of an unfortunate hack
