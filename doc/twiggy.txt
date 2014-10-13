@@ -138,11 +138,14 @@ MAPPINGS                                        *twiggy-mappings*
 
                   Sorting~
                                                 *twiggy-i*
-i                 Cycle through sorts of local group
+i                 Cycle through sorts of the group of the branch under the
+                  cursor.  If on a remote, all remote groups will be sorted.
 
 
                                                 *twiggy-gi*
-gi                Cycle through sorts of remote groups
+gi                Cycle through sorts of groups other than that of the branch
+                  under the cursor.  Useful for lazily resorting remote
+                  branches without having to jump down to them.
 
                   Checkout~
                                                 *twiggy-c*
@@ -169,12 +172,7 @@ O                 Same as C
 
                   Fetching~
                                                 *twiggy-f*
-f                 Fetch the remote for the branch under the cursor.
-
-                                                *twiggy-F*
-F                 Fetch all branches from the remote of the local branch
-                  under the cursor.  If the branch under the cursor is a
-                  remote, it will fetch all branches its remote.
+F                 Fetch the remote for the branch under the cursor.
 
                   Merging and Rebasing~
                                                 *twiggy-m*
@@ -266,5 +264,28 @@ WARNING!  As implied by the header, this whole thing is more of a fun
 experiment; At least for the time-being.  I don't use this a whole lot myself.
 Also, IT DOES NO FORM OF VALIDATION.  So typing 'snor' is going to run 'git
 rebase --only' or `git fetch --no-force` which are just wrong.
+
+
+SYNTAX                                        *twiggy-syntax*
+
+Twiggy provides a handful of syntax groups for your customization kicks.
+Below is a list of these groups and their defaults.  To override any of these,
+put something like the following in your vimrc:
+>
+  highlight TwiggyGroup ctermfg=10 guifg=#00FF00
+  highlight link TwiggySortText Normal
+<
+TwiggyGroup                 Type         a group heading (normal, origin, ...)
+TwiggySortText              Comment      sort indicator (beside the header)
+TwiggyBranchStatus          DiffDelete   group name becomes 'rebasing' or
+                                         'merging'
+TwiggyCurrent               Identifier   name of the current branch
+TwiggyNotInReflog           Comment      name of branches not in the reflog
+TwiggyIconCurrent           Identifier   icon: generally the * character
+TwiggyIconTracking          DiffAdd      icon: an up-to-date tracking banch
+TwiggyIconAhead             DiffDelete   icon: branch is ahead of remote
+TwiggyIconAheadBehind       DiffDelete   icon: branch is both ahead and behind
+TwiggyIconDetached          DiffChange   icon: current branch is detached
+TwiggyIconUnmerged          DiffChange   icon: current branch is unmerged
 
   vim:tw=78:et:ft=help:norl:

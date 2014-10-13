@@ -211,7 +211,7 @@ endfunction
 
 " {{{1 Option Parser
 function! s:OptionParser()
-  let terminators = ['m', 'M', 'r', 'R', 'f', 'F', '^']
+  let terminators = ['m', 'M', 'r', 'R', 'F', '^']
   let options = {
         \ 'a': 'all',
         \ 'f': 'ff',
@@ -655,8 +655,7 @@ function! s:Render()
   call s:mapping('O',    'Checkout',     [0])
   call s:mapping('dd',   'Delete',       [])
   call s:mapping('d^',   'DeleteRemote', [])
-  call s:mapping('f',    'Fetch',        [0])
-  call s:mapping('F',    'Fetch',        [1])
+  call s:mapping('F',    'Fetch',        [])
   call s:mapping('m',    'Merge',        [0])
   call s:mapping('M',    'Merge',        [1])
   call s:mapping('r',    'Rebase',       [0])
@@ -678,40 +677,40 @@ function! s:Render()
  " {{{ Syntax
   syntax clear
 
-  exec "syntax match TwiggyHeader '\\v(^[^\\ " . s:icons.current . "]+)'"
-  highlight link TwiggyHeader Type
+  exec "syntax match TwiggyGroup '\\v(^[^\\ " . s:icons.current . "]+)'"
+  highlight link TwiggyGroup Type
 
-  exec "syntax match TwiggyCurrentName '\\v" . s:get_current_branch() . "$'"
-  highlight link TwiggyCurrentName Identifier
+  exec "syntax match TwiggyCurrent '\\v" . s:get_current_branch() . "$'"
+  highlight link TwiggyCurrent Identifier
 
   exec "syntax match TwiggyCurrent '\\V\\%1c" . s:icons.current . "'"
   highlight link TwiggyCurrent Identifier
 
   exec "syntax match TwiggyTracking '\\V\\%2c" . s:icons.tracking . "'"
-  highlight TwiggyTracking ctermfg=3 guifg=#808000
+  highlight link TwiggyTracking DiffAdd
 
   exec "syntax match TwiggyAhead '\\V\\%2c" . s:icons.ahead . "'"
-  highlight TwiggyAhead ctermfg=2 guifg=#008000
+  highlight link TwiggyAhead DiffDelete
 
   exec "syntax match TwiggyAheadBehind '\\V\\%2c" . s:icons.behind . "'"
   exec "syntax match TwiggyAheadBehind '\\V\\%2c" . s:icons.both . "'"
-  highlight TwiggyAheadBehind ctermfg=1 guifg=#800000
+  highlight link TwiggyAheadBehind DiffDelete
 
   exec "syntax match TwiggyDetached '\\V\\%2c" . s:icons.detached . "'"
-  highlight TwiggyDetached ctermfg=1 guifg=#800000
+  highlight link TwiggyDetached DiffChange
 
   exec "syntax match TwiggyUnmerged '\\V\\%2c" . s:icons.unmerged . "'"
-  highlight TwiggyUnmerged ctermfg=5 guifg=#800000
+  highlight link TwiggyUnmerged DiffChange
 
-  syntax match TwiggySort '\v[[a-z]+]'
-  highlight link TwiggySort Comment
+  syntax match TwiggySortText '\v[[a-z]+]'
+  highlight link TwiggySortText Comment
 
   syntax match TwiggyBranchStatus "\v^(rebasing|merging)"
-  highlight TwiggyBranchStatus ctermfg=1 guifg=#800000
+  highlight link TwiggyBranchStatus DiffDelete
 
   if exists('s:branches_not_in_reflog') && len(s:branches_not_in_reflog)
-    exec "syntax match TwiggyBranchesNotInReflog '\\v" . join(s:branches_not_in_reflog) . "'"
-    highlight link TwiggyBranchesNotInReflog Comment
+    exec "syntax match TwiggyNotInReflog '\\v" . join(s:branches_not_in_reflog) . "'"
+    highlight link TwiggyNotInReflog Comment
   endif
 
   " }}}
@@ -789,11 +788,13 @@ function s:sort_branches(type)
 endfunction
 
 "     {{{3 Cycle
-function! s:CycleSort(remote)
-  if a:remote
-    call s:sort_branches('remote')
+function! s:CycleSort(alt)
+  let local = s:branch_under_cursor().group ==# 'local'
+
+  if !a:alt
+    call s:sort_branches(local ? 'local' : 'remote')
   else
-    call s:sort_branches('local')
+    call s:sort_branches(local ? 'remote' : 'local')
   endif
 
   " This is a little bit of an unfortunate hack
@@ -866,22 +867,17 @@ function! s:DeleteRemote()
 endfunction
 
 "     {{{3 Fetch
-function! s:Fetch(remote)
+function! s:Fetch()
   let branch = s:branch_under_cursor()
-  if a:remote !=# ''
-    call s:git_cmd('fetch ' . branch.remote, 1)
+  if branch.tracking !=# ''
+    let parts = split(branch.tracking, '/')
+    call s:git_cmd('fetch ' . s:git_flags . parts[0] . ' ' . join(parts[1:], '/') .
+          \ ':refs/remotes/' . parts[0] . '/' . branch.name, 1)
   else
-    if branch.tracking !=# ''
-      let parts = split(branch.tracking, '/')
-      call s:git_cmd('fetch ' . s:git_flags . parts[0] . ' ' . join(parts[1:], '/') .
-            \ ':refs/remotes/' . parts[0] . '/' . branch.name, 1)
-    else
-      redraw
-      echo branch.name . ' is not a tracking branch'
-      return 1
-    endif
+    redraw
+    echo branch.name . ' is not a tracking branch'
+    return 1
   endif
-
   return 0
 endfunction
 
