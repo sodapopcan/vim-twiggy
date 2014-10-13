@@ -6,7 +6,7 @@
 if exists('g:loaded_twiggy') || &cp || !exists('g:loaded_fugitive')
   finish
 endif
-let g:loaded_twiggy = 0
+let g:loaded_twiggy = 1
 
 for cmd in ['Twiggy', 'Twig']
   exec "command! -nargs=* -complete=custom,TwiggyCompleteGitBranches " .
