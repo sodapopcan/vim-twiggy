@@ -12,9 +12,12 @@ It also has [dispatch](https://github.com/tpope/vim-dispatch) support!
 
 ## NB!
 
-This plugin was developed on a 2013ish MacBook Air with Vim 7.3/7.4 and
-Git 1.8, 1.9 and 2.1.2.  It hasn't been tested in any other context.  Pull
-Requests are welcome!
+This plugin was developed on a 2013ish MacBook Air with Vim 7.3/7.4,
+Git 1.8, 1.9 and 2.1.2 using mostly zsh (but also a bit of bash).  I've
+opened it in MacVim a couple of times, but that's it. It hasn't been tested
+in any other context.  Some area are in need of some polish (see "Ramble"below).
+
+Pull requests welcome!
 
 ## Basic Usage
 
@@ -52,3 +55,24 @@ Type `q` to quit.
 NeoBundle, Vundle or Pathogen are all fine options.
 
 You __must__ have [fugitive](https://github.com/tpope/vim-fugitive) installed!
+
+## Ramble
+
+I started work on this in early 2014.  After getting it to do everything I
+wanted it to do, plus some extra stuff I just thought was cool, I ceased work
+on it for about six months, yet continued to use it daily.  I finally put it
+online in October 2014.  It still has a ways to go, but I'm actively working
+toward a stable release.
+
+Currently in the works (in rough order you can expect them):
+
+- A nicer rebase/merge experience (fixes and polish)
+- Fix the jarring cursor jump after deleting a branch
+- A mapping for `git pull` (but really, just F then R or M)
+- A mapping for `git cherry-pick`
+- Quick help (maybe)
+- Improve, er... "command option mapping composition thing" (see `:h twiggy-cmd`)
+
+This is my first-ever Vim plugin, so please excuse any erraticness in
+development over the next few weeks.  Any input anyone has for me is greatly
+appreciated!
