@@ -15,7 +15,8 @@ It also has [dispatch](https://github.com/tpope/vim-dispatch) support!
 This plugin was developed on a 2013ish MacBook Air with Vim 7.3/7.4,
 Git 1.8, 1.9 and 2.1.2 using mostly zsh (but also a bit of bash).  I've
 opened it in MacVim a couple of times, but that's it. It hasn't been tested
-in any other context.  Some area are in need of some polish (see "Ramble"below).
+in any other context.  Some areas are in need of some polish (see "Ramble"
+below).
 
 Pull requests welcome!
 
