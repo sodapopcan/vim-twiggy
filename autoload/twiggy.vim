@@ -745,7 +745,8 @@ function! twiggy#Branch(...) abort
     call s:git_cmd('checkout ' . f . join(a:000), 0)
     call s:ShowOutputBuffer()
     if s:get_option('bufnr')
-      call s:Render()
+      call s:buffocus(s:get_option('bufnr'))
+      call s:Refresh()
     end
     redraw
     echo 'Moved from ' . current_branch . ' to ' . a:1
@@ -760,7 +761,7 @@ function! twiggy#Branch(...) abort
       else
         " If twiggy is open, :Twiggy will focus the twiggy buffer then redraw " it
         call s:buffocus(s:get_option('bufnr'))
-        call s:Render()
+        call s:Refresh()
       end
     endif
   endif
@@ -1014,6 +1015,7 @@ function! s:GitCmd(prompt_to_stash, cmd, ...)
   call s:git_cmd(a:cmd . args, 1)
 
   if exists('g:twiggy_bufnr')
+    call s:buffocus(g:twiggy_bufnr)
     call s:Refresh()
   endif
 endfunction
