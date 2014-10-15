@@ -1093,6 +1093,6 @@ else
   let close_string = 'wincmd w'
 endif
 
-autocmd BufEnter Twiggy exec "command! -buffer Gstatus " . close_string . " | silent normal :Gstatus\<CR>"
-autocmd BufEnter Twiggy exec "command! -buffer Gcommit " . close_string . " | silent normal :Gcommit\<CR>"
-autocmd BufEnter Twiggy exec "command! -buffer Gblame  " . close_string . " | silent normal :Gblame\<CR>"
+autocmd BufEnter Twiggy exec "command! -buffer Gstatus " . close_string . " | silent normal! :<\C-U>Gstatus\<CR>"
+autocmd BufEnter Twiggy exec "command! -buffer Gcommit " . close_string . " | silent normal! :<\C-U>Gcommit\<CR>"
+autocmd BufEnter Twiggy exec "command! -buffer Gblame  " . close_string . " | silent normal! :<\C-U>Gblame\<CR>"
