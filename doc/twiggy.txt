@@ -286,6 +286,6 @@ TwiggyIconTracking          DiffAdd      icon: an up-to-date tracking banch
 TwiggyIconAhead             DiffDelete   icon: branch is ahead of remote
 TwiggyIconAheadBehind       DiffDelete   icon: branch is both ahead and behind
 TwiggyIconDetached          DiffChange   icon: current branch is detached
-TwiggyIconUnmerged          DiffChange   icon: current branch is unmerged
+TwiggyIconUnmerged          DiffDelete   icon: current branch is unmerged
 
   vim:tw=78:et:ft=help:norl:

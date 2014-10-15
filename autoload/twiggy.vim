@@ -699,8 +699,8 @@ function! s:Render()
   exec "syntax match TwiggyDetached '\\V\\%2c" . s:icons.detached . "'"
   highlight link TwiggyDetached DiffChange
 
-  exec "syntax match TwiggyUnmerged '\\V\\%2c" . s:icons.unmerged . "'"
-  highlight link TwiggyUnmerged DiffChange
+  exec "syntax match TwiggyUnmerged '\\V\\%1c" . s:icons.unmerged . "'"
+  highlight link TwiggyUnmerged DiffDelete
 
   syntax match TwiggySortText '\v[[a-z]+]'
   highlight link TwiggySortText Comment
