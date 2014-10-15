@@ -719,22 +719,17 @@ endfunction
 
 "     {{{3 Refresh
 function! s:Refresh()
-  if exists('s:stop_endless') | return | endif
-  if !exists('g:twiggy_bufnr') || !exists('b:git_dir')
-    return
-  endif
-  if &filetype ==# 'twiggy'
-    call s:Render()
-  else
+  if !exists('g:twiggy_bufnr') || !exists('b:git_dir') | return | endif
+  if exists('s:refreshing') | return | endif
+  let s:refreshing = 1
+  if &filetype !=# 'twiggy'
+    call s:buffocus(g:twiggy_bufnr)
     if g:twiggy_git_dir ==# b:git_dir | return | endif
     let g:twiggy_git_dir = b:git_dir
     let g:twiggy_git_cmd = fugitive#buffer().repo().git_command()
-    call s:buffocus(g:twiggy_bufnr)
-    call s:Render()
-    let s:stop_endless = 1
-    wincmd w
-    unlet s:stop_endless
   endif
+  call s:Render()
+  unlet s:refreshing
 endfunction
 
 "     {{{3 Branch
@@ -745,7 +740,6 @@ function! twiggy#Branch(...) abort
     call s:git_cmd('checkout ' . f . join(a:000), 0)
     call s:ShowOutputBuffer()
     if s:get_option('bufnr')
-      call s:buffocus(s:get_option('bufnr'))
       call s:Refresh()
     end
     redraw
@@ -761,7 +755,6 @@ function! twiggy#Branch(...) abort
       else
         " If twiggy is open, :Twiggy will focus the twiggy buffer then redraw " it
         call s:buffocus(s:get_option('bufnr'))
-        call s:Refresh()
       end
     endif
   endif
@@ -1015,7 +1008,6 @@ function! s:GitCmd(prompt_to_stash, cmd, ...)
   call s:git_cmd(a:cmd . args, 1)
 
   if exists('g:twiggy_bufnr')
-    call s:buffocus(g:twiggy_bufnr)
     call s:Refresh()
   endif
 endfunction
@@ -1080,9 +1072,7 @@ augroup twiggy
   autocmd CursorMoved Twiggy call s:show_branch_details()
   autocmd CursorMoved Twiggy call s:update_last_branch_under_cursor()
   autocmd BufEnter    Twiggy exec 'vertical resize ' . s:get_option('num_coloumns')
-
-  autocmd BufReadPost,BufEnter * call <SID>Refresh()
-
+  autocmd BufReadPost,BufEnter,BufLeave,VimResized Twiggy call <SID>Refresh()
   autocmd BufWinLeave Twiggy if exists('g:twiggy_bufnr') | unlet g:twiggy_bufnr | endif
 augroup END
 
