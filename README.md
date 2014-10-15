@@ -20,7 +20,9 @@ below).
 
 Pull requests welcome!
 
-## Basic Usage
+## Usage
+Press `i` to cycle through sorting options (`I` to go backwards) and `a` to
+toggle the grouping of local branches by slash (`/`).
 
 Invoke Twiggy with the `:Twiggy`, or simply `:Twig` command.
 

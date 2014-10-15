@@ -57,6 +57,19 @@ are tracking branches.  Here is the legend:
 As per standard git output, * is used to denote the current branch.
 
 
+GROUPING                                        *twiggy-grouping*
+
+Twiggy will group branches by local and remote.  By default, if any local
+branches contain a slash, they will be split up into groups based on the first
+slash in the name.  While a lot of the time this is desirable, it really
+breaks-up sorting by most-recently-used, which is meant to let you see one
+list of all local branches in the reverse order you checked them out in.  So
+you can toggle this behaviour at any point with the |twiggy-S| mapping.  You
+can also change the default with:
+>
+  let g:twiggy_group_locals_by_slash = 0
+<
+
 SORTING                                         *twiggy-sorting*
 
 Twiggy can sort your branches.
@@ -146,6 +159,10 @@ i                 Cycle through sorts of the group of the branch under the
 gi                Cycle through sorts of groups other than that of the branch
                   under the cursor.  Useful for lazily resorting remote
                   branches without having to jump down to them.
+
+                                                *twiggy-S*
+a                 Toggle grouping of local branches with slashes (/) in their
+                  names.
 
                   Checkout~
                                                 *twiggy-c*
