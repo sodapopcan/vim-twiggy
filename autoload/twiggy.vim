@@ -36,9 +36,9 @@ endfunction
 "   {{{2 The Options
 call s:init_option('num_coloumns', 31)
 call s:init_option('split_position', 'topleft')
-call s:init_option('local_branch_sort', 'mru')
+call s:init_option('local_branch_sort', 'alpha')
 call s:init_option('local_branch_sorts', ['alpha', 'mru', 'date', 'track'])
-call s:init_option('remote_branch_sort', 'date')
+call s:init_option('remote_branch_sort', 'alpha')
 call s:init_option('remote_branch_sorts', ['alpha', 'date'])
 call s:init_option('group_locals_by_slash', 1)
 call s:init_option('use_dispatch', exists('g:loaded_dispatch') && g:loaded_dispatch ? 1 : 0)

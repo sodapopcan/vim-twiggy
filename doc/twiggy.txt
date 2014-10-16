@@ -57,19 +57,6 @@ are tracking branches.  Here is the legend:
 As per standard git output, * is used to denote the current branch.
 
 
-GROUPING                                        *twiggy-grouping*
-
-Twiggy will group branches by local and remote.  By default, if any local
-branches contain a slash, they will be split up into groups based on the first
-slash in the name.  While a lot of the time this is desirable, it really
-breaks-up sorting by most-recently-used, which is meant to let you see one
-list of all local branches in the reverse order you checked them out in.  So
-you can toggle this behaviour at any point with the |twiggy-S| mapping.  You
-can also change the default with:
->
-  let g:twiggy_group_locals_by_slash = 0
-<
-
 SORTING                                         *twiggy-sorting*
 
 Twiggy can sort your branches.
@@ -78,29 +65,26 @@ Alpha-Numeric {alpha}       The standard one you are used to.
 
 Most Recently Used {mru}    Using the reflog, twiggy will sort descending
                             in the order you checked out each branch.  This
-                            isn't truely mru since if the branch isn't in the
+                            isn't truly mru since if the branch isn't in the
                             reflog, it will sort near the bottom (new branches
-                            or recently renamed branches, for example).  This is
-                            the default sort for local branches and is not
-                            available for remote branches.
+                            or recently renamed branches, for example).
 
-Tracking {track}            This sort puts tracking branchs first followed by
+Tracking {track}            This sort puts tracking branches first followed by
                             local branches.  The two groups are sorted alpha-
                             numerically.  This is not available for remote
                             branches.
 
 Committer Date {date}       Sort by the date of the last commit of each branch.
-                            This is the default sort for remote branches.
 
 
 SORTING OPTIONS                                 *twiggy-sorting-options*
 
                                                 *'local_branch_sort'*
-Default 'mru'
+Default 'alpha'
 The default/current sort for local branches.  Values can be 'aplha', 'mru',
 'date' or 'track'.
 >
-  let g:twiggy_local_branch_sort = 'aplha'
+  let g:twiggy_local_branch_sort = 'mru'
 <
                                                 *'local_branch_sorts'*
 This is the array of possible local branch sorts.  You can override it
@@ -112,16 +96,30 @@ Legal values are the same as for |local_branch_sort|.
 
                                                 *'remote_branch_sort'*
 
-Default 'date'
-The default/current sort for remote branches.  Values can be 'date' or
-'alpha'.
+Default 'alpha'
+The default/current sort for remote branches.  Values can be 'alpha'or
+'date' .
 >
-  let g:twiggy_remote_branch_sort = 'aplha'
+  let g:twiggy_remote_branch_sort = 'date'
 <
                                                 *'remote_branch_sorts'*
 As with |local_branch_sorts|, this an array of possible sorts to use.  This is
 really just here for completeness;  It's pretty useless as there are only two
 possible values.
+
+
+GROUPING                                        *twiggy-grouping*
+
+By default, twiggy groups branches via one level of "slash-nesting" for locals
+and one group each for remotes.
+
+Branches are sorted before they are grouped, so this can be a little odd when
+sorting by MRU.  To sort locals as one unified group, use the |twiggy-S|
+mapping (hint: it's a toggle).  You may set this grouping method to the
+default with the following:
+>
+  let g:twiggy_group_locals_by_slash = 0
+<
 
 
 OTHER OPTIONS                                   *twiggy-options*
@@ -299,7 +297,7 @@ TwiggyBranchStatus          DiffDelete   group name becomes 'rebasing' or
 TwiggyCurrent               Identifier   name of the current branch
 TwiggyNotInReflog           Comment      name of branches not in the reflog
 TwiggyIconCurrent           Identifier   icon: generally the * character
-TwiggyIconTracking          DiffAdd      icon: an up-to-date tracking banch
+TwiggyIconTracking          DiffAdd      icon: an up-to-date tracking branch
 TwiggyIconAhead             DiffDelete   icon: branch is ahead of remote
 TwiggyIconAheadBehind       DiffDelete   icon: branch is both ahead and behind
 TwiggyIconDetached          DiffChange   icon: current branch is detached
