@@ -679,7 +679,6 @@ function! s:Render()
 
   setlocal nomodified nomodifiable noswapfile
 
-  " This is solving a problem I don't have yet :O
   exec "normal! " . s:init_line . "gg"
 
   nnoremap <buffer> <silent> j     :<C-U>call <SID>traverseBranches('j')<CR>
@@ -885,6 +884,8 @@ function! s:Delete()
   if branch.fullname ==# s:get_current_branch()
     return
   endif
+
+  let s:init_line = branch.line
 
   if branch.is_local
     if index(s:get_merged_branches(), branch.fullname) < 0
