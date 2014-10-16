@@ -152,11 +152,17 @@ MAPPINGS                                        *twiggy-mappings*
 i                 Cycle through sorts of the group of the branch under the
                   cursor.  If on a remote, all remote groups will be sorted.
 
+                                                *twiggy-I*
+I                 Like i, but in reverse.
+
 
                                                 *twiggy-gi*
 gi                Cycle through sorts of groups other than that of the branch
                   under the cursor.  Useful for lazily resorting remote
                   branches without having to jump down to them.
+
+gI                Like gi, but in reverse... even though there are only two
+                  options.
 
                                                 *twiggy-S*
 a                 Toggle grouping of local branches with slashes (/) in their

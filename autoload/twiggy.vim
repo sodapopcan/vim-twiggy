@@ -37,7 +37,7 @@ endfunction
 call s:init_option('num_coloumns', 31)
 call s:init_option('split_position', 'topleft')
 call s:init_option('local_branch_sort', 'alpha')
-call s:init_option('local_branch_sorts', ['alpha', 'mru', 'date', 'track'])
+call s:init_option('local_branch_sorts', ['alpha', 'date', 'track', 'mru'])
 call s:init_option('remote_branch_sort', 'alpha')
 call s:init_option('remote_branch_sorts', ['alpha', 'date'])
 call s:init_option('group_locals_by_slash', 1)
@@ -813,10 +813,10 @@ endfunction
 
 "   {{{2 Sorting
 "     {{{3 Helpers
-function s:sort_branches(type)
-  let max_index = len(s:get_option(a:type . '_branch_sorts')) - 1
+function s:sort_branches(type, int)
+  let max_index = len(s:get_option(a:type . '_branch_sorts')) - a:int
   let new_index = index(s:get_option(a:type . '_branch_sorts'),
-        \  s:get_option(a:type . '_branch_sort')) + 1
+        \  s:get_option(a:type . '_branch_sort')) + a:int
 
   if new_index > max_index
     let new_index = 0
@@ -827,13 +827,13 @@ function s:sort_branches(type)
 endfunction
 
 "     {{{3 Cycle
-function! s:CycleSort(alt)
+function! s:CycleSort(alt, int)
   let local = s:branch_under_cursor().is_local
 
   if !a:alt
-    call s:sort_branches(local ? 'local' : 'remote')
+    call s:sort_branches(local ? 'local' : 'remote', a:int)
   else
-    call s:sort_branches(local ? 'remote' : 'local')
+    call s:sort_branches(local ? 'remote' : 'local', a:int)
   endif
 
   " This is a little bit of an unfortunate hack
