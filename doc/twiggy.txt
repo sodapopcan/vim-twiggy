@@ -147,6 +147,9 @@ MAPPINGS                                        *twiggy-mappings*
                                                 *twiggy-<C-P>*
 <C-P>             Jump to the first branch of the previous group
 
+                                                *twiggy-<C-^>*
+J                 Jump to the current branch
+
                   Sorting~
                                                 *twiggy-i*
 i                 Cycle through sorts of the group of the branch under the

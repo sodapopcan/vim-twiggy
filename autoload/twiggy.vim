@@ -463,7 +463,7 @@ function! s:standard_view()
     if !has_key(groups[branch.type], branch.group)
       let groups[branch.type][branch.group] = {}
       if branch.group ==# 'local'
-        let group_name = s:git_mode
+        let group_name = (s:git_mode == 'normal') ? 'local' : s:git_mode
       elseif branch.type ==# 'remote'
         let group_name = 'r:' . branch.group
       else
@@ -637,6 +637,10 @@ function! s:traverseGroups(motion)
   endif
 endfunction
 
+function! s:jumpToCurrentBranch()
+  call search(s:icons.current)
+endfunction
+
 "   {{{2 Main
 "     {{{3 Render
 function! s:Render()
@@ -685,6 +689,7 @@ function! s:Render()
   nnoremap <buffer> <silent> k     :<C-U>call <SID>traverseBranches('k')<CR>
   nnoremap <buffer> <silent> <C-N> :<C-U>call <SID>traverseGroups('j')<CR>
   nnoremap <buffer> <silent> <C-P> :<C-U>call <SID>traverseGroups('k')<CR>
+  nnoremap <buffer> <silent> J     :<C-U>call <SID>jumpToCurrentBranch()<CR>
   nnoremap <buffer>          gg    2gg
 
   nnoremap <buffer>          s     :<C-U>call <SID>OptionParser()<CR>
