@@ -711,11 +711,11 @@ function! s:Render()
   call s:mapping('a',       'ToggleSlashSort',  [])
 
   if s:git_mode ==# 'rebasing'
-    call s:mapping('A', 'Abort', ['rebase'])
+    call s:mapping('u', 'Abort', ['rebase'])
   elseif s:git_mode ==# 'merging'
-    call s:mapping('A', 'Abort', ['merge'])
+    call s:mapping('u', 'Abort', ['merge'])
   else
-    nnoremap <buffer> <silent> A :echo 'Nothing to abort'<CR>
+    nnoremap <buffer> <silent> u :echo 'Nothing to abort'<CR>
   endif
 
  " {{{ Syntax
@@ -977,6 +977,7 @@ endfunction
 "     {{{3 Merge/Rebase Abort
 function! s:Abort(type)
   call s:git_cmd(a:type . ' --abort', 0)
+  cclose
   redraw | echo a:type . ' aborted'
 endfunction
 
