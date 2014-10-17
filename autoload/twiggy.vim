@@ -913,8 +913,8 @@ function! s:DeleteRemote()
   let branch = s:branch_under_cursor()
 
   return s:Confirm(
-        \ 'WARNING! Delete branch ' . branch.name . ' from ' . branch.group . '?',
-        \ "s:git_cmd('push " . branch.group . " :" . branch.name . "', 1)")
+        \ 'WARNING! Delete branch ' . branch.name . ' from remote repo: ' . branch.group . '?',
+        \ "s:git_cmd('push " . branch.group . " :" . branch.name . "', 1)", 0)
 endfunction
 
 "     {{{3 Fetch
