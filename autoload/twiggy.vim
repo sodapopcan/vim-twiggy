@@ -46,7 +46,7 @@ call s:init_option('close_on_fugitive_cmd', 0)
 call s:init_option('icon_set', has('multi_byte') ? 'pretty' : 'standard')
 
 " {{{1 Script Variables
-let s:init_line                = 2
+let s:init_line                = 0
 let s:mappings                 = {}
 let s:branch_line_refs         = {}
 let s:current_branch_ref       = {}
@@ -55,6 +55,9 @@ let s:last_branch_under_cursor = {}
 let s:last_output              = ''
 let s:git_flags                = '' " I regret this
 let s:git_mode                 = ''
+
+let s:sorted      = 0
+let s:git_cmd_run = 0
 
 " {{{1 Icons
 let s:icons = {}
@@ -107,6 +110,7 @@ endfunction
 "   {{{2 git_cmd
 function! s:git_cmd(cmd, bg)
   let cmd = s:gitize(a:cmd)
+  let s:git_cmd_run = 1
   if a:bg
     call s:cmd(cmd, a:bg)
   else
@@ -457,6 +461,7 @@ function! s:standard_view()
   let group_refs = {}
   let group_refs['local'] = []
   let group_refs['remote'] = []
+  let s:init_line = 0
 
   let branches = s:get_branches()
   for branch in branches
@@ -501,29 +506,28 @@ function! s:standard_view()
         let line = line + 1
         let branch.line = line
         let s:branch_line_refs[line] = branch
-        if !empty(s:last_branch_under_cursor)
-          if !s:last_branch_under_cursor.is_local
-            if branch.status ==# 'detached'
-              let s:init_line = line
-            elseif exists('s:sorted')
-              if branch.fullname ==# s:last_branch_under_cursor.fullname
-                unlet s:sorted
-                let s:init_line = branch.line
-              endif
-            else
-              for _branch in group_ref['branches']
-                if _branch.remote ==# s:last_branch_under_cursor.fullname
-                  let s:init_line = _branch.line
-                  break
-                endif
-              endfor
+        if !s:init_line
+          if s:sorted
+            if branch.fullname ==# s:last_branch_under_cursor.fullname
+              let s:sorted = 0
+              let s:init_line = branch.line
             endif
-          elseif s:last_branch_under_cursor.fullname ==# branch.fullname
-            let s:init_line = line
+          elseif !s:git_cmd_run && !empty(s:last_branch_under_cursor)
+            let s:init_line = s:last_branch_under_cursor.line
+            let s:git_cmd_run = 0
+          else
+            if match(branch.fullname, '(no branch') >= 0
+              let s:init_line = line
+            elseif branch.status ==# 'detached'
+              let s:init_line = line
+            elseif !empty(s:last_branch_under_cursor)
+              let s:init_line = s:last_branch_under_cursor.line
+            elseif branch.current
+              let s:init_line = branch.line
+            endif
           endif
         endif
       endfor
-
     endfor
   endfor
 
