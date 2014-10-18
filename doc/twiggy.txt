@@ -229,10 +229,9 @@ u                 Abort a merge or rebase
 
                   Deleting~
                                                 *twiggy-dd*
-dd                Delete the branch under the cursor.  You will be prompted
-                  to confirm this.  If the branch isn't fully merged, the
-                  prompt will warn you of this.  Press <CR> of y to accept,
-                  press <Esc> or n to cancel.
+dd                Delete the branch under the cursor.  If the branch isn't
+                  fully merged, the prompt will warn you of this.  Press <CR>
+                  or y to accept, press <Esc> or n to cancel.
 
                                                 *twiggy-d^*
 d^                If the branch under the cursor is remote, this will prompt

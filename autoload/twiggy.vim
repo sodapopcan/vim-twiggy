@@ -901,14 +901,13 @@ function! s:Delete()
   let s:init_line = branch.line
 
   if branch.is_local
-    if index(s:get_merged_branches(), branch.fullname) < 0
+    call s:git_cmd('branch -d ' . branch.fullname, 0)
+    if v:shell_error
+      " blow out last output to suppress error buffer
+      let s:last_output = ''
       return s:Confirm(
             \ 'UNMERGED!  Force-delete local branch ' . branch.fullname . '?',
             \ "s:git_cmd('branch -D " . branch.fullname . "', 0)", 0)
-    else
-      return s:Confirm(
-            \ 'Delete local branch ' . branch.fullname . '?',
-            \ "s:git_cmd('branch -d " . branch.fullname . "', 0)", 0)
     endif
   else
     return s:Confirm(
