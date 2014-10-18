@@ -1139,12 +1139,14 @@ augroup twiggy
 augroup END
 
 " {{{1 Fugitive
-if s:get_option('close_on_fugitive_cmd')
-  let close_string = 'call <SID>Close()'
-else
-  let close_string = 'wincmd w'
-endif
+function! s:close_string()
+  if s:get_option('close_on_fugitive_cmd')
+    return 'call <SID>Close()'
+  else
+    return 'wincmd w'
+  endif
+endfunction
 
-autocmd BufEnter Twiggy exec "command! -buffer Gstatus " . close_string . " | silent normal! :<\C-U>Gstatus\<CR>"
-autocmd BufEnter Twiggy exec "command! -buffer Gcommit " . close_string . " | silent normal! :<\C-U>Gcommit\<CR>"
-autocmd BufEnter Twiggy exec "command! -buffer Gblame  " . close_string . " | silent normal! :<\C-U>Gblame\<CR>"
+autocmd BufEnter Twiggy exec "command! -buffer Gstatus " . <SID>close_string() . " | silent normal! :<\C-U>Gstatus\<CR>"
+autocmd BufEnter Twiggy exec "command! -buffer Gcommit " . <SID>close_string() . " | silent normal! :<\C-U>Gcommit\<CR>"
+autocmd BufEnter Twiggy exec "command! -buffer Gblame  " . <SID>close_string() . " | silent normal! :<\C-U>Gblame\<CR>"
