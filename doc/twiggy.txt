@@ -65,29 +65,26 @@ Alpha-Numeric {alpha}       The standard one you are used to.
 
 Most Recently Used {mru}    Using the reflog, twiggy will sort descending
                             in the order you checked out each branch.  This
-                            isn't truely mru since if the branch isn't in the
+                            isn't truly mru since if the branch isn't in the
                             reflog, it will sort near the bottom (new branches
-                            or recently renamed branches, for example).  This is
-                            the default sort for local branches and is not
-                            available for remote branches.
+                            or recently renamed branches, for example).
 
-Tracking {track}            This sort puts tracking branchs first followed by
+Tracking {track}            This sort puts tracking branches first followed by
                             local branches.  The two groups are sorted alpha-
                             numerically.  This is not available for remote
                             branches.
 
 Committer Date {date}       Sort by the date of the last commit of each branch.
-                            This is the default sort for remote branches.
 
 
 SORTING OPTIONS                                 *twiggy-sorting-options*
 
                                                 *'local_branch_sort'*
-Default 'mru'
+Default 'alpha'
 The default/current sort for local branches.  Values can be 'aplha', 'mru',
 'date' or 'track'.
 >
-  let g:twiggy_local_branch_sort = 'aplha'
+  let g:twiggy_local_branch_sort = 'mru'
 <
                                                 *'local_branch_sorts'*
 This is the array of possible local branch sorts.  You can override it
@@ -99,11 +96,11 @@ Legal values are the same as for |local_branch_sort|.
 
                                                 *'remote_branch_sort'*
 
-Default 'date'
-The default/current sort for remote branches.  Values can be 'date' or
-'alpha'.
+Default 'alpha'
+The default/current sort for remote branches.  Values can be 'alpha'or
+'date' .
 >
-  let g:twiggy_remote_branch_sort = 'aplha'
+  let g:twiggy_remote_branch_sort = 'date'
 <
                                                 *'remote_branch_sorts'*
 As with |local_branch_sorts|, this an array of possible sorts to use.  This is
@@ -111,12 +108,28 @@ really just here for completeness;  It's pretty useless as there are only two
 possible values.
 
 
+GROUPING                                        *twiggy-grouping*
+
+By default, twiggy groups branches via one level of "slash-nesting" for locals
+and one group each for remotes.
+
+Branches are sorted before they are grouped, so this can be a little odd when
+sorting by MRU.  To sort locals as one unified group, use the |twiggy-S|
+mapping (hint: it's a toggle).  You may set this grouping method to the
+default with the following:
+>
+  let g:twiggy_group_locals_by_slash = 0
+<
+
+
 OTHER OPTIONS                                   *twiggy-options*
 
                                                 *'num_columns'*
 Default: 31
 The width of Twiggy's buffer
-
+>
+  let g:twiggy_num_colums = 25
+<
                                                 *'split_method'*
 Default: 'topleft'
 The split method used to show the twiggy buffer.  Can be |leftabove|,
@@ -136,16 +149,29 @@ MAPPINGS                                        *twiggy-mappings*
                                                 *twiggy-<C-P>*
 <C-P>             Jump to the first branch of the previous group
 
+                                                *twiggy-<C-^>*
+J                 Jump to the current branch
+
                   Sorting~
                                                 *twiggy-i*
 i                 Cycle through sorts of the group of the branch under the
                   cursor.  If on a remote, all remote groups will be sorted.
+
+                                                *twiggy-I*
+I                 Like i, but in reverse.
 
 
                                                 *twiggy-gi*
 gi                Cycle through sorts of groups other than that of the branch
                   under the cursor.  Useful for lazily resorting remote
                   branches without having to jump down to them.
+
+gI                Like gi, but in reverse... even though there are only two
+                  options.
+
+                                                *twiggy-S*
+a                 Toggle grouping of local branches with slashes (/) in their
+                  names.
 
                   Checkout~
                                                 *twiggy-c*
@@ -192,6 +218,10 @@ r                 Rebase the current branch off the branch under the cursor.
 R                 Rebase the current branch off the branch under the
                   cursor's remote (if it has one).
 
+                                                *twiggy-u*
+                                                *twiggy-abort*
+u                 Abort a merge or rebase
+
                   Pushing~
                                                 *twiggy-^*
 ^                 Push the local branch under the cursor.  Think of it as an
@@ -199,15 +229,18 @@ R                 Rebase the current branch off the branch under the
 
                   Deleting~
                                                 *twiggy-dd*
-dd                Delete the branch under the cursor.  You will be prompted
-                  to confirm this.  If the branch isn't fully merged, the
-                  prompt will warn you of this.  Press <CR> of y to accept,
-                  press <Esc> or n to cancel.
+dd                Delete the branch under the cursor.  If the branch isn't
+                  fully merged, the prompt will warn you of this.  Press <CR>
+                  or y to accept, press <Esc> or n to cancel.
 
                                                 *twiggy-d^*
 d^                If the branch under the cursor is remote, this will prompt
-                  you to delete the branch of the remote repo.
-                  MAKE SURE YOU KNOW WHAT YOU ARE DOING.
+                  you to delete the branch off of the remote repo.  Since this
+                  can be dangerous in the wrong hands, you have to turn this
+                  mapping on with:
+                  >
+                    let g:twiggy_enable_remote_delete = 1
+<
 
                   Stashing~
                                                 *twiggy->>*
@@ -282,10 +315,10 @@ TwiggyBranchStatus          DiffDelete   group name becomes 'rebasing' or
 TwiggyCurrent               Identifier   name of the current branch
 TwiggyNotInReflog           Comment      name of branches not in the reflog
 TwiggyIconCurrent           Identifier   icon: generally the * character
-TwiggyIconTracking          DiffAdd      icon: an up-to-date tracking banch
+TwiggyIconTracking          DiffAdd      icon: an up-to-date tracking branch
 TwiggyIconAhead             DiffDelete   icon: branch is ahead of remote
 TwiggyIconAheadBehind       DiffDelete   icon: branch is both ahead and behind
 TwiggyIconDetached          DiffChange   icon: current branch is detached
-TwiggyIconUnmerged          DiffChange   icon: current branch is unmerged
+TwiggyIconUnmerged          DiffDelete   icon: current branch is unmerged
 
   vim:tw=78:et:ft=help:norl:

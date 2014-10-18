@@ -36,18 +36,19 @@ endfunction
 "   {{{2 The Options
 call s:init_option('num_coloumns', 31)
 call s:init_option('split_position', 'topleft')
-call s:init_option('local_branch_sort', 'mru')
-call s:init_option('local_branch_sorts', ['alpha', 'mru', 'date', 'track'])
-call s:init_option('remote_branch_sort', 'date')
+call s:init_option('local_branch_sort', 'alpha')
+call s:init_option('local_branch_sorts', ['alpha', 'date', 'track', 'mru'])
+call s:init_option('remote_branch_sort', 'alpha')
 call s:init_option('remote_branch_sorts', ['alpha', 'date'])
+call s:init_option('group_locals_by_slash', 1)
+call s:init_option('enable_remote_delete', 0)
 call s:init_option('use_dispatch', exists('g:loaded_dispatch') && g:loaded_dispatch ? 1 : 0)
 call s:init_option('close_on_fugitive_cmd', 0)
 call s:init_option('icon_set', has('multi_byte') ? 'pretty' : 'standard')
 
 " {{{1 Script Variables
-let s:init_line                = 2
+let s:init_line                = 0
 let s:mappings                 = {}
-let s:group_line_refs          = {}
 let s:branch_line_refs         = {}
 let s:current_branch_ref       = {}
 let s:last_local_sort          = s:get_option('local_branch_sort')
@@ -55,6 +56,9 @@ let s:last_branch_under_cursor = {}
 let s:last_output              = ''
 let s:git_flags                = '' " I regret this
 let s:git_mode                 = ''
+
+let s:sorted      = 0
+let s:git_cmd_run = 0
 
 " {{{1 Icons
 let s:icons = {}
@@ -107,6 +111,7 @@ endfunction
 "   {{{2 git_cmd
 function! s:git_cmd(cmd, bg)
   let cmd = s:gitize(a:cmd)
+  let s:git_cmd_run = 1
   if a:bg
     call s:cmd(cmd, a:bg)
   else
@@ -192,12 +197,27 @@ function! s:parse_branch(branch, type)
   let branch.fullname = matchstr(a:branch, '\v(\([^\)]+\)|^[^ ]+)', 2)
 
   if a:type == 'list'
-    let branch.group = 'local'
-    let branch.name = branch.fullname
+    let branch.is_local = 1
+    let branch.type  = 'local'
+    if s:get_option('group_locals_by_slash')
+      if match(branch.fullname, '/') >= 0
+        let group = matchstr(branch.fullname, '\v[^/]*')
+        let branch.group = group
+        let branch.name = substitute(branch.fullname, group . '/', '', '')
+      else
+        let branch.group = 'local'
+        let branch.name = branch.fullname
+      endif
+    else
+      let branch.group = 'local'
+      let branch.name = branch.fullname
+    endif
     if detached >= 0
       let branch.name = substitute(substitute(branch.name, '\v\(detached from ', '', ''), '\v\)', '', '')
     endif
   else
+    let branch.is_local = 0
+    let branch.type = 'remote'
     let branch_split = split(branch.fullname, '/')
     let branch.name  = join(branch_split[1:], '/')
     let branch.group = branch_split[0]
@@ -435,56 +455,83 @@ endfunction
 " {{{1 UI
 "   {{{2 Standard
 function! s:standard_view()
-  let output = []
-  let group  = ''
-  let line   = 0
-  let s:group_line_refs = {}
+  " Sort branches by group
+  let groups = {}
+  let groups['local'] = {}
+  let groups['remote'] = {}
+  let group_refs = {}
+  let group_refs['local'] = []
+  let group_refs['remote'] = []
+  let s:init_line = 0
 
   let branches = s:get_branches()
   for branch in branches
-    if group != branch.group
-      if line !=# 0
-        call add(output, '')
-        let line = line + 1
-      endif
-      let sort_type = branch.group ==# 'local' ? 'local' : 'remote'
-      if sort_type == 'local'
-        let group_name = s:git_mode
+    if !has_key(groups[branch.type], branch.group)
+      let groups[branch.type][branch.group] = {}
+      if branch.group ==# 'local'
+        let group_name = (s:git_mode == 'normal') ? 'local' : s:git_mode
+      elseif branch.type ==# 'remote'
+        let group_name = 'r:' . branch.group
       else
         let group_name = branch.group
       endif
-      call add(output, group_name)
-      let output[index(output, line)] .= ' [' . s:get_option(sort_type . '_branch_sort') . ']'
-      let line = line + 1
-      let s:group_line_refs[line] = branch.group
-      let group = branch.group
-    endif
-    call add(output, branch.decoration . branch.name)
-    let line = line + 1
-    let branch.line = line
-    let s:branch_line_refs[line] = branch
-    if !empty(s:last_branch_under_cursor)
-      if s:last_branch_under_cursor.group !=# 'local'
-        if branch.status ==# 'detached'
-          let s:init_line = line
-        elseif exists('s:sorted')
-          if branch.fullname ==# s:last_branch_under_cursor.fullname
-            unlet s:sorted
-            let s:init_line = branch.line
-          endif
-        else
-          for _branch in branches
-            if _branch.remote ==# s:last_branch_under_cursor.fullname
-              let s:init_line = _branch.line
-              break
-            endif
-          endfor
-        endif
-      elseif s:last_branch_under_cursor.fullname ==# branch.fullname
-        let s:init_line = line
+      let groups[branch.type][branch.group].name = group_name
+      let groups[branch.type][branch.group].branches = []
+      if branch.group ==# 'local'
+        " Sort the no-slash groups to the front like a pro
+        let group_refs['local'] = extend([groups['local']['local']], group_refs['local'])
+      else
+        call add(group_refs[branch.type], groups[branch.type][branch.group])
       endif
     endif
+
+    call add(groups[branch.type][branch.group]['branches'], branch)
   endfor
+
+  let output = []
+  let line   = 0
+
+  for group_type in ['local', 'remote']
+    for group_ref in group_refs[group_type]
+
+      let line = line + 1
+      if line !=# 1
+        call add(output, '')
+        let line = line + 1
+      endif
+
+      call add(output, group_ref.name . ' [' . s:get_option(group_type . '_branch_sort') . ']')
+
+      for branch in group_ref['branches']
+        call add(output, branch.decoration . branch.name)
+        let line = line + 1
+        let branch.line = line
+        let s:branch_line_refs[line] = branch
+        if !s:init_line
+          if s:sorted
+            if branch.fullname ==# s:last_branch_under_cursor.fullname
+              let s:sorted = 0
+              let s:init_line = branch.line
+            endif
+          elseif !s:git_cmd_run && !empty(s:last_branch_under_cursor)
+            let s:init_line = s:last_branch_under_cursor.line
+            let s:git_cmd_run = 0
+          else
+            if match(branch.fullname, '(no branch') >= 0
+              let s:init_line = line
+            elseif branch.status ==# 'detached'
+              let s:init_line = line
+            elseif !empty(s:last_branch_under_cursor)
+              let s:init_line = s:last_branch_under_cursor.line
+            elseif branch.current
+              let s:init_line = branch.line
+            endif
+          endif
+        endif
+      endfor
+    endfor
+  endfor
+
   return output
 endfunction
 
@@ -507,7 +554,7 @@ function! s:ShowOutputBuffer()
   if s:last_output ==# ''
     return
   endif
-  keepalt botright new TwiggyOutput
+  silent keepalt botright new TwiggyOutput
   let output = split(s:last_output, '\v\n')
   let height = len(output)
   if height < 5 | let height = 5 | endif
@@ -595,6 +642,10 @@ function! s:traverseGroups(motion)
   endif
 endfunction
 
+function! s:jumpToCurrentBranch()
+  call search(s:icons.current)
+endfunction
+
 "   {{{2 Main
 "     {{{3 Render
 function! s:Render()
@@ -637,41 +688,47 @@ function! s:Render()
 
   setlocal nomodified nomodifiable noswapfile
 
-  " This is solving a problem I don't have yet :O
   exec "normal! " . s:init_line . "gg"
 
   nnoremap <buffer> <silent> j     :<C-U>call <SID>traverseBranches('j')<CR>
   nnoremap <buffer> <silent> k     :<C-U>call <SID>traverseBranches('k')<CR>
   nnoremap <buffer> <silent> <C-N> :<C-U>call <SID>traverseGroups('j')<CR>
   nnoremap <buffer> <silent> <C-P> :<C-U>call <SID>traverseGroups('k')<CR>
+  nnoremap <buffer> <silent> J     :<C-U>call <SID>jumpToCurrentBranch()<CR>
   nnoremap <buffer>          gg    2gg
 
   nnoremap <buffer>          s     :<C-U>call <SID>OptionParser()<CR>
 
-  call s:mapping('<CR>', 'Checkout',     [1])
-  call s:mapping('c',    'Checkout',     [1])
-  call s:mapping('C',    'Checkout',     [0])
-  call s:mapping('o',    'Checkout',     [1])
-  call s:mapping('O',    'Checkout',     [0])
-  call s:mapping('dd',   'Delete',       [])
-  call s:mapping('d^',   'DeleteRemote', [])
-  call s:mapping('F',    'Fetch',        [])
-  call s:mapping('m',    'Merge',        [0])
-  call s:mapping('M',    'Merge',        [1])
-  call s:mapping('r',    'Rebase',       [0])
-  call s:mapping('R',    'Rebase',       [1])
-  call s:mapping('^',    'Push',         [0])
-  call s:mapping('<<',   'Stash',        [0])
-  call s:mapping('>>',   'Stash',        [1])
-  call s:mapping('i',    'CycleSort',    [0])
-  call s:mapping('gi',   'CycleSort',    [1])
+  call s:mapping('<CR>',    'Checkout',         [1])
+  call s:mapping('c',       'Checkout',         [1])
+  call s:mapping('C',       'Checkout',         [0])
+  call s:mapping('o',       'Checkout',         [1])
+  call s:mapping('O',       'Checkout',         [0])
+  call s:mapping('dd',      'Delete',           [])
+  call s:mapping('F',       'Fetch',            [])
+  call s:mapping('m',       'Merge',            [0])
+  call s:mapping('M',       'Merge',            [1])
+  call s:mapping('r',       'Rebase',           [0])
+  call s:mapping('R',       'Rebase',           [1])
+  call s:mapping('^',       'Push',             [0])
+  call s:mapping('<<',      'Stash',            [0])
+  call s:mapping('>>',      'Stash',            [1])
+  call s:mapping('i',       'CycleSort',        [0,1])
+  call s:mapping('I',       'CycleSort',        [0,-1])
+  call s:mapping('gi',      'CycleSort',        [1,1])
+  call s:mapping('gI',      'CycleSort',        [1,-1])
+  call s:mapping('a',       'ToggleSlashSort',  [])
 
   if s:git_mode ==# 'rebasing'
-    call s:mapping('A', 'Abort', ['rebase'])
+    call s:mapping('u', 'Abort', ['rebase'])
   elseif s:git_mode ==# 'merging'
-    call s:mapping('A', 'Abort', ['merge'])
+    call s:mapping('u', 'Abort', ['merge'])
   else
-    nnoremap <buffer> <silent> A :echo 'Nothing to abort'<CR>
+    nnoremap <buffer> <silent> u :echo 'Nothing to abort'<CR>
+  endif
+
+  if s:get_option('enable_remote_delete')
+    call s:mapping('d^',      'DeleteRemote',     [])
   endif
 
  " {{{ Syntax
@@ -699,8 +756,8 @@ function! s:Render()
   exec "syntax match TwiggyDetached '\\V\\%2c" . s:icons.detached . "'"
   highlight link TwiggyDetached DiffChange
 
-  exec "syntax match TwiggyUnmerged '\\V\\%2c" . s:icons.unmerged . "'"
-  highlight link TwiggyUnmerged DiffChange
+  exec "syntax match TwiggyUnmerged '\\V\\%1c" . s:icons.unmerged . "'"
+  highlight link TwiggyUnmerged DiffDelete
 
   syntax match TwiggySortText '\v[[a-z]+]'
   highlight link TwiggySortText Comment
@@ -709,7 +766,7 @@ function! s:Render()
   highlight link TwiggyBranchStatus DiffDelete
 
   if exists('s:branches_not_in_reflog') && len(s:branches_not_in_reflog)
-    exec "syntax match TwiggyNotInReflog '\\v" . join(s:branches_not_in_reflog) . "'"
+    exec "syntax match TwiggyNotInReflog '\\v" . substitute(substitute(join(s:branches_not_in_reflog), '(', '', 'g'), ')', '', 'g') . "'"
     highlight link TwiggyNotInReflog Comment
   endif
 
@@ -719,22 +776,17 @@ endfunction
 
 "     {{{3 Refresh
 function! s:Refresh()
-  if exists('s:stop_endless') | return | endif
-  if !exists('g:twiggy_bufnr') || !exists('b:git_dir')
-    return
-  endif
-  if &filetype ==# 'twiggy'
-    call s:Render()
-  else
+  if !exists('g:twiggy_bufnr') || !exists('b:git_dir') | return | endif
+  if exists('s:refreshing') | return | endif
+  let s:refreshing = 1
+  if &filetype !=# 'twiggy'
+    call s:buffocus(g:twiggy_bufnr)
     if g:twiggy_git_dir ==# b:git_dir | return | endif
     let g:twiggy_git_dir = b:git_dir
     let g:twiggy_git_cmd = fugitive#buffer().repo().git_command()
-    call s:buffocus(g:twiggy_bufnr)
-    call s:Render()
-    let s:stop_endless = 1
-    wincmd w
-    unlet s:stop_endless
   endif
+  call s:Render()
+  unlet s:refreshing
 endfunction
 
 "     {{{3 Branch
@@ -745,7 +797,6 @@ function! twiggy#Branch(...) abort
     call s:git_cmd('checkout ' . f . join(a:000), 0)
     call s:ShowOutputBuffer()
     if s:get_option('bufnr')
-      call s:buffocus(s:get_option('bufnr'))
       call s:Refresh()
     end
     redraw
@@ -761,7 +812,6 @@ function! twiggy#Branch(...) abort
       else
         " If twiggy is open, :Twiggy will focus the twiggy buffer then redraw " it
         call s:buffocus(s:get_option('bufnr'))
-        call s:Refresh()
       end
     endif
   endif
@@ -770,15 +820,15 @@ endfunction
 "     {{{3 Close
 function! s:Close()
   bdelete!
-  echo ''
+  redraw | echo ''
 endfunction
 
 "   {{{2 Sorting
 "     {{{3 Helpers
-function s:sort_branches(type)
-  let max_index = len(s:get_option(a:type . '_branch_sorts')) - 1
+function s:sort_branches(type, int)
+  let max_index = len(s:get_option(a:type . '_branch_sorts')) - a:int
   let new_index = index(s:get_option(a:type . '_branch_sorts'),
-        \  s:get_option(a:type . '_branch_sort')) + 1
+        \  s:get_option(a:type . '_branch_sort')) + a:int
 
   if new_index > max_index
     let new_index = 0
@@ -789,18 +839,24 @@ function s:sort_branches(type)
 endfunction
 
 "     {{{3 Cycle
-function! s:CycleSort(alt)
-  let local = s:branch_under_cursor().group ==# 'local'
+function! s:CycleSort(alt, int)
+  let local = s:branch_under_cursor().is_local
 
   if !a:alt
-    call s:sort_branches(local ? 'local' : 'remote')
+    call s:sort_branches(local ? 'local' : 'remote', a:int)
   else
-    call s:sort_branches(local ? 'remote' : 'local')
+    call s:sort_branches(local ? 'remote' : 'local', a:int)
   endif
 
   " This is a little bit of an unfortunate hack
   let s:sorted = 1
 
+  return 0
+endfunction
+
+"     {{{3 Slash Group
+function! s:ToggleSlashSort()
+  let g:twiggy_group_locals_by_slash = s:get_option('group_locals_by_slash') ? 0 : 1
   return 0
 endfunction
 
@@ -815,7 +871,7 @@ function! s:Checkout(track)
   else
     redraw
     echo 'Moving from ' . current_branch . ' to ' . switch_branch.fullname . '...'
-    if a:track && switch_branch.group !=# 'local'
+    if a:track && !switch_branch.is_local
       if index(map(split(s:git_cmd('branch --list', 0), '\n'), 'v:val[2:]'), switch_branch.name) >= 0
         call s:git_cmd('checkout ' . switch_branch.name, 0)
       else
@@ -823,7 +879,7 @@ function! s:Checkout(track)
         call s:git_cmd('checkout -b ' . switch_branch.name . ' ' . switch_branch.fullname , 0)
       endif
     else
-      if switch_branch.group ==# 'local'
+      if switch_branch.is_local
         call s:git_cmd('checkout ' . switch_branch.fullname, 0)
       else
         call s:git_cmd('checkout ' . switch_branch.fullname, 0)
@@ -842,17 +898,18 @@ function! s:Delete()
     return
   endif
 
-  if branch.group ==# 'local'
-    if index(s:get_merged_branches(), branch.name) < 0
+  let s:init_line = branch.line
+
+  if branch.is_local
+    call s:git_cmd('branch -d ' . branch.fullname, 0)
+    if v:shell_error
+      " blow out last output to suppress error buffer
+      let s:last_output = ''
       return s:Confirm(
-            \ 'UNMERGED!  Force-delete local branch ' . branch.name . '?',
-            \ "s:git_cmd('branch -D " . branch.name . "', 0)", 0)
-    else
-      return s:Confirm(
-            \ 'Delete local branch ' . branch.name . '?',
-            \ "s:git_cmd('branch -d " . branch.name . "', 0)", 0)
+            \ 'UNMERGED!  Force-delete local branch ' . branch.fullname . '?',
+            \ "s:git_cmd('branch -D " . branch.fullname . "', 0)", 0)
     endif
-  elseif branch.group !=# 'local'
+  else
     return s:Confirm(
           \ 'Delete remote branch ' . branch.fullname . '?',
           \ "s:git_cmd('branch -d -r " . branch.fullname . "', 0)", 0)
@@ -863,8 +920,8 @@ function! s:DeleteRemote()
   let branch = s:branch_under_cursor()
 
   return s:Confirm(
-        \ 'WARNING! Delete branch ' . branch.name . ' from ' . branch.group . '?',
-        \ "s:git_cmd('push " . branch.group . " :" . branch.name . "', 1)")
+        \ 'WARNING! Delete branch ' . branch.name . ' from remote repo: ' . branch.group . '?',
+        \ "s:git_cmd('push " . branch.group . " :" . branch.name . "', 1)", 0)
 endfunction
 
 "     {{{3 Fetch
@@ -873,7 +930,7 @@ function! s:Fetch()
   if branch.tracking !=# ''
     let parts = split(branch.tracking, '/')
     call s:git_cmd('fetch ' . s:git_flags . parts[0] . ' ' . join(parts[1:], '/') .
-          \ ':refs/remotes/' . parts[0] . '/' . branch.name, 1)
+          \ ':refs/remotes/' . parts[0] . '/' . branch.fullname, 1)
   else
     redraw
     echo branch.name . ' is not a tracking branch'
@@ -888,13 +945,13 @@ function! s:Merge(remote)
 
   if a:remote
     if branch.tracking ==# ''
-      let v:warningmsg = 'No tracking branch for ' . branch.name
+      let v:warningmsg = 'No tracking branch for ' . branch.fullname
       return 1
     else
       call s:git_cmd('merge ' . s:git_flags . ' ' . branch.tracking, 1)
     endif
   else
-    if branch.fullname ==# s:get_current_branch()
+    if branch.name ==# s:get_current_branch()
       let v:warningmsg = 'Can''t merge into self'
       return 1
     else
@@ -932,6 +989,7 @@ endfunction
 "     {{{3 Merge/Rebase Abort
 function! s:Abort(type)
   call s:git_cmd(a:type . ' --abort', 0)
+  cclose
   redraw | echo a:type . ' aborted'
 endfunction
 
@@ -939,7 +997,7 @@ endfunction
 function! s:Push(current)
   let branch = a:current ? s:current_branch_ref : s:branch_under_cursor()
 
-  if branch.group !=# 'local'
+  if !branch.is_local
     let v:warningmsg = "Can't push a remote branch"
     return 1
   endif
@@ -963,7 +1021,7 @@ function! s:Push(current)
     let v:warningmsg = "Remote does not exist"
     return 1
   else
-    call s:git_cmd('push ' . flag . ' ' . s:git_flags . ' ' . group . ' ' . branch.name, 1)
+    call s:git_cmd('push ' . flag . ' ' . s:git_flags . ' ' . group . ' ' . branch.fullname, 1)
   endif
 
   return 0
@@ -1080,19 +1138,19 @@ augroup twiggy
   autocmd CursorMoved Twiggy call s:show_branch_details()
   autocmd CursorMoved Twiggy call s:update_last_branch_under_cursor()
   autocmd BufEnter    Twiggy exec 'vertical resize ' . s:get_option('num_coloumns')
-
-  autocmd BufReadPost,BufEnter * call <SID>Refresh()
-
+  autocmd BufReadPost,BufEnter,BufLeave,VimResized Twiggy call <SID>Refresh()
   autocmd BufWinLeave Twiggy if exists('g:twiggy_bufnr') | unlet g:twiggy_bufnr | endif
 augroup END
 
 " {{{1 Fugitive
-if s:get_option('close_on_fugitive_cmd')
-  let close_string = 'call <SID>Close()'
-else
-  let close_string = 'wincmd w'
-endif
+function! s:close_string()
+  if s:get_option('close_on_fugitive_cmd')
+    return 'call <SID>Close()'
+  else
+    return 'wincmd w'
+  endif
+endfunction
 
-autocmd BufEnter Twiggy exec "command! -buffer Gstatus " . close_string . " | silent normal :Gstatus\<CR>"
-autocmd BufEnter Twiggy exec "command! -buffer Gcommit " . close_string . " | silent normal :Gcommit\<CR>"
-autocmd BufEnter Twiggy exec "command! -buffer Gblame  " . close_string . " | silent normal :Gblame\<CR>"
+autocmd BufEnter Twiggy exec "command! -buffer Gstatus " . <SID>close_string() . " | silent normal! :<\C-U>Gstatus\<CR>"
+autocmd BufEnter Twiggy exec "command! -buffer Gcommit " . <SID>close_string() . " | silent normal! :<\C-U>Gcommit\<CR>"
+autocmd BufEnter Twiggy exec "command! -buffer Gblame  " . <SID>close_string() . " | silent normal! :<\C-U>Gblame\<CR>"
