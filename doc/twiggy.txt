@@ -127,7 +127,9 @@ OTHER OPTIONS                                   *twiggy-options*
                                                 *'num_columns'*
 Default: 31
 The width of Twiggy's buffer
-
+>
+  let g:twiggy_num_colums = 25
+<
                                                 *'split_method'*
 Default: 'topleft'
 The split method used to show the twiggy buffer.  Can be |leftabove|,
@@ -234,8 +236,12 @@ dd                Delete the branch under the cursor.  You will be prompted
 
                                                 *twiggy-d^*
 d^                If the branch under the cursor is remote, this will prompt
-                  you to delete the branch of the remote repo.
-                  MAKE SURE YOU KNOW WHAT YOU ARE DOING.
+                  you to delete the branch off of the remote repo.  Since this
+                  can be dangerous in the wrong hands, you have to turn this
+                  mapping on with:
+                  >
+                    let g:twiggy_enable_remote_delete = 1
+<
 
                   Stashing~
                                                 *twiggy->>*

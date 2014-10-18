@@ -41,6 +41,7 @@ call s:init_option('local_branch_sorts', ['alpha', 'date', 'track', 'mru'])
 call s:init_option('remote_branch_sort', 'alpha')
 call s:init_option('remote_branch_sorts', ['alpha', 'date'])
 call s:init_option('group_locals_by_slash', 1)
+call s:init_option('enable_remote_delete', 0)
 call s:init_option('use_dispatch', exists('g:loaded_dispatch') && g:loaded_dispatch ? 1 : 0)
 call s:init_option('close_on_fugitive_cmd', 0)
 call s:init_option('icon_set', has('multi_byte') ? 'pretty' : 'standard')
@@ -704,7 +705,6 @@ function! s:Render()
   call s:mapping('o',       'Checkout',         [1])
   call s:mapping('O',       'Checkout',         [0])
   call s:mapping('dd',      'Delete',           [])
-  call s:mapping('d^',      'DeleteRemote',     [])
   call s:mapping('F',       'Fetch',            [])
   call s:mapping('m',       'Merge',            [0])
   call s:mapping('M',       'Merge',            [1])
@@ -725,6 +725,10 @@ function! s:Render()
     call s:mapping('u', 'Abort', ['merge'])
   else
     nnoremap <buffer> <silent> u :echo 'Nothing to abort'<CR>
+  endif
+
+  if s:get_option('enable_remote_delete')
+    call s:mapping('d^',      'DeleteRemote',     [])
   endif
 
  " {{{ Syntax
