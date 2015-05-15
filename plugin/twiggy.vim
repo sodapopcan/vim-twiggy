@@ -3,7 +3,7 @@
 " Website:    https://www.github.com/sodapopcan/vim-twiggy
 " License:    Same terms as Vim itself (see :help license)
 
-if exists('g:loaded_twiggy') || &cp || !exists('g:loaded_fugitive')
+if exists('g:loaded_twiggy') || &cp
   finish
 endif
 let g:loaded_twiggy = 1
@@ -15,6 +15,6 @@ endfor
 
 augroup twiggy_booter
   autocmd!
-  autocmd BufReadPost * if exists('b:git_dir') | call twiggy#define_commands() | endif
+  autocmd BufReadPost * if exists('b:git_dir') && | call twiggy#define_commands() | endif
   autocmd BufEnter Twiggy call twiggy#define_commands()
 augroup END
