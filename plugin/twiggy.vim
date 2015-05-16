@@ -15,6 +15,6 @@ endfor
 
 augroup twiggy_booter
   autocmd!
-  autocmd BufReadPost * if exists('b:git_dir') && | call twiggy#define_commands() | endif
+  autocmd BufReadPost * if exists('b:git_dir') | call twiggy#define_commands() | endif
   autocmd BufEnter Twiggy call twiggy#define_commands()
 augroup END
