@@ -862,11 +862,8 @@ function! s:Checkout(track)
         call s:git_cmd('checkout -b ' . switch_branch.name . ' ' . switch_branch.fullname , 0)
       endif
     else
-      if switch_branch.is_local
-        call s:git_cmd('checkout ' . switch_branch.fullname, 0)
-      else
-        call s:git_cmd('checkout ' . switch_branch.fullname, 0)
-      endif
+      let detach = switch_branch.is_local ? '' : '--detach '
+      call s:git_cmd('checkout ' . detach . switch_branch.fullname, 0)
     endif
   endif
 
