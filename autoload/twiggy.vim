@@ -19,11 +19,6 @@ endfunction
 
 " {{{1 Options
 "   {{{2 Helpers
-function! s:init_option(option, val)
-  let var = "g:twiggy_" . a:option
-  if !exists(var) | let {var} = a:val | endif
-endfunction
-
 function! s:get_option(option)
   let var = "g:twiggy_" . a:option
   if !exists(var)
@@ -34,17 +29,17 @@ function! s:get_option(option)
 endfunction
 
 "   {{{2 The Options
-call s:init_option('num_coloumns', 31)
-call s:init_option('split_position', 'topleft')
-call s:init_option('local_branch_sort', 'alpha')
-call s:init_option('local_branch_sorts', ['alpha', 'date', 'track', 'mru'])
-call s:init_option('remote_branch_sort', 'alpha')
-call s:init_option('remote_branch_sorts', ['alpha', 'date'])
-call s:init_option('group_locals_by_slash', 1)
-call s:init_option('enable_remote_delete', 0)
-call s:init_option('use_dispatch', exists('g:loaded_dispatch') && g:loaded_dispatch ? 1 : 0)
-call s:init_option('close_on_fugitive_cmd', 0)
-call s:init_option('icon_set', has('multi_byte') ? 'pretty' : 'standard')
+let g:twiggy_num_coloumns           = get(g:,'twiggy_num_coloumns',            31                                                      )
+let g:twiggy_split_position         = get(g:,'twiggy_split_position',         'topleft'                                                )
+let g:twiggy_local_branch_sort      = get(g:,'twiggy_local_branch_sort',      'alpha'                                                  )
+let g:twiggy_local_branch_sorts     = get(g:,'twiggy_local_branch_sorts',     ['alpha', 'date', 'track', 'mru']                        )
+let g:twiggy_remote_branch_sort     = get(g:,'twiggy_remote_branch_sort',     'alpha'                                                  )
+let g:twiggy_remote_branch_sorts    = get(g:,'twiggy_remote_branch_sorts',    ['alpha', 'date']                                        )
+let g:twiggy_group_locals_by_slash  = get(g:,'twiggy_group_locals_by_slash',  1                                                        )
+let g:twiggy_enable_remote_delete   = get(g:,'twiggy_enable_remote_delete',   0                                                        )
+let g:twiggy_use_dispatch           = get(g:,'twiggy_use_dispatch',           exists('g:loaded_dispatch') && g:loaded_dispatch ? 1 : 0 )
+let g:twiggy_close_on_fugitive_cmd  = get(g:,'twiggy_close_on_fugitive_cmd',  0                                                        )
+let g:twiggy_icon_set               = get(g:,'twiggy_icon_set',               has('multi_byte') ? 'pretty' : 'standard'                )
 
 " {{{1 Script Variables
 let s:init_line                = 0
@@ -76,7 +71,7 @@ let s:icons.detached = s:icons[s:get_option('icon_set')][5]
 let s:icons.unmerged = s:icons[s:get_option('icon_set')][6]
 
 " hmmmmmm
-call s:init_option('custom_icons', s:icons[s:get_option('icon_set')])
+let twiggy_custom_icons = get(g:, 'twiggy_custom_icons', s:icons[s:get_option('icon_set')])
 
 " {{{1 System
 "   {{{2 cmd
@@ -771,7 +766,7 @@ function! s:Render()
   endif
 
   " }}}
-  call s:init_option('bufnr', bufnr(''))
+  let twiggy_bufnr = get(g:, 'twiggy_bufnr', bufnr(''))
 endfunction
 
 "     {{{3 Refresh
