@@ -642,11 +642,11 @@ function! s:Render()
     return
   endif
 
-  if !exists('g:twiggy_bufnr') || !(exists('g:twiggy_bufnr') && g:twiggy_bufnr ==# bufnr(''))
+  if !exists('t:twiggy_bufnr') || !(exists('t:twiggy_bufnr') && t:twiggy_bufnr ==# bufnr(''))
     exec 'silent keepalt ' . g:twiggy_split_position . ' ' . g:twiggy_num_coloumns . 'vsplit Twiggy'
     setlocal filetype=twiggy buftype=nofile
     setlocal nonumber nowrap lisp
-    let g:twiggy_bufnr = bufnr('')
+    let t:twiggy_bufnr = bufnr('')
   endif
 
   nnoremap <buffer> <silent> q     :<C-U>call <SID>Close()<CR>
@@ -759,11 +759,11 @@ endfunction
 
 "     {{{3 Refresh
 function! s:Refresh()
-  if !exists('g:twiggy_bufnr') || !exists('b:git_dir') | return | endif
+  if !exists('t:twiggy_bufnr') || !exists('b:git_dir') | return | endif
   if exists('s:refreshing') | return | endif
   let s:refreshing = 1
   if &filetype !=# 'twiggy'
-    call s:buffocus(g:twiggy_bufnr)
+    call s:buffocus(t:twiggy_bufnr)
     if g:twiggy_git_dir ==# b:git_dir | return | endif
     let g:twiggy_git_dir = b:git_dir
     let g:twiggy_git_cmd = fugitive#buffer().repo().git_command()
@@ -779,13 +779,13 @@ function! twiggy#Branch(...) abort
     let f = s:branch_exists(a:1) ? '' : '-b '
     call s:git_cmd('checkout ' . f . join(a:000), 0)
     call s:ShowOutputBuffer()
-    if exists('g:twiggy_bufnr')
+    if exists('t:twiggy_bufnr')
       call s:Refresh()
     end
     redraw
     echo 'Moved from ' . current_branch . ' to ' . a:1
   else
-    let twiggy_bufnr = exists('g:twiggy_bufnr') ? g:twiggy_bufnr : 0
+    let twiggy_bufnr = exists('t:twiggy_bufnr') ? t:twiggy_bufnr : 0
     if !twiggy_bufnr
       call s:Render()
     else
@@ -794,7 +794,7 @@ function! twiggy#Branch(...) abort
         call s:Close()
       else
         " If twiggy is open, :Twiggy will focus the twiggy buffer then redraw " it
-        call s:buffocus(g:twiggy_bufnr)
+        call s:buffocus(t:twiggy_bufnr)
       end
     endif
   endif
@@ -1059,7 +1059,7 @@ augroup twiggy
   autocmd CursorMoved Twiggy call s:show_branch_details()
   autocmd CursorMoved Twiggy call s:update_last_branch_under_cursor()
   autocmd BufReadPost,BufEnter,BufLeave,VimResized Twiggy call <SID>Refresh()
-  autocmd BufWinLeave Twiggy if exists('g:twiggy_bufnr') | unlet g:twiggy_bufnr | endif
+  autocmd BufWinLeave Twiggy if exists('t:twiggy_bufnr') | unlet t:twiggy_bufnr | endif
 augroup END
 
 " {{{1 Fugitive
