@@ -9,12 +9,22 @@ endif
 let g:autoloaded_twiggy = 1
 
 " {{{1 Utility
-"   {{{2 focusbuf
 function! s:buffocus(bufnr)
   let switchbuf_cached = &switchbuf
   set switchbuf=useopen
   exec 'sb ' . a:bufnr
   exec 'set switchbuf=' . switchbuf_cached
+endfunction
+
+function! s:mapping(mapping, fn, args)
+  let s:mappings[s:encode_mapping(a:mapping)] = [a:fn, a:args]
+  exe "nnoremap <buffer> <silent> " .
+        \ a:mapping . " :<C-U>call <SID>call('" .
+        \ s:encode_mapping(a:mapping) . "')<CR>"
+endfunction
+
+function! s:encode_mapping(mapping)
+  return substitute(a:mapping, '\v^\<', '___', '')
 endfunction
 
 " {{{1 Script Variables
@@ -114,19 +124,6 @@ function! s:call(mapping)
 endfunction
 
 
-
-" {{{1 Helpers
-"   {{{2 mapping
-function! s:mapping(mapping, fn, args)
-  let s:mappings[s:encode_mapping(a:mapping)] = [a:fn, a:args]
-  exe "nnoremap <buffer> <silent> " .
-        \ a:mapping . " :<C-U>call <SID>call('" .
-        \ s:encode_mapping(a:mapping) . "')<CR>"
-endfunction
-
-function! s:encode_mapping(mapping)
-  return substitute(a:mapping, '\v^\<', '___', '')
-endfunction
 
 " {{{1 Branch Parser
 function! s:parse_branch(branch, type)
