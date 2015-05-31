@@ -21,15 +21,6 @@ COMMANDS                                        *twiggy-commands*
                             may also provide the starting point branch as a
                             second argument.
 
-:TwigPush, :TwigFetch, :TwigMerge, :TwigRebase and :TwigPull are all vanilla
-wrappers to their respective git commands (with completion).  If you have
-|dispatch| installed, it will be used by default.  If you'd prefer not to use
-it, set:
->
-  let g:twiggy_use_dispatch = 0
-<
-:TwigStash is also available and called through plain ol' |system()|.
-
 
 FUGITIVE COMPATIBILITY                         *twiggy-fugitive*
 Twiggy is aware of the |fugitive| commands |:Gstatus|, |:Gcommit| and |:Gblame|.

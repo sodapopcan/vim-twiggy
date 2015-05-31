@@ -12,9 +12,3 @@ for cmd in ['Twiggy', 'Twig']
   exec "command! -nargs=* -complete=custom,TwiggyCompleteGitBranches " .
         \ cmd . " call twiggy#Branch(<f-args>)"
 endfor
-
-augroup twiggy_booter
-  autocmd!
-  autocmd BufReadPost * if exists('b:git_dir') | call twiggy#define_commands() | endif
-  autocmd BufEnter Twiggy call twiggy#define_commands()
-augroup END

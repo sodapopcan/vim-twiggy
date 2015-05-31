@@ -1041,27 +1041,6 @@ function! s:Revert(bang)
   exec "normal :e " . currfile . "\<CR>"
 endfunction
 
-"     {{{3 GitCmd
-function! s:GitCmd(prompt_to_stash, cmd, ...)
-  let choice = ''
-  if a:prompt_to_stash && s:dirty_tree() && s:git_mode == 'local'
-    let choice = s:PromptToStash()
-  endif
-  if choice ==# -1
-    redraw | echo ''
-    return
-  endif
-
-  let args = a:0 ? ' ' . join(map(copy(a:000), 'shellescape(v:val)')) : ''
-  call s:git_cmd(a:cmd . args, 1)
-
-  if exists('g:twiggy_bufnr')
-    call s:buffocus(g:twiggy_bufnr)
-    call s:Refresh()
-  endif
-endfunction
-
-
 " Completion
 
 function! TwiggyCompleteGitBranches(A,L,P)
@@ -1072,47 +1051,6 @@ function! TwiggyCompleteGitBranches(A,L,P)
     endif
   endfor
   return ''
-endfunction
-
-function! s:complete_git_cmd(A,L,P,args) abort
-  " First part ripped from tpope
-  if a:A =~ '^-' || type(a:A) == type(0)
-    return filter(a:args,'v:val[0 : strlen(a:A)-1] ==# a:A')
-  else
-    return [TwiggyCompleteGitBranches(a:A,a:L,a:P)]
-  endif
-endfunction
-
-function! TwiggyCompletePush(A,L,P) abort
-  return s:complete_git_cmd(a:A,a:L,a:P, ['--all', '--prune', '--mirror', '-n', '--dry-run', '--porcelain', '--delete', '--tags', '--follow-tags', '--receive-pack=', '--exec=', '--force-with-lease', '--no-force-with-lease', '-f', '--force', '--repo=', '-u', '--set-upstream', '--thin', '--no-thin', '-q', '--quiet', '-v', '--verbose', '--progress', '--recurse-submodules=', '--verify', '--no-verifiy'])
-endfunction
-
-function! TwiggyCompletePull(A,L,P) abort
-  return s:complete_git_cmd(a:A,a:L,a:P, ['-q', '--quiet', '-v', '--verbose', '--recurse-submodules=', '--no-recurse-submodules=', '--commit', '--no-commit', '-e', '--edit', '--no-edit', '--ff', '--no-ff', '--ff-only', '--log=', '--no-log', '-n', '--stat', '--no-stat', '--squash', '--no-squash', '-s', '--strategy=', '--verify-signatures', '--no-verify-signatures', '--summary', '--no-summary', '-r', '--rebase', '--no-rebase', '--all', '-a', '--append', '--depth=', '--unshallow', '--update-shallow', '-f', '--force', '-k', '--keep', '--no-tags', '-u', '--update-head-ok', '--upload-pack', '--progress'])
-endfunction
-
-function! TwiggyCompleteRebase(A,L,P) abort
-  return s:complete_git_cmd(a:A,a:L,a:P, ['--onto', '--continue', '--abort', '--keep-empty', '--skip', '--edit-todo', '-m', '--merge', '-s', '--strategy=', '-X', '--strategy-option=', '-q', '--quiet', '-v', '--verbose', '--stat', '-n', '--no-stat', '--no-verify', '--verifiy', '-C', '-f', '--force-rebase', '--fork-point', '--no-fork-point', 'ignore-whitespace', '--whitespace=', '--committer-date-is-author-date', '--ignore-date', '-i', '--interactive', '-p', '--preserver-merges', '-x', '--exec', '--root', '--autosquash', '--no-autosquash', '--auto-stash', '--no-autostash', '--no-ff'])
-endfunction
-
-function! TwiggyCompleteMerge(A,L,P) abort
-  return s:complete_git_cmd(a:A,a:L,a:P, ['--commit', '--no-commit', '-e', '--edit', '--no-edit', '--ff', '--no-ff', '--ff-only', '--log=', '--no-log', '-n', '--stat', '--no-stat', '--squash', '--no-squash', '-s', '--strategy=', '-X', '--verify-signatures', '--no-verify-signatures', '--summary', '--no-summary', '-q', '--quiet', '-v', '--verbose', '--progress', '--no-progress', '-S', '--gpg-sign=', '-m', '--rerere-autoupdate', '--no-rerere-autoupdate', '--abort'])
-endfunction
-
-function! TwiggyCompleteStash(A,L,P) abort
-  return ['list', 'show', 'drop', 'pop', 'apply', 'branch', 'save', 'clear', 'create', 'store']
-endfunction
-
-" User Commands
-
-function! twiggy#define_commands()
-  command! -buffer -nargs=0 -bang TwigRevert call s:Revert(<bang>0)
-  command! -buffer -nargs=* -complete=customlist,TwiggyCompletePush   TwigPush   call s:GitCmd(0, 'push', <f-args>)
-  command! -buffer -nargs=* -complete=customlist,TwiggyCompleteFetch  TwigFetch  call s:GitCmd(0, 'fetch', <f-args>)
-  command! -buffer -nargs=* -complete=customlist,TwiggyCompleteMerge  TwigMerge  call s:GitCmd(1, 'merge', <f-args>)
-  command! -buffer -nargs=* -complete=customlist,TwiggyCompleteRebase TwigRebase call s:GitCmd(1, 'rebase', <f-args>)
-  command! -buffer -nargs=* -complete=customlist,TwiggyCompletePull   TwigPull   call s:GitCmd(1, 'pull', <f-args>)
-  command! -buffer -nargs=* TwigStash call s:GitCmd(0, 'stash', <f-args>)
 endfunction
 
 " {{{1 Auto Commands
