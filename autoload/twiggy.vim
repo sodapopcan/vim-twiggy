@@ -9,21 +9,21 @@ endif
 let g:autoloaded_twiggy = 1
 
 " {{{1 Utility
-function! s:buffocus(bufnr)
+function! s:buffocus(bufnr) abort
   let switchbuf_cached = &switchbuf
   set switchbuf=useopen
   exec 'sb ' . a:bufnr
   exec 'set switchbuf=' . switchbuf_cached
 endfunction
 
-function! s:mapping(mapping, fn, args)
+function! s:mapping(mapping, fn, args) abort
   let s:mappings[s:encode_mapping(a:mapping)] = [a:fn, a:args]
   exe "nnoremap <buffer> <silent> " .
         \ a:mapping . " :<C-U>call <SID>call('" .
         \ s:encode_mapping(a:mapping) . "')<CR>"
 endfunction
 
-function! s:encode_mapping(mapping)
+function! s:encode_mapping(mapping) abort
   return substitute(a:mapping, '\v^\<', '___', '')
 endfunction
 
@@ -72,7 +72,7 @@ let g:twiggy_custom_icons           = get(g:,'twiggy_custom_icons',           s:
 
 " {{{1 System
 "   {{{2 cmd
-function! s:cmd(cmd, bg)
+function! s:cmd(cmd, bg) abort
   let command = a:cmd
 
   if a:bg
@@ -92,8 +92,9 @@ function! s:cmd(cmd, bg)
   endif
 endfunction
 
+
 "   {{{2 gitize
-function! s:gitize(cmd)
+function! s:gitize(cmd) abort
   if !exists('g:twiggy_git_cmd')
     let g:twiggy_git_cmd = fugitive#buffer().repo().git_command()
   end
@@ -101,7 +102,7 @@ function! s:gitize(cmd)
 endfunction
 
 "   {{{2 git_cmd
-function! s:git_cmd(cmd, bg)
+function! s:git_cmd(cmd, bg) abort
   let cmd = s:gitize(a:cmd)
   let s:git_cmd_run = 1
   if a:bg
@@ -112,7 +113,7 @@ function! s:git_cmd(cmd, bg)
 endfunction
 
 "   {{{2 call
-function! s:call(mapping)
+function! s:call(mapping) abort
   let key = s:encode_mapping(a:mapping)
   if call('s:' . s:mappings[key][0], s:mappings[key][1])
     call s:ErrorMsg()
@@ -126,7 +127,7 @@ endfunction
 
 
 " {{{1 Branch Parser
-function! s:parse_branch(branch, type)
+function! s:parse_branch(branch, type) abort
   let branch = {}
 
   let branch.current = match(a:branch, '\v^\*') >= 0
@@ -209,7 +210,7 @@ endfunction
 
 
 " {{{1 Option Parser
-function! s:OptionParser()
+function! s:OptionParser() abort
   let terminators = ['m', 'M', 'r', 'R', 'F', '^']
   let options = {
         \ 'a': 'all',
@@ -255,18 +256,18 @@ endfunction
 
 " {{{1 Git
 "   {{{2 any_commits
-function! s:no_commits()
+function! s:no_commits() abort
   call s:git_cmd('rev-list -n 1 --all &> /dev/null', 0)
   return v:shell_error
 endfunction
 
 "   {{{2 dirty_tree
-function! s:dirty_tree()
+function! s:dirty_tree() abort
   return s:git_cmd('diff --shortstat', 0) !=# ''
 endfunction
 
 "   {{{2 _git_branch_vv
-function! s:_git_branch_vv(type)
+function! s:_git_branch_vv(type) abort
   let branches = []
   for branch in split(s:git_cmd('branch --' . a:type . ' -vv --no-color', 0), '\v\n')
     call add(branches, s:parse_branch(branch, a:type))
@@ -276,7 +277,7 @@ function! s:_git_branch_vv(type)
 endfunction
 
 "   {{{2 branch_status
-function! s:get_git_mode()
+function! s:get_git_mode() abort
   if isdirectory(g:twiggy_git_dir . '/rebase-apply')
     return 'rebasing'
   elseif filereadable(g:twiggy_git_dir . '/MERGE_HEAD')
@@ -289,7 +290,7 @@ function! s:get_git_mode()
 endfunction
 
 "   {{{2 get_branches
-function! s:get_branches()
+function! s:get_branches() abort
   let locals = s:_git_branch_vv('list')
   let locals_sorted = []
 
@@ -378,18 +379,18 @@ function! s:get_branches()
 endfunction
 
 "   {{{2 get_current_branch
-function! s:get_current_branch()
+function! s:get_current_branch() abort
   return s:git_cmd('branch --list | grep \*', 0)[2:-2]
 endfunction
 
 "   branch_exists
-function! s:branch_exists(branch)
+function! s:branch_exists(branch) abort
   call s:git_cmd('show-ref --verify --quiet refs/heads/' . a:branch, 0)
   return !v:shell_error
 endfunction
 
 "   {{{2 branch_under_cursor
-function! s:branch_under_cursor()
+function! s:branch_under_cursor() abort
   let line = line('.')
   if has_key(s:branch_line_refs, line)
     return s:branch_line_refs[line]
@@ -399,7 +400,7 @@ endfunction
 
 "   {{{2 get_uniq_branch_names_from_reflog
 " http://stackoverflow.com/questions/14062402/awk-using-a-file-to-filter-another-one-out-tr
-function! s:get_uniq_branch_names_from_reflog()
+function! s:get_uniq_branch_names_from_reflog() abort
   let cmd = "awk 'FNR==NR { a[$NF]; next } $NF in a' <(" . s:gitize('branch --list') . ") "
   let cmd.= "<(" . s:gitize('reflog') . " | awk -F\" \" '/checkout: moving from/ { print $8 }' | "
   let cmd.= "awk " . shellescape('!f[$0]++') . ")"
@@ -409,12 +410,12 @@ endfunction
 
 "   get_merged_branches
 " I'm sure there is a better plumbing command to figure this out
-function! s:get_merged_branches()
+function! s:get_merged_branches() abort
   return map(split(s:git_cmd('branch --list --merged', 0), '\n'), 'v:val[2:]')
 endfunction
 
 "   {{{2 get_by_committer_date
-function! s:get_by_commiter_date(type)
+function! s:get_by_commiter_date(type) abort
   let cmd = "cut -d'/' -f 3- <("
         \ . s:gitize("for-each-ref --sort=-authordate refs/" . a:type)
         \ . " | awk -F\" \" ' { print $3 }')"
@@ -422,7 +423,7 @@ function! s:get_by_commiter_date(type)
 endfunction
 
 "   {{{2 update_last_branch_under_cursor
-function! s:update_last_branch_under_cursor()
+function! s:update_last_branch_under_cursor() abort
   " Yeah, gonna swallow the exception here
   try
     let s:last_branch_under_cursor = s:branch_under_cursor()
@@ -433,7 +434,7 @@ endfunction
 
 " {{{1 UI
 "   {{{2 Standard
-function! s:standard_view()
+function! s:standard_view() abort
   " Sort branches by group
   let groups = {}
   let groups['local'] = {}
@@ -516,7 +517,7 @@ function! s:standard_view()
 endfunction
 
 "   {{{2 Branch Details
-function! s:show_branch_details()
+function! s:show_branch_details() abort
   let line = line('.')
   if has_key(s:branch_line_refs, line)
     let max_len = &columns - 8
@@ -530,7 +531,7 @@ function! s:show_branch_details()
 endfunction
 
 "   {{{2 Stdout/Stderr Buffer
-function! s:ShowOutputBuffer()
+function! s:ShowOutputBuffer() abort
   if s:last_output ==# ''
     return
   endif
@@ -559,7 +560,7 @@ function! s:ShowOutputBuffer()
 endfunction
 
 "   {{{2 Confirm
-function! s:Confirm(prompt, cmd, abort)
+function! s:Confirm(prompt, cmd, abort) abort
   redraw
   echohl WarningMsg
   echo a:prompt . " [Yn" . (a:abort ? 'a' : '') . "]"
@@ -575,13 +576,13 @@ function! s:Confirm(prompt, cmd, abort)
   return 0
 endfunction
 
-function! s:PromptToStash()
+function! s:PromptToStash() abort
   return s:Confirm("Working tree is dirty.  Stash first?",
         \ "s:git_cmd('stash', 0)", 1)
 endfunction
 
 "   {{{2 ErrorMsg
-function! s:ErrorMsg()
+function! s:ErrorMsg() abort
   if v:warningmsg !=# ''
     redraw
     echohl WarningMsg
@@ -594,7 +595,7 @@ endfunction
 " {{{1 Plugin
 "   {{{2 Navigation
 "     {{{3 traverseBranches
-function! s:traverseBranches(motion) abort
+function! s:traverseBranches(motion) abort abort
   execute "normal! " . a:motion
   let current_line = line('.')
   if current_line ==# s:total_lines && a:motion ==# 'j'
@@ -609,7 +610,7 @@ function! s:traverseBranches(motion) abort
 endfunction
 
 "     {{{3 traverseGroups
-function! s:traverseGroups(motion)
+function! s:traverseGroups(motion) abort
   if a:motion ==# 'j'
     if search('\v^[A-Za-z]', 'W')
       normal! j
@@ -622,13 +623,13 @@ function! s:traverseGroups(motion)
   endif
 endfunction
 
-function! s:jumpToCurrentBranch()
+function! s:jumpToCurrentBranch() abort
   call search(s:icons.current)
 endfunction
 
 "   {{{2 Main
 "     {{{3 Render
-function! s:Render()
+function! s:Render() abort
   redraw
 
   if exists('b:git_dir') && &filetype !=# 'twiggy'
@@ -755,7 +756,7 @@ function! s:Render()
 endfunction
 
 "     {{{3 Refresh
-function! s:Refresh()
+function! s:Refresh() abort
   if !exists('t:twiggy_bufnr') || !exists('b:git_dir') | return | endif
   if exists('s:refreshing') | return | endif
   let s:refreshing = 1
@@ -798,7 +799,7 @@ function! twiggy#Branch(...) abort
 endfunction
 
 "     {{{3 Close
-function! s:Close()
+function! s:Close() abort
   bdelete!
   redraw | echo ''
 endfunction
@@ -819,7 +820,7 @@ function s:sort_branches(type, int)
 endfunction
 
 "     {{{3 Cycle
-function! s:CycleSort(alt, int)
+function! s:CycleSort(alt, int) abort
   let local = s:branch_under_cursor().is_local
 
   if !a:alt
@@ -835,14 +836,14 @@ function! s:CycleSort(alt, int)
 endfunction
 
 "     {{{3 Slash Group
-function! s:ToggleSlashSort()
+function! s:ToggleSlashSort() abort
   let g:twiggy_group_locals_by_slash = g:twiggy_group_locals_by_slash ? 0 : 1
   return 0
 endfunction
 
 "   {{{2 Git
 "     {{{3 Checkout
-function! s:Checkout(track)
+function! s:Checkout(track) abort
   let current_branch = s:get_current_branch()
   let switch_branch = s:branch_under_cursor()
 
@@ -868,7 +869,7 @@ function! s:Checkout(track)
 endfunction
 
 "     {{{3 Delete
-function! s:Delete()
+function! s:Delete() abort
   let branch = s:branch_under_cursor()
 
   if branch.fullname ==# s:get_current_branch()
@@ -893,7 +894,7 @@ function! s:Delete()
   endif
 endfunction
 
-function! s:DeleteRemote()
+function! s:DeleteRemote() abort
   let branch = s:branch_under_cursor()
 
   return s:Confirm(
@@ -902,7 +903,7 @@ function! s:DeleteRemote()
 endfunction
 
 "     {{{3 Fetch
-function! s:Fetch()
+function! s:Fetch() abort
   let branch = s:branch_under_cursor()
   if branch.tracking !=# ''
     let parts = split(branch.tracking, '/')
@@ -917,7 +918,7 @@ function! s:Fetch()
 endfunction
 
 "     {{{3 Merge
-function! s:Merge(remote)
+function! s:Merge(remote) abort
   let branch = s:branch_under_cursor()
 
   if a:remote
@@ -940,7 +941,7 @@ function! s:Merge(remote)
 endfunction
 
 "     {{{3 Rebase
-function! s:Rebase(remote)
+function! s:Rebase(remote) abort
   let branch = s:branch_under_cursor()
 
   if a:remote
@@ -964,14 +965,14 @@ endfunction
 
 
 "     {{{3 Merge/Rebase Abort
-function! s:Abort(type)
+function! s:Abort(type) abort
   call s:git_cmd(a:type . ' --abort', 0)
   cclose
   redraw | echo a:type . ' aborted'
 endfunction
 
 "     {{{3 Push
-function! s:Push(current)
+function! s:Push(current) abort
   let branch = a:current ? s:current_branch_ref : s:branch_under_cursor()
 
   if !branch.is_local
@@ -1004,7 +1005,7 @@ function! s:Push(current)
   return 0
 endfunction
 
-function! TwiggyCompleteRemotes(A,L,P)
+function! TwiggyCompleteRemotes(A,L,P) abort
   for remote in split(s:git_cmd('remote', 0), '\v\n')
     if match(remote, '\v^' . a:A) >= 0
       return remote
@@ -1015,7 +1016,7 @@ function! TwiggyCompleteRemotes(A,L,P)
 endfunction
 
 "     {{{3 Stash
-function! s:Stash(pop)
+function! s:Stash(pop) abort
   let pop = a:pop ? ' pop' : ''
   call s:git_cmd('stash' . pop, 0)
 
@@ -1026,7 +1027,7 @@ function! s:Stash(pop)
 endfunction
 
 "     {{{3 Revert
-function! s:Revert(bang)
+function! s:Revert(bang) abort
   let currfile = expand('%:p')
   if a:bang
     call s:git_cmd('reset ' . currfile, 0)
@@ -1037,7 +1038,7 @@ endfunction
 
 " Completion
 
-function! TwiggyCompleteGitBranches(A,L,P)
+function! TwiggyCompleteGitBranches(A,L,P) abort
   for branch in s:get_branches()
     if match(branch.fullname, '\v^' . a:A) >= 0
       let slicepos = len(split(a:A, '/')) - 1
@@ -1057,7 +1058,7 @@ augroup twiggy
 augroup END
 
 " {{{1 Fugitive
-function! s:close_string()
+function! s:close_string() abort
   if g:twiggy_close_on_fugitive_cmd
     return 'call <SID>Close()'
   else
