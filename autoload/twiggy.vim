@@ -48,7 +48,7 @@ let s:icons.unmerged = get(g:,'twiggy_icon_set', s:icons.pretty[6])
 " {{{1 Options
 
 let g:twiggy_num_coloumns           = get(g:,'twiggy_num_coloumns',           31                                                       )
-let g:twiggy_split_position         = get(g:,'twiggy_split_position',         'topleft'                                                )
+let g:twiggy_split_position         = get(g:,'twiggy_split_position',         ''                                                       )
 let g:twiggy_local_branch_sort      = get(g:,'twiggy_local_branch_sort',      'alpha'                                                  )
 let g:twiggy_local_branch_sorts     = get(g:,'twiggy_local_branch_sorts',     ['alpha', 'date', 'track', 'mru']                        )
 let g:twiggy_remote_branch_sort     = get(g:,'twiggy_remote_branch_sort',     'alpha'                                                  )
@@ -643,9 +643,8 @@ function! s:Render()
   endif
 
   if !exists('g:twiggy_bufnr') || !(exists('g:twiggy_bufnr') && g:twiggy_bufnr ==# bufnr(''))
-    exec 'silent keepalt ' . g:twiggy_split_position . ' vsplit Twiggy'
+    exec 'silent keepalt ' . g:twiggy_split_position . ' ' . g:twiggy_num_coloumns . 'vsplit Twiggy'
     setlocal filetype=twiggy buftype=nofile
-    exec 'vertical resize ' . g:twiggy_num_coloumns
     setlocal nonumber nowrap lisp
     let g:twiggy_bufnr = bufnr('')
   endif
@@ -1121,7 +1120,6 @@ augroup twiggy
   autocmd!
   autocmd CursorMoved Twiggy call s:show_branch_details()
   autocmd CursorMoved Twiggy call s:update_last_branch_under_cursor()
-  autocmd BufEnter    Twiggy exec 'vertical resize ' . g:twiggy_num_coloumns
   autocmd BufReadPost,BufEnter,BufLeave,VimResized Twiggy call <SID>Refresh()
   autocmd BufWinLeave Twiggy if exists('g:twiggy_bufnr') | unlet g:twiggy_bufnr | endif
 augroup END
