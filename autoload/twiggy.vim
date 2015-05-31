@@ -17,19 +17,37 @@ function! s:buffocus(bufnr)
   exec 'set switchbuf=' . switchbuf_cached
 endfunction
 
-" {{{1 Options
-"   {{{2 Helpers
-function! s:get_option(option)
-  let var = "g:twiggy_" . a:option
-  if !exists(var)
-    return 0
-  else
-    return {var}
-  endif
-endfunction
+" {{{1 Script Variables
+let s:init_line                = 0
+let s:mappings                 = {}
+let s:branch_line_refs         = {}
+let s:current_branch_ref       = {}
+let s:last_branch_under_cursor = {}
+let s:last_output              = ''
+let s:git_flags                = '' " I regret this
+let s:git_mode                 = ''
 
-"   {{{2 The Options
-let g:twiggy_num_coloumns           = get(g:,'twiggy_num_coloumns',            31                                                      )
+let s:sorted      = 0
+let s:git_cmd_run = 0
+
+" {{{1 Icons
+let s:icons          = {}
+let s:icons.pretty   = ['*', '✓', '↑', '↓', '↕', '∅', '✗']
+let s:icons.standard = ['*', '=', '+', '-', '~', '%', 'x']
+let s:icons.custom   = get(g:,'twiggy_custom_icons', 'pretty')
+
+let s:icons.current  = get(g:,'twiggy_icon_set', s:icons.pretty[0])
+let s:icons.tracking = get(g:,'twiggy_icon_set', s:icons.pretty[1])
+let s:icons.ahead    = get(g:,'twiggy_icon_set', s:icons.pretty[2])
+let s:icons.behind   = get(g:,'twiggy_icon_set', s:icons.pretty[3])
+let s:icons.both     = get(g:,'twiggy_icon_set', s:icons.pretty[4])
+let s:icons.detached = get(g:,'twiggy_icon_set', s:icons.pretty[5])
+let s:icons.unmerged = get(g:,'twiggy_icon_set', s:icons.pretty[6])
+
+
+" {{{1 Options
+
+let g:twiggy_num_coloumns           = get(g:,'twiggy_num_coloumns',           31                                                       )
 let g:twiggy_split_position         = get(g:,'twiggy_split_position',         'topleft'                                                )
 let g:twiggy_local_branch_sort      = get(g:,'twiggy_local_branch_sort',      'alpha'                                                  )
 let g:twiggy_local_branch_sorts     = get(g:,'twiggy_local_branch_sorts',     ['alpha', 'date', 'track', 'mru']                        )
@@ -40,38 +58,7 @@ let g:twiggy_enable_remote_delete   = get(g:,'twiggy_enable_remote_delete',   0 
 let g:twiggy_use_dispatch           = get(g:,'twiggy_use_dispatch',           exists('g:loaded_dispatch') && g:loaded_dispatch ? 1 : 0 )
 let g:twiggy_close_on_fugitive_cmd  = get(g:,'twiggy_close_on_fugitive_cmd',  0                                                        )
 let g:twiggy_icon_set               = get(g:,'twiggy_icon_set',               has('multi_byte') ? 'pretty' : 'standard'                )
-
-" {{{1 Script Variables
-let s:init_line                = 0
-let s:mappings                 = {}
-let s:branch_line_refs         = {}
-let s:current_branch_ref       = {}
-let s:last_local_sort          = s:get_option('local_branch_sort')
-let s:last_branch_under_cursor = {}
-let s:last_output              = ''
-let s:git_flags                = '' " I regret this
-let s:git_mode                 = ''
-
-let s:sorted      = 0
-let s:git_cmd_run = 0
-
-" {{{1 Icons
-let s:icons = {}
-
-let s:icons.pretty   = ['*', '✓', '↑', '↓', '↕', '∅', '✗']
-let s:icons.standard = ['*', '=', '+', '-', '~', '%', 'x']
-let s:icons.custom   = s:get_option('custom_icons')
-
-let s:icons.current  = s:icons[s:get_option('icon_set')][0]
-let s:icons.tracking = s:icons[s:get_option('icon_set')][1]
-let s:icons.ahead    = s:icons[s:get_option('icon_set')][2]
-let s:icons.behind   = s:icons[s:get_option('icon_set')][3]
-let s:icons.both     = s:icons[s:get_option('icon_set')][4]
-let s:icons.detached = s:icons[s:get_option('icon_set')][5]
-let s:icons.unmerged = s:icons[s:get_option('icon_set')][6]
-
-" hmmmmmm
-let twiggy_custom_icons = get(g:, 'twiggy_custom_icons', s:icons[s:get_option('icon_set')])
+let g:twiggy_custom_icons           = get(g:,'twiggy_custom_icons',           s:icons[g:twiggy_icon_set]                               )
 
 " {{{1 System
 "   {{{2 cmd
@@ -80,7 +67,7 @@ function! s:cmd(cmd, bg)
 
   if a:bg
     if exists('g:loaded_dispatch') && g:loaded_dispatch &&
-          \ s:get_option('use_dispatch')
+          \ g:twiggy_use_dispatch
       exec ':Dispatch ' . command
     else
       exec ':!' . command
@@ -194,7 +181,7 @@ function! s:parse_branch(branch, type)
   if a:type == 'list'
     let branch.is_local = 1
     let branch.type  = 'local'
-    if s:get_option('group_locals_by_slash')
+    if g:twiggy_group_locals_by_slash
       if match(branch.fullname, '/') >= 0
         let group = matchstr(branch.fullname, '\v[^/]*')
         let branch.group = group
@@ -323,14 +310,14 @@ function! s:get_branches()
 
   for branch_name in reflog
     if has_key(local_refs, branch_name)
-      if s:get_option('local_branch_sort') ==# 'mru'
+      if g:twiggy_local_branch_sort ==# 'mru'
         call add(locals_sorted, local_refs[branch_name])
         call remove(locals, index(locals, local_refs[branch_name]))
       endif
     endif
   endfor
 
-  if s:get_option('local_branch_sort') ==# 'track'
+  if g:twiggy_local_branch_sort ==# 'track'
     let ahead_branches               = []
     let behind_branches              = []
     let both_branches                = []
@@ -359,7 +346,7 @@ function! s:get_branches()
           \   up_to_date_tracking_branches), non_tracking_branches)
   endif
 
-  if s:get_option('local_branch_sort') ==# 'date'
+  if g:twiggy_local_branch_sort ==# 'date'
     for branch_name in s:get_by_commiter_date('heads')
       if has_key(local_refs, branch_name)
         call add(locals_sorted, local_refs[branch_name])
@@ -373,7 +360,7 @@ function! s:get_branches()
   let remotes = s:_git_branch_vv('remote')
   let remotes_sorted = []
 
-  if s:get_option('remote_branch_sort') ==# 'date'
+  if g:twiggy_remote_branch_sort ==# 'date'
     let remote_refs = {}
 
     for branch in remotes
@@ -495,7 +482,8 @@ function! s:standard_view()
         let line = line + 1
       endif
 
-      call add(output, group_ref.name . ' [' . s:get_option(group_type . '_branch_sort') . ']')
+      exec "let sort_name = g:twiggy_" . group_type . "_branch_sort"
+      call add(output, group_ref.name . ' [' . sort_name . ']')
 
       for branch in group_ref['branches']
         call add(output, branch.decoration . branch.name)
@@ -654,11 +642,12 @@ function! s:Render()
     return
   endif
 
-  if !s:get_option('bufnr') && s:get_option('bufnr') !=# bufnr('')
-    exec 'silent keepalt ' . s:get_option('split_position') . ' vsplit Twiggy'
+  if !exists('g:twiggy_bufnr') || !(exists('g:twiggy_bufnr') && g:twiggy_bufnr ==# bufnr(''))
+    exec 'silent keepalt ' . g:twiggy_split_position . ' vsplit Twiggy'
     setlocal filetype=twiggy buftype=nofile
-    exec 'vertical resize ' . s:get_option('num_coloumns')
+    exec 'vertical resize ' . g:twiggy_num_coloumns
     setlocal nonumber nowrap lisp
+    let g:twiggy_bufnr = bufnr('')
   endif
 
   nnoremap <buffer> <silent> q     :<C-U>call <SID>Close()<CR>
@@ -722,7 +711,7 @@ function! s:Render()
     nnoremap <buffer> <silent> u :echo 'Nothing to abort'<CR>
   endif
 
-  if s:get_option('enable_remote_delete')
+  if g:twiggy_enable_remote_delete
     call s:mapping('d^',      'DeleteRemote',     [])
   endif
 
@@ -791,13 +780,13 @@ function! twiggy#Branch(...) abort
     let f = s:branch_exists(a:1) ? '' : '-b '
     call s:git_cmd('checkout ' . f . join(a:000), 0)
     call s:ShowOutputBuffer()
-    if s:get_option('bufnr')
+    if exists('g:twiggy_bufnr')
       call s:Refresh()
     end
     redraw
     echo 'Moved from ' . current_branch . ' to ' . a:1
   else
-    let twiggy_bufnr = s:get_option('bufnr')
+    let twiggy_bufnr = exists('g:twiggy_bufnr') ? g:twiggy_bufnr : 0
     if !twiggy_bufnr
       call s:Render()
     else
@@ -806,7 +795,7 @@ function! twiggy#Branch(...) abort
         call s:Close()
       else
         " If twiggy is open, :Twiggy will focus the twiggy buffer then redraw " it
-        call s:buffocus(s:get_option('bufnr'))
+        call s:buffocus(g:twiggy_bufnr)
       end
     endif
   endif
@@ -821,16 +810,16 @@ endfunction
 "   {{{2 Sorting
 "     {{{3 Helpers
 function s:sort_branches(type, int)
-  let max_index = len(s:get_option(a:type . '_branch_sorts')) - a:int
-  let new_index = index(s:get_option(a:type . '_branch_sorts'),
-        \  s:get_option(a:type . '_branch_sort')) + a:int
+  exec "let sorts     = g:twiggy_" . a:type . "_branch_sorts"
+  exec "let sort_name = g:twiggy_" . a:type . "_branch_sort"
+  let max_index = len(sorts) - a:int
+  let new_index = index(sorts, sort_name) + a:int
 
   if new_index > max_index
     let new_index = 0
   endif
 
-  exec "let g:twiggy_" . a:type . "_branch_sort = s:get_option('" . a:type
-        \ . "_branch_sorts')[new_index]"
+  exec "let g:twiggy_" . a:type . "_branch_sort = g:twiggy_" . a:type . "_branch_sorts[new_index]"
 endfunction
 
 "     {{{3 Cycle
@@ -851,7 +840,7 @@ endfunction
 
 "     {{{3 Slash Group
 function! s:ToggleSlashSort()
-  let g:twiggy_group_locals_by_slash = s:get_option('group_locals_by_slash') ? 0 : 1
+  let g:twiggy_group_locals_by_slash = g:twiggy_group_locals_by_slash ? 0 : 1
   return 0
 endfunction
 
@@ -1132,14 +1121,14 @@ augroup twiggy
   autocmd!
   autocmd CursorMoved Twiggy call s:show_branch_details()
   autocmd CursorMoved Twiggy call s:update_last_branch_under_cursor()
-  autocmd BufEnter    Twiggy exec 'vertical resize ' . s:get_option('num_coloumns')
+  autocmd BufEnter    Twiggy exec 'vertical resize ' . g:twiggy_num_coloumns
   autocmd BufReadPost,BufEnter,BufLeave,VimResized Twiggy call <SID>Refresh()
   autocmd BufWinLeave Twiggy if exists('g:twiggy_bufnr') | unlet g:twiggy_bufnr | endif
 augroup END
 
 " {{{1 Fugitive
 function! s:close_string()
-  if s:get_option('close_on_fugitive_cmd')
+  if g:twiggy_close_on_fugitive_cmd
     return 'call <SID>Close()'
   else
     return 'wincmd w'
