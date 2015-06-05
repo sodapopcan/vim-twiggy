@@ -16,6 +16,7 @@ function! s:buffocus(bufnr) abort
   exec 'set switchbuf=' . switchbuf_cached
 endfunction
 
+" Create local mappings in the twiggy buffer
 function! s:mapping(mapping, fn, args) abort
   let s:mappings[s:encode_mapping(a:mapping)] = [a:fn, a:args]
   exe "nnoremap <buffer> <silent> " .
