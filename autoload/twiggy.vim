@@ -73,7 +73,7 @@ let g:twiggy_custom_icons           = get(g:,'twiggy_custom_icons',           s:
 
 " {{{1 System
 "   {{{2 cmd
-function! s:cmd(cmd, bg) abort
+function! s:system(cmd, bg) abort
   let command = a:cmd
 
   if a:bg
@@ -96,10 +96,10 @@ endfunction
 
 "   {{{2 gitize
 function! s:gitize(cmd) abort
-  if !exists('g:twiggy_git_cmd')
-    let g:twiggy_git_cmd = fugitive#buffer().repo().git_command()
+  if !exists('t:twiggy_git_cmd')
+    let t:twiggy_git_cmd = fugitive#buffer().repo().git_command()
   end
-  return g:twiggy_git_cmd . ' ' . a:cmd
+  return t:twiggy_git_cmd . ' ' . a:cmd
 endfunction
 
 "   {{{2 git_cmd
@@ -107,9 +107,9 @@ function! s:git_cmd(cmd, bg) abort
   let cmd = s:gitize(a:cmd)
   let s:git_cmd_run = 1
   if a:bg
-    call s:cmd(cmd, a:bg)
+    call s:system(cmd, a:bg)
   else
-    return s:cmd(cmd, a:bg)
+    return s:system(cmd, a:bg)
   endif
 endfunction
 
@@ -406,7 +406,7 @@ function! s:get_uniq_branch_names_from_reflog() abort
   let cmd.= "<(" . s:gitize('reflog') . " | awk -F\" \" '/checkout: moving from/ { print $8 }' | "
   let cmd.= "awk " . shellescape('!f[$0]++') . ")"
 
-  return split(s:cmd(cmd, 0), '\v\n')
+  return split(s:system(cmd, 0), '\v\n')
 endfunction
 
 "   get_merged_branches
@@ -420,7 +420,7 @@ function! s:get_by_commiter_date(type) abort
   let cmd = "cut -d'/' -f 3- <("
         \ . s:gitize("for-each-ref --sort=-authordate refs/" . a:type)
         \ . " | awk -F\" \" ' { print $3 }')"
-  return split(s:cmd(cmd, 0), '\v\n')
+  return split(s:system(cmd, 0), '\v\n')
 endfunction
 
 "   {{{2 update_last_branch_under_cursor
