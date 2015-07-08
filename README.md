@@ -69,10 +69,11 @@ Type `q` to quit.
 
 ## Installation
 
+I personally recommend [vim-plug](https://github.com/junegunn/vim-plug), but
 [NeoBundle](https://github.com/Shougo/neobundle.vim),
 [Vundle](https://github.com/gmarik/Vundle.vim) or
 [pathogen](https://github.com/tpope/vim-pathogen)
-are all fine options.  Or just good ol' unzip if that's what yer into.
+are all fine options as well.
 
 You __must__ have [fugitive](https://github.com/tpope/vim-fugitive) installed!
 
