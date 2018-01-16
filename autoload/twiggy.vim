@@ -133,26 +133,17 @@ function! s:parse_branch(branch, type) abort
 
   let branch.current = match(a:branch, '\v^\*') >= 0
 
+  let branch.decoration = ' '
   if branch.current
     let s:current_branch_ref = branch
-    if s:git_mode !=# 'normal'
-      let branch.decoration = s:icons.unmerged
-    else
-      let branch.decoration = s:icons.current
-    end
-  else
-    let branch.decoration = ' '
+    let branch.decoration = s:git_mode !=# 'normal' ? s:icons.unmerged : s:icons.current
   endif
 
   let detached = match(a:branch, '\v^\(detached from', 2)
 
   let remote_details = matchstr(a:branch, '\v\[[^\[]+\]')
   let branch.tracking = matchstr(remote_details, '\v[^ \:\]]+', 1)
-  if branch.tracking != ''
-    let branch.remote = split(branch.tracking, '/')[0]
-  else
-    let branch.remote = ''
-  end
+  let branch.remote =  branch.tracking != '' ? split(branch.tracking, '/')[0] : ''
   if branch.tracking !=# ''
     if match(remote_details, '\vahead [0-9]+\, behind [0-9]') >= 0
       let branch.status      = 'both'
