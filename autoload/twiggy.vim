@@ -270,9 +270,9 @@ endfunction
 
 "   {{{2 branch_status
 function! s:get_git_mode() abort
-  if isdirectory(g:twiggy_git_dir . '/rebase-apply')
+  if isdirectory(t:twiggy_git_dir . '/rebase-apply')
     return 'rebasing'
-  elseif filereadable(g:twiggy_git_dir . '/MERGE_HEAD')
+  elseif filereadable(t:twiggy_git_dir . '/MERGE_HEAD')
     return 'merging'
   elseif s:git_cmd('diff --shortstat --diff-filter=U | tail -1', 0) !=# ''
     return 'merging'
@@ -625,15 +625,15 @@ function! s:Render() abort
   redraw
 
   if exists('b:git_dir') && &filetype !=# 'twiggy'
-    let g:twiggy_git_dir = b:git_dir
-    let g:twiggy_git_cmd = fugitive#buffer().repo().git_command()
-  elseif !exists('g:twiggy_git_cmd')
+    let t:twiggy_git_dir = b:git_dir
+    let t:twiggy_git_cmd = fugitive#buffer().repo().git_command()
+  elseif !exists('t:twiggy_git_cmd')
     echo "Not a git repository"
     return
   endif
 
   if !exists('t:twiggy_bufnr') || !(exists('t:twiggy_bufnr') && t:twiggy_bufnr ==# bufnr(''))
-    exec 'silent keepalt ' . g:twiggy_split_position . ' ' . g:twiggy_num_coloumns . 'vsplit Twiggy'
+    exec 'silent keepalt ' . g:twiggy_split_position . ' ' . g:twiggy_num_coloumns . 'vsplit twiggy://' . t:twiggy_git_dir . '/branches'
     setlocal filetype=twiggy buftype=nofile
     setlocal nonumber nowrap lisp
     let t:twiggy_bufnr = bufnr('')
@@ -744,22 +744,26 @@ function! s:Render() abort
   endif
 
   " }}}
-  let twiggy_bufnr = get(g:, 'twiggy_bufnr', bufnr(''))
+  " let twiggy_bufnr = get(t:, 'twiggy_bufnr', bufnr(''))
 endfunction
 
 "     {{{3 Refresh
 function! s:Refresh() abort
-  if !exists('t:twiggy_bufnr') || !exists('b:git_dir') | return | endif
-  if exists('s:refreshing') | return | endif
-  let s:refreshing = 1
+  if exists('t:refreshing') || !exists('t:twiggy_bufnr') || !exists('b:git_dir')
+    return
+  endif
+  let t:refreshing = 1
   if &filetype !=# 'twiggy'
+    let t:twiggy_git_dir = b:git_dir
+    let t:twiggy_git_cmd = fugitive#buffer().repo().git_command()
     call s:buffocus(t:twiggy_bufnr)
-    if g:twiggy_git_dir ==# b:git_dir | return | endif
-    let g:twiggy_git_dir = b:git_dir
-    let g:twiggy_git_cmd = fugitive#buffer().repo().git_command()
+    " if t:twiggy_git_dir ==# b:git_dir
+    "   unlet t:refreshing
+    "   return
+    " endif
   endif
   call s:Render()
-  unlet s:refreshing
+  unlet t:refreshing
 endfunction
 
 "     {{{3 Branch
@@ -784,6 +788,8 @@ function! twiggy#Branch(...) abort
         call s:Close()
       else
         " If twiggy is open, :Twiggy will focus the twiggy buffer then redraw " it
+        let t:twiggy_git_dir = b:git_dir
+        let t:twiggy_git_cmd = fugitive#buffer().repo().git_command()
         call s:buffocus(t:twiggy_bufnr)
       end
     endif
@@ -1040,13 +1046,17 @@ function! TwiggyCompleteGitBranches(A,L,P) abort
   return ''
 endfunction
 
-" {{{1 Auto Commands
+  " {{{1 Auto Commands
 augroup twiggy
   autocmd!
-  autocmd CursorMoved Twiggy call s:show_branch_details()
-  autocmd CursorMoved Twiggy call s:update_last_branch_under_cursor()
-  autocmd BufReadPost,BufEnter,BufLeave,VimResized Twiggy call <SID>Refresh()
-  autocmd BufWinLeave Twiggy if exists('t:twiggy_bufnr') | unlet t:twiggy_bufnr | endif
+  autocmd CursorMoved twiggy://* call s:show_branch_details()
+  autocmd CursorMoved twiggy://* call s:update_last_branch_under_cursor()
+  autocmd BufReadPost,BufEnter,BufLeave,VimResized twiggy://* call <SID>Refresh()
+  autocmd BufWinLeave twiggy://* if exists('t:twiggy_bufnr') |
+        \ unlet t:twiggy_bufnr |
+        \ unlet t:twiggy_git_dir |
+        \ unlet t:twiggy_git_cmd |
+        \ endif
 augroup END
 
 " {{{1 Fugitive
@@ -1058,6 +1068,6 @@ function! s:close_string() abort
   endif
 endfunction
 
-autocmd BufEnter Twiggy exec "command! -buffer Gstatus " . <SID>close_string() . " | silent normal! :<\C-U>Gstatus\<CR>"
-autocmd BufEnter Twiggy exec "command! -buffer Gcommit " . <SID>close_string() . " | silent normal! :<\C-U>Gcommit\<CR>"
-autocmd BufEnter Twiggy exec "command! -buffer Gblame  " . <SID>close_string() . " | silent normal! :<\C-U>Gblame\<CR>"
+autocmd BufEnter twiggy://* exec "command! -buffer Gstatus " . <SID>close_string() . " | silent normal! :<\C-U>Gstatus\<CR>"
+autocmd BufEnter twiggy://* exec "command! -buffer Gcommit " . <SID>close_string() . " | silent normal! :<\C-U>Gcommit\<CR>"
+autocmd BufEnter twiggy://* exec "command! -buffer Gblame  " . <SID>close_string() . " | silent normal! :<\C-U>Gblame\<CR>"
