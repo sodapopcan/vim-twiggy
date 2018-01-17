@@ -15,7 +15,7 @@ for experienced git users.
 
 ## Usage
 
-Invoke Twiggy with the `:Twiggy`, or simply `:Twig` command.
+Invoke Twiggy with the `:Twiggy` command.
 
 Use `j` and `k` to jump between branch names and `<C-N>` and `<C-P>` to jump
 between groups.  As your cursor moves, information about the branch under the
@@ -61,7 +61,7 @@ press `M`.
 
 `dd` to delete a branch.  You will be prompted if it's unmerged.
 
-Create or checkout a branch with `:Twig <branch-name>`.
+Create or checkout a branch with `:Twiggy <branch-name>`.
 
 Type `q` to quit.
 
