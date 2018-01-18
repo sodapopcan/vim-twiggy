@@ -8,8 +8,6 @@ Twiggy is a [fugitive](https://github.com/tpope/vim-fugitive) extension that
 loads, decorates and sorts(!) git branches into an interactive buffer.  It
 provides basic merge and rebase support, stashing, and some other goodies.
 
-It also has [dispatch](https://github.com/tpope/vim-dispatch) support!
-
 Twiggy is *not* a simplified branching abstraction.  It is a convenience tool
 for experienced git users.
 
