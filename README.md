@@ -63,7 +63,7 @@ Create or checkout a branch with `:Twiggy <branch-name>`.
 
 Type `q` to quit.
 
-`:h twiggy` for plenty more.
+`:help twiggy` for plenty more.
 
 ## Installation
 
@@ -73,23 +73,12 @@ I personally recommend [vim-plug](https://github.com/junegunn/vim-plug), but
 [pathogen](https://github.com/tpope/vim-pathogen)
 are all fine options as well.
 
+&hellip;and now [dein](https://github.com/Shougo/dein.vim) and
+[minipac](https://github.com/k-takata/minpac) too&mdash;oh my.
+
 You __must__ have [fugitive](https://github.com/tpope/vim-fugitive) installed!
 
-## Ramble
+## About
 
-I started work on this in early 2014.  After getting it to do everything I
-wanted it to do, plus some extra stuff I just thought was cool, I ceased work
-on it for about six months, yet continued to use it daily.  I finally put it
-online in October 2014.  It still has a ways to go, but I'm actively working
-toward a stable release.
-
-Currently in the works (in rough order you can expect them):
-
-- A mapping for `git pull` (but really, just F then R or M)
-- A mapping for `git cherry-pick`
-- Quick help (maybe)
-- Improve, er... "command option mapping composition thing" (see `:h twiggy-cmd`)
-
-This is my first-ever Vim plugin, so please excuse any erraticness in
-development over the next few weeks.  Any input anyone has for me is greatly
-appreciated!
+If you like this plugin, please star it and vote for it on
+[vim.org](https://vim.sourceforge.io/scripts/script.php?script_id=5644)!
