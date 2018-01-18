@@ -8,7 +8,4 @@ if exists('g:loaded_twiggy') || &cp
 endif
 let g:loaded_twiggy = 1
 
-for cmd in ['Twiggy', 'Twig']
-  exec "command! -nargs=* -complete=custom,TwiggyCompleteGitBranches " .
-        \ cmd . " call twiggy#Branch(<f-args>)"
-endfor
+command -nargs=* -complete=custom,TwiggyCompleteGitBranches Twiggy call twiggy#Branch(<f-args>)
