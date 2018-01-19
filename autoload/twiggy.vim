@@ -96,10 +96,12 @@ endfunction
 
 "   {{{2 gitize
 function! s:gitize(cmd) abort
-  if !exists('t:twiggy_git_cmd')
-    let t:twiggy_git_cmd = fugitive#buffer().repo().git_command()
+  if exists('t:twiggy_bufnr') && t:twiggy_bufnr == bufnr('')
+    let git_cmd = t:twiggy_git_cmd
+  else
+    let git_cmd = fugitive#buffer().repo().git_command()
   end
-  return t:twiggy_git_cmd . ' ' . a:cmd
+  return git_cmd . ' ' . a:cmd
 endfunction
 
 "   {{{2 git_cmd
