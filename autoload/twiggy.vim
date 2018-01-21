@@ -32,7 +32,6 @@ endfunction
 let s:init_line                = 0
 let s:mappings                 = {}
 let s:branch_line_refs         = {}
-let s:current_branch_ref       = {}
 let s:last_branch_under_cursor = {}
 let s:last_output              = ''
 let s:git_flags                = '' " I regret this
@@ -137,7 +136,6 @@ function! s:parse_branch(branch, type) abort
 
   let branch.decoration = ' '
   if branch.current
-    let s:current_branch_ref = branch
     let branch.decoration = s:git_mode !=# 'normal' ? s:icons.unmerged : s:icons.current
   endif
 
@@ -685,7 +683,7 @@ function! s:Render() abort
   call s:mapping('M',       'Merge',            [1])
   call s:mapping('r',       'Rebase',           [0])
   call s:mapping('R',       'Rebase',           [1])
-  call s:mapping('^',       'Push',             [0])
+  call s:mapping('^',       'Push',             [])
   call s:mapping('<<',      'Stash',            [0])
   call s:mapping('>>',      'Stash',            [1])
   call s:mapping('i',       'CycleSort',        [0,1])
@@ -972,8 +970,8 @@ function! s:Abort(type) abort
 endfunction
 
 "     {{{3 Push
-function! s:Push(current) abort
-  let branch = a:current ? s:current_branch_ref : s:branch_under_cursor()
+function! s:Push() abort
+  let branch = s:branch_under_cursor()
 
   if !branch.is_local
     let v:warningmsg = "Can't push a remote branch"
