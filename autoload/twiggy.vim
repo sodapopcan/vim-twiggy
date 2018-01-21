@@ -683,7 +683,8 @@ function! s:Render() abort
   call s:mapping('M',       'Merge',            [1])
   call s:mapping('r',       'Rebase',           [0])
   call s:mapping('R',       'Rebase',           [1])
-  call s:mapping('^',       'Push',             [])
+  call s:mapping('^',       'Push',             [0])
+  call s:mapping('g^',      'Push',             [1])
   call s:mapping('<<',      'Stash',            [0])
   call s:mapping('>>',      'Stash',            [1])
   call s:mapping('i',       'CycleSort',        [0,1])
@@ -970,7 +971,7 @@ function! s:Abort(type) abort
 endfunction
 
 "     {{{3 Push
-function! s:Push() abort
+function! s:Push(choose_upstream) abort
   let branch = s:branch_under_cursor()
 
   if !branch.is_local
@@ -980,7 +981,8 @@ function! s:Push() abort
 
   let remote_groups = split(s:git_cmd('remote', 0), "\n")
 
-  if branch.tracking ==# ''
+  let flag = ''
+  if branch.tracking ==# '' && !a:choose_upstream
     let flag = '--set-upstream'
     if len(remote_groups) > 1
       redraw
@@ -989,8 +991,12 @@ function! s:Push() abort
       let group = remote_groups[0]
     endif
   else
-    let flag = ''
-    let group = split(branch.tracking, '/')[0]
+    if a:choose_upstream
+      redraw
+      let group = input("Push to which remote?: ", '', "custom,TwiggyCompleteRemotes")
+    else
+      let group = split(branch.tracking, '/')[0]
+    endif
   endif
 
   if index(remote_groups, group) < 0

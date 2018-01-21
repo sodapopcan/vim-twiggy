@@ -218,6 +218,9 @@ u                 Abort a merge or rebase
 ^                 Push the local branch under the cursor.  Think of it as an
                   upward arrow.
 
+                                                *twiggy-g^*
+g^                Prompt to specify the remote repo before pushing.
+
                   Deleting~
                                                 *twiggy-dd*
 dd                Delete the branch under the cursor.  If the branch isn't
