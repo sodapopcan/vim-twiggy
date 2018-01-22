@@ -642,11 +642,19 @@ function! s:Render() abort
 
   nnoremap <buffer> <silent> q     :<C-U>call <SID>Close()<CR>
 
+  autocmd! BufWinLeave twiggy://*
+        \ if exists('t:twiggy_bufnr') |
+        \   unlet t:twiggy_bufnr |
+        \   unlet t:twiggy_git_dir |
+        \   unlet t:twiggy_git_cmd |
+        \ endif
+
   if s:no_commits()
     set modifiable
     silent 1,$delete _
     call append(0, "No commits")
     normal! dd
+    set nomodifiable
     return
   endif
 
@@ -663,6 +671,13 @@ function! s:Render() abort
   setlocal nomodified nomodifiable noswapfile
 
   exec "normal! " . s:init_line . "gg"
+
+  augroup twiggy
+    autocmd!
+    autocmd CursorMoved twiggy://* call s:show_branch_details()
+    autocmd CursorMoved twiggy://* call s:update_last_branch_under_cursor()
+    autocmd BufReadPost,BufEnter,BufLeave,VimResized twiggy://* call <SID>Refresh()
+  augroup END
 
   nnoremap <buffer> <silent> j     :<C-U>call <SID>traverseBranches('j')<CR>
   nnoremap <buffer> <silent> k     :<C-U>call <SID>traverseBranches('k')<CR>
@@ -1054,19 +1069,6 @@ function! TwiggyCompleteGitBranches(A,L,P) abort
   endfor
   return ''
 endfunction
-
-  " {{{1 Auto Commands
-augroup twiggy
-  autocmd!
-  autocmd CursorMoved twiggy://* call s:show_branch_details()
-  autocmd CursorMoved twiggy://* call s:update_last_branch_under_cursor()
-  autocmd BufReadPost,BufEnter,BufLeave,VimResized twiggy://* call <SID>Refresh()
-  autocmd BufWinLeave twiggy://* if exists('t:twiggy_bufnr') |
-        \ unlet t:twiggy_bufnr |
-        \ unlet t:twiggy_git_dir |
-        \ unlet t:twiggy_git_cmd |
-        \ endif
-augroup END
 
 " {{{1 Fugitive
 function! s:close_string() abort
