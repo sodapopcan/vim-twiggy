@@ -727,7 +727,7 @@ function! s:Render() abort
   exec "syntax match TwiggyGroup '\\v(^[^\\ " . s:icons.current . "]+)'"
   highlight link TwiggyGroup Type
 
-  exec "syntax match TwiggyCurrent '\\v" . s:get_current_branch() . "$'"
+  exec "syntax match TwiggyCurrent '\\v%3v" . s:get_current_branch() . "$'"
   highlight link TwiggyCurrent Identifier
 
   exec "syntax match TwiggyCurrent '\\V\\%1c" . s:icons.current . "'"
