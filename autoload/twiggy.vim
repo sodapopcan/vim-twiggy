@@ -64,6 +64,7 @@ let g:twiggy_local_branch_sorts     = get(g:,'twiggy_local_branch_sorts',     ['
 let g:twiggy_remote_branch_sort     = get(g:,'twiggy_remote_branch_sort',     'alpha'                                                  )
 let g:twiggy_remote_branch_sorts    = get(g:,'twiggy_remote_branch_sorts',    ['alpha', 'date']                                        )
 let g:twiggy_group_locals_by_slash  = get(g:,'twiggy_group_locals_by_slash',  1                                                        )
+let g:twiggy_set_upstream           = get(g:,'twiggy_set_upstream',           1                                                        )
 let g:twiggy_enable_remote_delete   = get(g:,'twiggy_enable_remote_delete',   0                                                        )
 let g:twiggy_use_dispatch           = get(g:,'twiggy_use_dispatch',           exists('g:loaded_dispatch') && g:loaded_dispatch ? 1 : 0 )
 let g:twiggy_close_on_fugitive_cmd  = get(g:,'twiggy_close_on_fugitive_cmd',  0                                                        )
@@ -983,7 +984,9 @@ function! s:Push(choose_upstream) abort
 
   let flag = ''
   if branch.tracking ==# '' && !a:choose_upstream
-    let flag = '--set-upstream'
+    if g:twiggy_set_upstream
+      let flag = '-u'
+    endif
     if len(remote_groups) > 1
       redraw
       let group = input("Push to which remote?: ", '', "custom,TwiggyCompleteRemotes")

@@ -130,6 +130,13 @@ The split method used to show the twiggy buffer.  Can be |leftabove|,
 <
 Twiggy only allows a verticle split.
 
+                                                *'set_upstream'*
+Default: 1
+Whether or not to automatically set the upstream the first time you push
+a each branch.
+>
+  let g:twiggy_set_upstream = 0
+<
 
 MAPPINGS                                        *twiggy-mappings*
 
@@ -215,9 +222,12 @@ u                 Abort a merge or rebase
 
                   Pushing~
                                                 *twiggy-^*
-^                 Push the local branch under the cursor.  Think of it as an
-                  upward arrow.
-
+^                 Push the local branch under the cursor (think of it as an
+                  upward arrow).  It will set the upstream if it's not
+                  currently set--You can turn off this behaviour with:
+                  >
+                    let g:twiggy_set_upstream = 0
+<
                                                 *twiggy-g^*
 g^                Prompt to specify the remote repo before pushing.
 
