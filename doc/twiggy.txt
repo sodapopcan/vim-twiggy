@@ -105,7 +105,7 @@ By default, twiggy groups branches via one level of "slash-nesting" for locals
 and one group each for remotes.
 
 Branches are sorted before they are grouped, so this can be a little odd when
-sorting by MRU.  To sort locals as one unified group, use the |twiggy-S|
+sorting by MRU.  To sort locals as one unified group, use the |twiggy-a|
 mapping (hint: it's a toggle).  You may set this grouping method to the
 default with the following:
 >
@@ -167,7 +167,7 @@ gi                Cycle through sorts of groups other than that of the branch
 gI                Like gi, but in reverse... even though there are only two
                   options.
 
-                                                *twiggy-S*
+                                                *twiggy-a*
 a                 Toggle grouping of local branches with slashes (/) in their
                   names.
 
