@@ -880,6 +880,9 @@ function! s:Checkout(track) abort
     endif
   endif
 
+  let s:init_line = 0
+  let s:last_branch_under_cursor = 0
+
   return 0
 endfunction
 
