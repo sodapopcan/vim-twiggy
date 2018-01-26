@@ -1063,7 +1063,7 @@ endfunction
 
 " Completion
 
-function! TwiggyCompleteGitBranches(A,L,P) abort
+function! twiggy#TwiggyCompleteGitBranches(A,L,P) abort
   for branch in s:get_branches()
     if match(branch.fullname, '\v^' . a:A) >= 0
       let slicepos = len(split(a:A, '/')) - 1

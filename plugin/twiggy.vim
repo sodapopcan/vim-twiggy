@@ -8,4 +8,4 @@ if exists('g:loaded_twiggy') || &cp
 endif
 let g:loaded_twiggy = 1
 
-command -nargs=* -complete=custom,TwiggyCompleteGitBranches Twiggy call twiggy#Branch(<f-args>)
+command -nargs=* -complete=custom,twiggy#TwiggyCompleteGitBranches Twiggy call twiggy#Branch(<f-args>)
