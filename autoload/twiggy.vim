@@ -1064,13 +1064,13 @@ endfunction
 " Completion
 
 function! twiggy#TwiggyCompleteGitBranches(A,L,P) abort
+  let branches = ''
   for branch in s:get_branches()
-    if match(branch.fullname, '\v^' . a:A) >= 0
-      let slicepos = len(split(a:A, '/')) - 1
-      return join(split(branch.fullname, '/')[0:slicepos], '/')
-    endif
+    let slicepos = len(split(a:A, '/')) - 1
+    let branch = join(split(branch.fullname, '/')[0:slicepos], '/')
+    let branches = branches . branch . "\n"
   endfor
-  return ''
+  return branches
 endfunction
 
 " {{{1 Fugitive
