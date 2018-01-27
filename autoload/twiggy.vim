@@ -41,18 +41,24 @@ let s:sorted      = 0
 let s:git_cmd_run = 0
 
 " {{{1 Icons
-let s:icons          = {}
-let s:icons.pretty   = ['*', '✓', '↑', '↓', '↕', '∅', '✗']
-let s:icons.standard = ['*', '=', '+', '-', '~', '%', 'x']
-let s:icons.custom   = get(g:,'twiggy_custom_icons', 'pretty')
+if exists('g:twiggy_icons')
+      \ && type(g:twiggy_icons) == 3
+      \ && len(filter(g:twiggy_icons, 'type(v:val) ==# 1 && strchars(v:val) ==# 1')) ==# 7
+  let s:icon_set = g:twiggy_icons
+elseif has('multi_byte')
+  let s:icon_set = ['*', '✓', '↑', '↓', '↕', '∅', '✗']
+else
+  let s:icon_set = ['*', '=', '+', '-', '~', '%', 'x']
+endif
 
-let s:icons.current  = get(g:,'twiggy_icon_set', s:icons.pretty[0])
-let s:icons.tracking = get(g:,'twiggy_icon_set', s:icons.pretty[1])
-let s:icons.ahead    = get(g:,'twiggy_icon_set', s:icons.pretty[2])
-let s:icons.behind   = get(g:,'twiggy_icon_set', s:icons.pretty[3])
-let s:icons.both     = get(g:,'twiggy_icon_set', s:icons.pretty[4])
-let s:icons.detached = get(g:,'twiggy_icon_set', s:icons.pretty[5])
-let s:icons.unmerged = get(g:,'twiggy_icon_set', s:icons.pretty[6])
+let s:icons = {}
+let s:icons.current  = s:icon_set[0]
+let s:icons.tracking = s:icon_set[1]
+let s:icons.ahead    = s:icon_set[2]
+let s:icons.behind   = s:icon_set[3]
+let s:icons.both     = s:icon_set[4]
+let s:icons.detached = s:icon_set[5]
+let s:icons.unmerged = s:icon_set[6]
 
 
 " {{{1 Options
@@ -68,8 +74,6 @@ let g:twiggy_set_upstream           = get(g:,'twiggy_set_upstream',           1 
 let g:twiggy_enable_remote_delete   = get(g:,'twiggy_enable_remote_delete',   0                                                        )
 let g:twiggy_use_dispatch           = get(g:,'twiggy_use_dispatch',           exists('g:loaded_dispatch') && g:loaded_dispatch ? 1 : 0 )
 let g:twiggy_close_on_fugitive_cmd  = get(g:,'twiggy_close_on_fugitive_cmd',  0                                                        )
-let g:twiggy_icon_set               = get(g:,'twiggy_icon_set',               has('multi_byte') ? 'pretty' : 'standard'                )
-let g:twiggy_custom_icons           = get(g:,'twiggy_custom_icons',           s:icons[g:twiggy_icon_set]                               )
 
 " {{{1 System
 "   {{{2 cmd

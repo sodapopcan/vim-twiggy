@@ -35,17 +35,25 @@ twiggy when running these commands by setting:
 
 ICONS                                           *twiggy-icons*
 
-Some branches have icons prepended to them.  For the most part, it means they
-are tracking branches.  Here is the legend:
+As per standard git output, * is used to denote the current branch.  Branches
+may also have secondary icons prepended to them which, for the most part, mean
+they are tracking branches.  Here is the legend:
 
-✓ =                 branch is in synch with its upstream
-↑ -                 branch is ahead of its upstream
-↓ +                 branch is behind of its upstream
-↕ ~                 branch is both ahead and behind its upstream
-∅ %                 branch is detached
-✗ x                 in merge/rebase state
+multi_byte    standard
+✓             =             branch is in synch with its upstream
+↑             -             branch is ahead of its upstream
+↓             +             branch is behind of its upstream
+↕             ~             branch is both ahead and behind its upstream
+∅             %             branch is detached
+✗             x             in merge/rebase state
 
-As per standard git output, * is used to denote the current branch.
+You may also use you own icons by setting the following in your vimrc:
+>
+  let g:twiggy_icons = ['*', '=', '+', '-', '~', '%', 'x']
+<
+The list must have 7, single character entries.  The first position is used
+for the current branch then the rest are in the order listed in the above
+legend.
 
 
 SORTING                                         *twiggy-sorting*
