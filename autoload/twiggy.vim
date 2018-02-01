@@ -283,7 +283,7 @@ function! s:get_git_mode() abort
 endfunction
 
 "   {{{2 get_branches
-function! s:get_branches() abort
+function! twiggy#get_branches() abort
   let locals = s:_git_branch_vv('list')
   let locals_sorted = []
 
@@ -437,7 +437,7 @@ function! s:standard_view() abort
   let group_refs['remote'] = []
   let s:init_line = 0
 
-  let branches = s:get_branches()
+  let branches = twiggy#get_branches()
   for branch in branches
     if !has_key(groups[branch.type], branch.group)
       let groups[branch.type][branch.group] = {}
@@ -1065,7 +1065,7 @@ endfunction
 
 function! twiggy#TwiggyCompleteGitBranches(A,L,P) abort
   let branches = ''
-  for branch in s:get_branches()
+  for branch in twiggy#get_branches()
     let slicepos = len(split(a:A, '/')) - 1
     let branch = join(split(branch.fullname, '/')[0:slicepos], '/')
     let branches = branches . branch . "\n"
