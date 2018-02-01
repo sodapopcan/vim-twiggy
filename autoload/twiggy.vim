@@ -1061,18 +1061,6 @@ function! s:Revert(bang) abort
   exec "normal :e " . currfile . "\<CR>"
 endfunction
 
-" Completion
-
-function! twiggy#TwiggyCompleteGitBranches(A,L,P) abort
-  let branches = ''
-  for branch in twiggy#get_branches()
-    let slicepos = len(split(a:A, '/')) - 1
-    let branch = join(split(branch.fullname, '/')[0:slicepos], '/')
-    let branches = branches . branch . "\n"
-  endfor
-  return branches
-endfunction
-
 " {{{1 Fugitive
 function! s:close_string() abort
   if g:twiggy_close_on_fugitive_cmd
