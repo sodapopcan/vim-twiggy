@@ -8,4 +8,14 @@ if exists('g:loaded_twiggy') || &cp
 endif
 let g:loaded_twiggy = 1
 
-command -nargs=* -complete=custom,TwiggyCompleteGitBranches Twiggy call twiggy#Branch(<f-args>)
+function! s:complete_branches(A,L,P) abort
+  let branches = ''
+  for branch in twiggy#get_branches()
+    let slicepos = len(split(a:A, '/')) - 1
+    let branch = join(split(branch.fullname, '/')[0:slicepos], '/')
+    let branches = branches . branch . "\n"
+  endfor
+  return branches
+endfunction
+
+command -nargs=* -complete=custom,s:complete_branches Twiggy call twiggy#Branch(<f-args>)

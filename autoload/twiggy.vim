@@ -287,7 +287,7 @@ function! s:get_git_mode() abort
 endfunction
 
 "   {{{2 get_branches
-function! s:get_branches() abort
+function! twiggy#get_branches() abort
   let locals = s:_git_branch_vv('list')
   let locals_sorted = []
 
@@ -441,7 +441,7 @@ function! s:standard_view() abort
   let group_refs['remote'] = []
   let s:init_line = 0
 
-  let branches = s:get_branches()
+  let branches = twiggy#get_branches()
   for branch in branches
     if !has_key(groups[branch.type], branch.group)
       let groups[branch.type][branch.group] = {}
@@ -1063,18 +1063,6 @@ function! s:Revert(bang) abort
   endif
   call s:git_cmd('checkout ' . currfile, 0)
   exec "normal :e " . currfile . "\<CR>"
-endfunction
-
-" Completion
-
-function! TwiggyCompleteGitBranches(A,L,P) abort
-  for branch in s:get_branches()
-    if match(branch.fullname, '\v^' . a:A) >= 0
-      let slicepos = len(split(a:A, '/')) - 1
-      return join(split(branch.fullname, '/')[0:slicepos], '/')
-    endif
-  endfor
-  return ''
 endfunction
 
 " {{{1 Fugitive
