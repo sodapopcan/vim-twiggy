@@ -63,7 +63,7 @@ let s:icons.unmerged = s:icon_set[6]
 
 " {{{1 Options
 
-let g:twiggy_num_coloumns           = get(g:,'twiggy_num_coloumns',           31                                                       )
+let g:twiggy_num_columns            = get(g:,'twiggy_num_columns',            31                                                       )
 let g:twiggy_split_position         = get(g:,'twiggy_split_position',         ''                                                       )
 let g:twiggy_local_branch_sort      = get(g:,'twiggy_local_branch_sort',      'alpha'                                                  )
 let g:twiggy_local_branch_sorts     = get(g:,'twiggy_local_branch_sorts',     ['alpha', 'date', 'track', 'mru']                        )
@@ -638,7 +638,7 @@ function! s:Render() abort
   endif
 
   if !exists('t:twiggy_bufnr') || !(exists('t:twiggy_bufnr') && t:twiggy_bufnr ==# bufnr(''))
-    exec 'silent keepalt ' . g:twiggy_split_position . ' ' . g:twiggy_num_coloumns . 'vsplit twiggy://' . t:twiggy_git_dir . '/branches'
+    exec 'silent keepalt ' . g:twiggy_split_position . ' ' . g:twiggy_num_columns . 'vsplit twiggy://' . t:twiggy_git_dir . '/branches'
     setlocal filetype=twiggy buftype=nofile
     setlocal nonumber nowrap lisp
     let t:twiggy_bufnr = bufnr('')
