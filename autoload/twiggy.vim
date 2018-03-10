@@ -74,6 +74,7 @@ let g:twiggy_set_upstream           = get(g:,'twiggy_set_upstream',           1 
 let g:twiggy_enable_remote_delete   = get(g:,'twiggy_enable_remote_delete',   0                                                        )
 let g:twiggy_use_dispatch           = get(g:,'twiggy_use_dispatch',           exists('g:loaded_dispatch') && g:loaded_dispatch ? 1 : 0 )
 let g:twiggy_close_on_fugitive_cmd  = get(g:,'twiggy_close_on_fugitive_cmd',  0                                                        )
+let g:twiggy_enable_quickhelp       = get(g:,'twiggy_enable_quickhelp',       1                                                        )
 
 " {{{1 System
 "   {{{2 cmd
@@ -513,6 +514,51 @@ function! s:standard_view() abort
   return output
 endfunction
 
+"   {{{2 Quickhelp
+function! s:quickhelp_view() abort
+  let output = []
+  call add(output, 'Twiggy Quickhelp')
+  call add(output, '===========================')
+  call add(output, '<C-N> jump to next group')
+  call add(output, '<C-P> jump to prev group')
+  call add(output, 'J     jump to curr branch')
+  call add(output, 'q     quit')
+  call add(output, '?     toggle this help')
+  call add(output, '---------------------------')
+  call add(output, 'w/ the cursor on a branch:')
+  call add(output, '---------------------------')
+  call add(output, 'c     checkout')
+  call add(output, 'o     checkout')
+  call add(output, '<CR>  checkout')
+  call add(output, 'C     checkout remote')
+  call add(output, 'O     checkout remote')
+  call add(output, 'F     fetch remote')
+  call add(output, 'V     pull')
+  call add(output, 'm     merge')
+  call add(output, 'M     merge remote')
+  call add(output, 'r     rebase')
+  call add(output, 'R     rebase remote')
+  call add(output, 'u     abort merge/rebase')
+  call add(output, '^     push')
+  call add(output, 'g^    push (prompted)')
+  call add(output, 'dd    delete')
+  if g:twiggy_enable_remote_delete
+    call add(output, 'd^    delete from server')
+  endif
+  call add(output, '<<    stash')
+  call add(output, '>>    pop stash')
+  call add(output, '----------------------------')
+  call add(output, 'sorting, etc:')
+  call add(output, '----------------------------')
+  call add(output, 'i     cycle sorts')
+  call add(output, 'I     `i` in reverse')
+  call add(output, 'gi    cycle remote sorts')
+  call add(output, 'gI    `gi` in reverse')
+  call add(output, 'a     toggle slash-grouping')
+
+  return output
+endfunction
+
 "   {{{2 Branch Details
 function! s:show_branch_details() abort
   let line = line('.')
@@ -638,13 +684,21 @@ function! s:Render() abort
   endif
 
   if !exists('t:twiggy_bufnr') || !(exists('t:twiggy_bufnr') && t:twiggy_bufnr ==# bufnr(''))
-    exec 'silent keepalt ' . g:twiggy_split_position . ' ' . g:twiggy_num_columns . 'vsplit twiggy://' . t:twiggy_git_dir . '/branches'
+    let fname = 'twiggy://' . t:twiggy_git_dir . '/branches'
+    if &filetype ==# 'twiggyqh'
+      exec "edit" fname
+    else
+      exec 'silent keepalt ' . g:twiggy_split_position . ' ' . g:twiggy_num_columns . 'vsplit ' . fname
+    endif
     setlocal filetype=twiggy buftype=nofile
     setlocal nonumber nowrap lisp
     let t:twiggy_bufnr = bufnr('')
   endif
 
   nnoremap <buffer> <silent> q     :<C-U>call <SID>Close()<CR>
+  if g:twiggy_enable_quickhelp
+    nnoremap <buffer> <silent> ?     :<C-U>call <SID>Quickhelp()<CR>
+  endif
 
   autocmd! BufWinLeave twiggy://*
         \ if exists('t:twiggy_bufnr') |
@@ -767,6 +821,41 @@ function! s:Render() abort
 
   " }}}
   " let twiggy_bufnr = get(t:, 'twiggy_bufnr', bufnr(''))
+endfunction
+
+"     {{{3 Quickhelp
+function! s:Quickhelp() abort
+  if &filetype !=# 'twiggy'
+    return
+  endif
+
+  let t:twiggy_cached_git_dir = t:twiggy_git_dir
+
+  silent keepalt edit quickhelp
+  setlocal filetype=twiggyqh buftype=nofile bufhidden=delete
+  setlocal nonumber nowrap lisp
+  setlocal modifiable
+  silent 1,$delete _
+  let b:git_dir = t:twiggy_cached_git_dir
+  unlet t:twiggy_cached_git_dir
+  let bufnr = bufnr('')
+
+  nnoremap <buffer> <silent> q :quit<CR>
+  nnoremap <buffer> <silent> ? :Twiggy<CR>
+
+  call append(0, s:quickhelp_view())
+  normal! Gddgg
+  setlocal nomodifiable
+
+  syntax clear
+  syntax match TwiggyQuickhelpMapping "\v%<7c[A-Za-z\-\?\^\<\>]"
+  highlight link TwiggyQuickhelpMapping Identifier
+  syntax match TwiggyQuickhelpSpecial "\v\`[a-zA-Z]+\`"
+  highlight link TwiggyQuickhelpSpecial Identifier
+  syntax match TwiggyQuickhelpHeader "\v[A-Za-z ]+\n[=]+"
+  highlight link TwiggyQuickhelpHeader String
+  syntax match TwiggyQuickhelpSectionHeader "\v[\-]+\n[a-z,\/ \:]+\n[\-]+"
+  highlight link TwiggyQuickhelpSectionHeader String
 endfunction
 
 "     {{{3 Refresh

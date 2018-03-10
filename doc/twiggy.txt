@@ -145,6 +145,12 @@ a each branch.
 >
   let g:twiggy_set_upstream = 0
 <
+                                                *'enable_quickhelp'*
+Default: 1
+Enables |twiggy-?| for quickhelp.  To turn it off:
+>
+  let g:twiggy_enable_quickhelp = 0
+
 
 MAPPINGS                                        *twiggy-mappings*
 
@@ -270,6 +276,9 @@ q                 Quit
 
                                                 *twiggy-Q*
 Q                 Quit all twiggy buffers (including the error buffer)
+
+                                                *twiggy-?*
+?                 Open the quickhelp
 
 
 
