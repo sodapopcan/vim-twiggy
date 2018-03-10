@@ -253,6 +253,12 @@ function! s:OptionParser() abort
 endfunction
 
 " {{{1 Git
+
+"   {{{2 git_version
+function! s:git_version() abort
+  return fugitive#git_version()
+endfunction
+
 "   {{{2 any_commits
 function! s:no_commits() abort
   call s:git_cmd('rev-list -n 1 --all &> /dev/null', 0)
@@ -414,9 +420,9 @@ endfunction
 
 "   {{{2 get_by_committer_date
 function! s:get_by_commiter_date(type) abort
-  let cmd = "cut -d'/' -f 3- <("
-        \ . s:gitize("for-each-ref --sort=-authordate refs/" . a:type)
-        \ . " | awk -F\" \" ' { print $3 }')"
+  let cmd = s:gitize(
+        \ "for-each-ref --sort=-committerdate --format='%(refname)' " .
+        \ "refs/" . a:type . " | sed 's/refs\\/" . a:type . "\\///g'")
   return split(s:system(cmd, 0), '\v\n')
 endfunction
 
