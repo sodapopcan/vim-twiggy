@@ -206,6 +206,9 @@ O                 Same as C
                                                 *twiggy-f*
 F                 Fetch the remote for the branch under the cursor.
 
+                                                *twiggy-V*
+V                 Pull the branch under the cursor.
+
                   Merging and Rebasing~
                                                 *twiggy-m*
 m                 Merge the branch under the cursor into the current branch.

@@ -46,10 +46,8 @@ settings will be remembered until you close Vim.
 
 With your cursor on a branch, `m` merges it into the current branch.  With your
 cursor on a local branch, `M` will merge its tracking branch into the current
-branch.  Use `r` and `R` for rebasing.  `F` fetches the branch under the cursor.
-
-Hint: to pull on the current branch, move your cursor to it and press `F` then
-press `M`.
+branch.  Use `r` and `R` for rebasing.  `F` fetches the branch under the cursor,
+`V` pulls.
 
 `u` aborts a merge or rebase.
 

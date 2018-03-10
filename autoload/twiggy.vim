@@ -698,7 +698,8 @@ function! s:Render() abort
   call s:mapping('o',       'Checkout',         [1])
   call s:mapping('O',       'Checkout',         [0])
   call s:mapping('dd',      'Delete',           [])
-  call s:mapping('F',       'Fetch',            [])
+  call s:mapping('F',       'Fetch',            [0])
+  call s:mapping('V',       'Pull',             [])
   call s:mapping('m',       'Merge',            [0])
   call s:mapping('M',       'Merge',            [1])
   call s:mapping('r',       'Rebase',           [0])
@@ -925,11 +926,12 @@ function! s:DeleteRemote() abort
 endfunction
 
 "     {{{3 Fetch
-function! s:Fetch() abort
+function! s:Fetch(pull) abort
+  let cmd = a:pull ? 'pull' : 'fetch'
   let branch = s:branch_under_cursor()
   if branch.tracking !=# ''
     let parts = split(branch.tracking, '/')
-    call s:git_cmd('fetch ' . s:git_flags . parts[0] . ' ' . join(parts[1:], '/') .
+    call s:git_cmd(cmd . ' ' . s:git_flags . parts[0] . ' ' . join(parts[1:], '/') .
           \ ':refs/remotes/' . parts[0] . '/' . branch.fullname, 1)
   else
     redraw
@@ -937,6 +939,11 @@ function! s:Fetch() abort
     return 1
   endif
   return 0
+endfunction
+
+"     {{{3 Push
+function! s:Pull() abort
+  return s:Fetch(1)
 endfunction
 
 "     {{{3 Merge
