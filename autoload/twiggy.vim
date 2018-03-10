@@ -9,6 +9,7 @@ endif
 let g:autoloaded_twiggy = 1
 
 " {{{1 Utility
+"   {{{2 buffocus
 function! s:buffocus(bufnr) abort
   let switchbuf_cached = &switchbuf
   set switchbuf=useopen
@@ -16,6 +17,7 @@ function! s:buffocus(bufnr) abort
   exec 'set switchbuf=' . switchbuf_cached
 endfunction
 
+"   {{{2 mapping
 " Create local mappings in the twiggy buffer
 function! s:mapping(mapping, fn, args) abort
   let s:mappings[s:encode_mapping(a:mapping)] = [a:fn, a:args]
@@ -24,6 +26,7 @@ function! s:mapping(mapping, fn, args) abort
         \ s:encode_mapping(a:mapping) . "')<CR>"
 endfunction
 
+"   {{{2 encode_mapping
 function! s:encode_mapping(mapping) abort
   return substitute(a:mapping, '\v^\<', '___', '')
 endfunction
@@ -34,7 +37,7 @@ let s:mappings                 = {}
 let s:branch_line_refs         = {}
 let s:last_branch_under_cursor = {}
 let s:last_output              = ''
-let s:git_flags                = '' " I regret this
+let s:git_flags                = ''
 let s:git_mode                 = ''
 
 let s:sorted      = 0
@@ -127,7 +130,7 @@ function! s:call(mapping) abort
     call s:ErrorMsg()
   else
     call s:Render()
-    call s:ShowOutputBuffer()
+    call s:RenderOutputBuffer()
   endif
   let s:git_flags = ''
 endfunction
@@ -252,14 +255,9 @@ function! s:OptionParser() abort
   endwhile
 endfunction
 
+
 " {{{1 Git
-
-"   {{{2 git_version
-function! s:git_version() abort
-  return fugitive#git_version()
-endfunction
-
-"   {{{2 any_commits
+"   {{{2 no_commits
 function! s:no_commits() abort
   call s:git_cmd('rev-list -n 1 --all &> /dev/null', 0)
   return v:shell_error
@@ -412,7 +410,7 @@ function! s:get_uniq_branch_names_from_reflog() abort
   return split(s:system(cmd, 0), '\v\n')
 endfunction
 
-"   get_merged_branches
+"   {{{2 get_merged_branches
 " I'm sure there is a better plumbing command to figure this out
 function! s:get_merged_branches() abort
   return map(split(s:git_cmd('branch --list --merged', 0), '\n'), 'v:val[2:]')
@@ -435,6 +433,7 @@ function! s:update_last_branch_under_cursor() abort
     return
   endtry
 endfunction
+
 
 " {{{1 UI
 "   {{{2 Standard
@@ -580,7 +579,7 @@ function! s:show_branch_details() abort
 endfunction
 
 "   {{{2 Stdout/Stderr Buffer
-function! s:ShowOutputBuffer() abort
+function! s:RenderOutputBuffer() abort
   if s:last_output ==# ''
     return
   endif
@@ -643,8 +642,8 @@ endfunction
 
 " {{{1 Plugin
 "   {{{2 Navigation
-"     {{{3 traverseBranches
-function! s:traverseBranches(motion) abort abort
+"     {{{3 traverse_branches
+function! s:traverse_branches(motion) abort abort
   execute "normal! " . a:motion
   let current_line = line('.')
   if current_line ==# s:total_lines && a:motion ==# 'j'
@@ -658,8 +657,8 @@ function! s:traverseBranches(motion) abort abort
   end
 endfunction
 
-"     {{{3 traverseGroups
-function! s:traverseGroups(motion) abort
+"     {{{3 traverse_groups
+function! s:traverse_groups(motion) abort
   if a:motion ==# 'j'
     if search('\v^[A-Za-z]', 'W')
       normal! j
@@ -672,7 +671,7 @@ function! s:traverseGroups(motion) abort
   endif
 endfunction
 
-function! s:jumpToCurrentBranch() abort
+function! s:jump_to_current_branch() abort
   call search(s:icons.current)
 endfunction
 
@@ -743,11 +742,11 @@ function! s:Render() abort
     autocmd BufReadPost,BufEnter,BufLeave,VimResized twiggy://* call <SID>Refresh()
   augroup END
 
-  nnoremap <buffer> <silent> j     :<C-U>call <SID>traverseBranches('j')<CR>
-  nnoremap <buffer> <silent> k     :<C-U>call <SID>traverseBranches('k')<CR>
-  nnoremap <buffer> <silent> <C-N> :<C-U>call <SID>traverseGroups('j')<CR>
-  nnoremap <buffer> <silent> <C-P> :<C-U>call <SID>traverseGroups('k')<CR>
-  nnoremap <buffer> <silent> J     :<C-U>call <SID>jumpToCurrentBranch()<CR>
+  nnoremap <buffer> <silent> j     :<C-U>call <SID>traverse_branches('j')<CR>
+  nnoremap <buffer> <silent> k     :<C-U>call <SID>traverse_branches('k')<CR>
+  nnoremap <buffer> <silent> <C-N> :<C-U>call <SID>traverse_groups('j')<CR>
+  nnoremap <buffer> <silent> <C-P> :<C-U>call <SID>traverse_groups('k')<CR>
+  nnoremap <buffer> <silent> J     :<C-U>call <SID>jump_to_current_branch()<CR>
   nnoremap <buffer>          gg    2gg
 
   nnoremap <buffer>          s     :<C-U>call <SID>OptionParser()<CR>
@@ -826,7 +825,6 @@ function! s:Render() abort
   endif
 
   " }}}
-  " let twiggy_bufnr = get(t:, 'twiggy_bufnr', bufnr(''))
 endfunction
 
 "     {{{3 Quickhelp
@@ -889,7 +887,7 @@ function! twiggy#Branch(...) abort
     let current_branch = s:get_current_branch()
     let f = s:branch_exists(a:1) ? '' : '-b '
     call s:git_cmd('checkout ' . f . join(a:000), 0)
-    call s:ShowOutputBuffer()
+    call s:RenderOutputBuffer()
     if exists('t:twiggy_bufnr')
       call s:Refresh()
     end
