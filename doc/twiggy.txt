@@ -41,8 +41,8 @@ they are tracking branches.  Here is the legend:
 
 multi_byte    standard
 ✓             =             branch is in synch with its upstream
-↑             -             branch is ahead of its upstream
-↓             +             branch is behind of its upstream
+↑             +             branch is ahead of its upstream
+↓             -             branch is behind its upstream
 ↕             ~             branch is both ahead and behind its upstream
 ∅             %             branch is detached
 ✗             x             in merge/rebase state
