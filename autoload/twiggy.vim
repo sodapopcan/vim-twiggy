@@ -78,6 +78,12 @@ let g:twiggy_enable_remote_delete   = get(g:,'twiggy_enable_remote_delete',   0 
 let g:twiggy_use_dispatch           = get(g:,'twiggy_use_dispatch',           exists('g:loaded_dispatch') && g:loaded_dispatch ? 1 : 0 )
 let g:twiggy_close_on_fugitive_cmd  = get(g:,'twiggy_close_on_fugitive_cmd',  0                                                        )
 let g:twiggy_enable_quickhelp       = get(g:,'twiggy_enable_quickhelp',       1                                                        )
+let g:twiggy_show_full_ui           = get(g:,'twiggy_show_full_ui',           g:twiggy_enable_quickhelp                                )
+
+"   {{{2 show_full_ui
+function! s:showing_full_ui()
+  return g:twiggy_enable_quickhelp && g:twiggy_show_full_ui
+endfunction
 
 " {{{1 System
 "   {{{2 cmd
@@ -472,7 +478,9 @@ function! s:standard_view() abort
   endfor
 
   let output = []
-  let line   = 0
+  " Starting the line at 1 will cause an empty line to be added if the
+  " quickhelp hint is showing.
+  let line   = s:showing_full_ui() ? 1 : 0
 
   for group_type in ['local', 'remote']
     for group_ref in group_refs[group_type]
@@ -643,12 +651,13 @@ endfunction
 " {{{1 Plugin
 "   {{{2 Navigation
 "     {{{3 traverse_branches
-function! s:traverse_branches(motion) abort abort
+function! s:traverse_branches(motion) abort
   execute "normal! " . a:motion
   let current_line = line('.')
+  let border_line = s:showing_full_ui() ? 3 : 1
   if current_line ==# s:total_lines && a:motion ==# 'j'
     return
-  elseif (a:motion ==# 'k' && current_line ==# '1')
+  elseif (a:motion ==# 'k' && current_line <=# border_line)
     normal! j
   else
     while getline('.') =~# '\v^[A-Za-z]' || getline('.') ==# ''
@@ -723,7 +732,13 @@ function! s:Render() abort
 
   let s:git_mode = s:get_git_mode()
 
-  let output = s:standard_view()
+  let output = []
+  if s:showing_full_ui()
+    " We don't need to manually add a second empty line here since
+    " s:standard_view() will automatically add one.
+    call extend(output, ["press ? for help"])
+  endif
+  call extend(output, s:standard_view())
   set modifiable
   silent 1,$delete _
   call append(0, output)
@@ -749,7 +764,11 @@ function! s:Render() abort
   nnoremap <buffer> <silent> <C-N> :<C-U>call <SID>traverse_groups('j')<CR>
   nnoremap <buffer> <silent> <C-P> :<C-U>call <SID>traverse_groups('k')<CR>
   nnoremap <buffer> <silent> J     :<C-U>call <SID>jump_to_current_branch()<CR>
-  nnoremap <buffer>          gg    2gg
+  if s:showing_full_ui()
+    nnoremap <buffer> <silent> gg    :normal! 4gg<CR>
+  else
+    nnoremap <buffer> <silent> gg    :normal! 2gg<CR>
+  endif
 
   nnoremap <buffer>          s     :<C-U>call <SID>OptionParser()<CR>
 
@@ -824,6 +843,13 @@ function! s:Render() abort
   if exists('s:branches_not_in_reflog') && len(s:branches_not_in_reflog)
     exec "syntax match TwiggyNotInReflog '\\v" . substitute(substitute(join(s:branches_not_in_reflog), '(', '', 'g'), ')', '', 'g') . "'"
     highlight link TwiggyNotInReflog Comment
+  endif
+
+  if s:showing_full_ui()
+    syntax match TwiggyHelpHint "\v%1l"
+    highlight link TwiggyHelpHint Normal
+    syntax match TwiggyHelpHintKey "\v%1l\?"
+    highlight link TwiggyHelpHintKey Identifier
   endif
 
   " }}}

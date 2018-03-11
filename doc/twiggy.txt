@@ -150,6 +150,12 @@ Default: 1
 Enables |twiggy-?| for quickhelp.  To turn it off:
 >
   let g:twiggy_enable_quickhelp = 0
+<
+                                                *'show_full_ui'*
+Default: 1, 0 if 'enable_quickhelp' is 0
+Shows the "press ? for help" hint.  To turn it off:
+>
+  let g:twiggy_show_full_ui = 0
 
 
 MAPPINGS                                        *twiggy-mappings*
