@@ -568,6 +568,12 @@ function! s:quickhelp_view() abort
   call add(output, 'gi    cycle remote sorts')
   call add(output, 'gI    `gi` in reverse')
   call add(output, 'a     toggle slash-grouping')
+  if g:twiggy_show_full_ui
+    call add(output, '')
+    call add(output, '****************************')
+    call add(output, 'For more detailed info:')
+    call add(output, ':help twiggy-mappings')
+  endif
 
   return output
 endfunction
@@ -890,6 +896,10 @@ function! s:Quickhelp() abort
   highlight link TwiggyQuickhelpHeader String
   syntax match TwiggyQuickhelpSectionHeader "\v[\-]+\n[a-z,\/ \:]+\n[\-]+"
   highlight link TwiggyQuickhelpSectionHeader String
+  if g:twiggy_show_full_ui
+    syntax match TwiggyQuickhelpRecommendation "\v^\*+\n[A-Za-z\: ]+\n[a-z\:\- ]+"
+    highlight link TwiggyQuickhelpRecommendation String
+  endif
 endfunction
 
 "     {{{3 Refresh
