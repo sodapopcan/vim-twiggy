@@ -693,16 +693,16 @@ function! s:Render() abort
     if &filetype ==# 'twiggyqh'
       exec "edit" fname
     else
-      exec 'silent keepalt ' . g:twiggy_split_position . ' ' . g:twiggy_num_columns . 'vsplit ' . fname
+      exec 'silent keepalt' g:twiggy_split_position g:twiggy_num_columns . 'vsplit' fname
     endif
     setlocal filetype=twiggy buftype=nofile
     setlocal nonumber nowrap lisp
     let t:twiggy_bufnr = bufnr('')
   endif
 
-  nnoremap <buffer> <silent> q     :<C-U>call <SID>Close()<CR>
+  nnoremap <buffer> <silent> q :<C-U>call <SID>Close()<CR>
   if g:twiggy_enable_quickhelp
-    nnoremap <buffer> <silent> ?     :<C-U>call <SID>Quickhelp()<CR>
+    nnoremap <buffer> <silent> ? :<C-U>call <SID>Quickhelp()<CR>
   endif
 
   autocmd! BufWinLeave twiggy://*
