@@ -716,7 +716,7 @@ function! s:Render() abort
     set modifiable
     silent 1,$delete _
     call append(0, "No commits")
-    normal! dd
+    delete _
     set nomodifiable
     return
   endif
@@ -727,7 +727,9 @@ function! s:Render() abort
   set modifiable
   silent 1,$delete _
   call append(0, output)
-  normal! Gddgg
+  normal! G
+  delete _
+  normal! gg
   call s:show_branch_details()
   let s:total_lines = len(output)
 
@@ -848,7 +850,9 @@ function! s:Quickhelp() abort
   nnoremap <buffer> <silent> ? :Twiggy<CR>
 
   call append(0, s:quickhelp_view())
-  normal! Gddgg
+  normal! G
+  delete _
+  normal! gg
   setlocal nomodifiable
 
   syntax clear
