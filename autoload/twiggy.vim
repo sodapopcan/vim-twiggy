@@ -424,10 +424,10 @@ endfunction
 
 "   {{{2 get_by_committer_date
 function! s:get_by_commiter_date(type) abort
-  let type = substitute(a:type, '/', '\\/', '')
   let cmd = s:gitize(
         \ "for-each-ref --sort=-committerdate --format='%(refname)' " .
-        \ "refs/" . type . " | sed 's/refs\\/" . type . "\\///g'")
+        \ "refs/" . a:type . " | sed 's/refs\\/" .
+        \ substitute(a:type, '/', '\\/', '') . "\\///g'")
   return split(s:system(cmd, 0), '\v\n')
 endfunction
 
