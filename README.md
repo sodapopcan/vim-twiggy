@@ -11,6 +11,8 @@ provides basic merge and rebase support, stashing, and some other goodies.
 Twiggy is *not* a simplified branching abstraction.  It is a convenience tool
 for experienced git users.
 
+<img src="https://raw.githubusercontent.com/sodapopcan/-/master/twiggy-preview.png" width=1500>
+
 ## Usage
 
 Invoke Twiggy with the `:Twiggy` command.
