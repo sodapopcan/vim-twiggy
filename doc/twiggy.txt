@@ -291,6 +291,11 @@ Q                 Quit all twiggy buffers (including the error buffer)
 
 EXPERIMENTAL CODE BLOAT                        *twiggy-cmd*
 
+** DEPRECATION NOTICE ***********************************************
+* This was a fun experiment but it's convoluted and I never use it. *
+* I will removing it completely at some point in the near future.   *
+*********************************************************************
+
 Pressing s while in the twiggy buffer will start a sort of command prompt that
 looks like this:
 >

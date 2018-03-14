@@ -229,7 +229,7 @@ function! s:OptionParser() abort
         \  }
   let chosen_options = []
 
-  redraw | echo 'git <cmd> '
+  redraw | echo '**DEPRECATED**: git <cmd> '
 
   while 1
     let option = nr2char(getchar())
@@ -257,7 +257,7 @@ function! s:OptionParser() abort
       endif
     endif
 
-    redraw | echo 'git <cmd> ' . join(chosen_options) . ' '
+    redraw | echo '**DEPRECATED**: git <cmd> ' . join(chosen_options) . ' '
   endwhile
 endfunction
 
