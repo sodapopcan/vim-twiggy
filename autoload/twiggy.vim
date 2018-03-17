@@ -166,7 +166,7 @@ function! s:parse_branch(branch, type) abort
     let branch.decoration = s:git_mode !=# 'normal' ? s:icons.unmerged : s:icons.current
   endif
 
-  let detached = match(a:branch, '\v^\(detached from', 2)
+  let detached = match(a:branch, '\v^*\ \((\w+ )?detached at \w+\/[a-zA-Z]+\)')
 
   let remote_details = matchstr(a:branch, '\v\[[^\[]+\]')
   let branch.tracking = matchstr(remote_details, '\v[^ \:\]]+', 1)
