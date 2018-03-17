@@ -839,26 +839,26 @@ function! s:Render() abort
   highlight link TwiggyCurrent Identifier
 
   exec "syntax match TwiggyTracking '\\V\\%2c" . s:icons.tracking . "'"
-  highlight link TwiggyTracking DiffAdd
+  highlight TwiggyTracking ctermfg=2 ctermbg=none guifg=Green
 
   exec "syntax match TwiggyAhead '\\V\\%2c" . s:icons.ahead . "'"
-  highlight link TwiggyAhead DiffDelete
+  highlight TwiggyAhead ctermfg=1 ctermbg=none guibg=Red
 
   exec "syntax match TwiggyAheadBehind '\\V\\%2c" . s:icons.behind . "'"
   exec "syntax match TwiggyAheadBehind '\\V\\%2c" . s:icons.both . "'"
-  highlight link TwiggyAheadBehind DiffDelete
+  highlight TwiggyAheadBehind ctermfg=1 ctermbg=none guibg=Red
 
   exec "syntax match TwiggyDetached '\\V\\%2c" . s:icons.detached . "'"
-  highlight link TwiggyDetached DiffChange
+  highlight TwiggyDetached ctermfg=5 ctermbg=none guibg=Purple
 
   exec "syntax match TwiggyUnmerged '\\V\\%1c" . s:icons.unmerged . "'"
-  highlight link TwiggyUnmerged DiffDelete
+  highlight TwiggyUnmerged ctermfg=1 ctermbg=none guibg=Red
 
   syntax match TwiggySortText '\v[[a-z]+]'
   highlight link TwiggySortText Comment
 
   syntax match TwiggyBranchStatus "\v^(rebasing|merging)"
-  highlight link TwiggyBranchStatus DiffDelete
+  highlight TwiggyBranchStatus ctermfg=1 ctermbg=none guibg=Red
 
   if exists('s:branches_not_in_reflog') && len(s:branches_not_in_reflog)
     exec "syntax match TwiggyNotInReflog '" .
