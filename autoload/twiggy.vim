@@ -17,6 +17,18 @@ function! s:buffocus(bufnr) abort
   exec 'set switchbuf=' . switchbuf_cached
 endfunction
 
+"   {{{2 sub
+" Stolen right from tpope
+function! s:sub(str,pat,rep) abort
+  return substitute(a:str, '\v\C'.a:pat, a:rep, '')
+endfunction
+
+"   {{{2 gsub
+" Stolen right from tpope
+function! s:gsub(str,pat,rep) abort
+  return substitute(a:str, '\v\C'.a:pat, a:rep, 'g')
+endfunction
+
 "   {{{2 mapping
 " Create local mappings in the twiggy buffer
 function! s:mapping(mapping, fn, args) abort
@@ -28,7 +40,7 @@ endfunction
 
 "   {{{2 encode_mapping
 function! s:encode_mapping(mapping) abort
-  return substitute(a:mapping, '\v^\<', '___', '')
+  return s:sub(a:mapping, '\v^\<', '___',)
 endfunction
 
 " {{{1 Script Variables
@@ -190,7 +202,7 @@ function! s:parse_branch(branch, type) abort
       if match(branch.fullname, '/') >= 0
         let group = matchstr(branch.fullname, '\v[^/]*')
         let branch.group = group
-        let branch.name = substitute(branch.fullname, group . '/', '', '')
+        let branch.name = s:sub(branch.fullname, group . '/', '')
       else
         let branch.group = 'local'
         let branch.name = branch.fullname
@@ -200,7 +212,7 @@ function! s:parse_branch(branch, type) abort
       let branch.name = branch.fullname
     endif
     if detached >= 0
-      let branch.name = substitute(substitute(branch.name, '\v\(detached from ', '', ''), '\v\)', '', '')
+      let branch.name = s:sub(s:sub(branch.name, '\(detached from ', ''), '\)', '')
     endif
   else
     let branch.is_local = 0
@@ -210,7 +222,7 @@ function! s:parse_branch(branch, type) abort
     let branch.group = branch_split[0]
   endif
 
-  let branch.details = substitute(a:branch,  '\v[* ] [0-9A-Za-z_/\-]+[ ]+', '', '')
+  let branch.details = s:sub(a:branch,  '[* ] [0-9A-Za-z_/\-]+[ ]+', '')
 
   return branch
 endfunction
@@ -427,7 +439,7 @@ function! s:get_by_commiter_date(type) abort
   let cmd = s:gitize(
         \ "for-each-ref --sort=-committerdate --format='%(refname)' " .
         \ "refs/" . a:type . " | sed 's/refs\\/" .
-        \ substitute(a:type, '/', '\\/', '') . "\\///g'")
+        \ s:sub(a:type, '/', '\\/') . "\\///g'")
   return split(s:system(cmd, 0), '\v\n')
 endfunction
 
@@ -849,7 +861,9 @@ function! s:Render() abort
   highlight link TwiggyBranchStatus DiffDelete
 
   if exists('s:branches_not_in_reflog') && len(s:branches_not_in_reflog)
-    exec "syntax match TwiggyNotInReflog '\\v" . substitute(substitute(join(s:branches_not_in_reflog), '(', '', 'g'), ')', '', 'g') . "'"
+    exec "syntax match TwiggyNotInReflog '" .
+          \ s:gsub(s:gsub(join(s:branches_not_in_reflog), '\(', ''), '\)', '') .
+          \ "'"
     highlight link TwiggyNotInReflog Comment
   endif
 
