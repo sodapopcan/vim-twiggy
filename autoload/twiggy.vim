@@ -830,48 +830,48 @@ function! s:Render() abort
   syntax clear
 
   exec "syntax match TwiggyGroup '\\v(^[^\\ " . s:icons.current . "]+)'"
-  highlight link TwiggyGroup Type
+  highlight default link TwiggyGroup Type
 
   exec "syntax match TwiggyCurrent '\\v%3v" . s:get_current_branch() . "$'"
-  highlight link TwiggyCurrent Identifier
+  highlight default link TwiggyCurrent Identifier
 
   exec "syntax match TwiggyCurrent '\\V\\%1c" . s:icons.current . "'"
-  highlight link TwiggyCurrent Identifier
+  highlight default link TwiggyCurrent Identifier
 
   exec "syntax match TwiggyTracking '\\V\\%2c" . s:icons.tracking . "'"
-  highlight TwiggyTracking ctermfg=2 ctermbg=none guifg=Green
+  highlight default link TwiggyTracking String
 
   exec "syntax match TwiggyAhead '\\V\\%2c" . s:icons.ahead . "'"
-  highlight TwiggyAhead ctermfg=1 ctermbg=none guibg=Red
+  highlight default link TwiggyAhead Type
 
   exec "syntax match TwiggyAheadBehind '\\V\\%2c" . s:icons.behind . "'"
   exec "syntax match TwiggyAheadBehind '\\V\\%2c" . s:icons.both . "'"
-  highlight TwiggyAheadBehind ctermfg=1 ctermbg=none guibg=Red
+  highlight default link TwiggyAheadBehind Type
 
   exec "syntax match TwiggyDetached '\\V\\%2c" . s:icons.detached . "'"
-  highlight TwiggyDetached ctermfg=5 ctermbg=none guibg=Purple
+  highlight default link TwiggyDetached Type
 
   exec "syntax match TwiggyUnmerged '\\V\\%1c" . s:icons.unmerged . "'"
-  highlight TwiggyUnmerged ctermfg=1 ctermbg=none guibg=Red
+  highlight default link TwiggyUnmerged Identifier
 
   syntax match TwiggySortText '\v[[a-z]+]'
-  highlight link TwiggySortText Comment
+  highlight default link TwiggySortText Comment
 
   syntax match TwiggyBranchStatus "\v^(rebasing|merging)"
-  highlight TwiggyBranchStatus ctermfg=1 ctermbg=none guibg=Red
+  highlight link TwiggyBranchStatus DiffDelete
 
   if exists('s:branches_not_in_reflog') && len(s:branches_not_in_reflog)
     exec "syntax match TwiggyNotInReflog '" .
           \ s:gsub(s:gsub(join(s:branches_not_in_reflog), '\(', ''), '\)', '') .
           \ "'"
-    highlight link TwiggyNotInReflog Comment
+    highlight default link TwiggyNotInReflog Comment
   endif
 
   if s:showing_full_ui()
     syntax match TwiggyHelpHint "\v%1l"
-    highlight link TwiggyHelpHint Normal
+    highlight default link TwiggyHelpHint Normal
     syntax match TwiggyHelpHintKey "\v%1l\?"
-    highlight link TwiggyHelpHintKey Identifier
+    highlight default link TwiggyHelpHintKey Identifier
   endif
 
   " }}}

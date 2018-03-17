@@ -344,17 +344,17 @@ put something like the following in your vimrc:
   highlight TwiggyGroup ctermfg=10 guifg=#00FF00
   highlight link TwiggySortText Normal
 <
-TwiggyGroup                 Type         a group heading (normal, origin, ...)
-TwiggySortText              Comment      sort indicator (beside the header)
+TwiggyGroup                 Type         a group heading (local, origin, ...)
+TwiggySortText              Comment      sort indicator (beside the heading)
 TwiggyBranchStatus          DiffDelete   group name becomes 'rebasing' or
                                          'merging'
 TwiggyCurrent               Identifier   name of the current branch
 TwiggyNotInReflog           Comment      name of branches not in the reflog
 TwiggyIconCurrent           Identifier   icon: generally the * character
-TwiggyIconTracking          DiffAdd      icon: an up-to-date tracking branch
-TwiggyIconAhead             DiffDelete   icon: branch is ahead of remote
-TwiggyIconAheadBehind       DiffDelete   icon: branch is both ahead and behind
-TwiggyIconDetached          DiffChange   icon: current branch is detached
-TwiggyIconUnmerged          DiffDelete   icon: current branch is unmerged
+TwiggyIconTracking          String       icon: an up-to-date tracking branch
+TwiggyIconAhead             Type         icon: branch is ahead of remote
+TwiggyIconAheadBehind       Type         icon: branch is both ahead and behind
+TwiggyIconDetached          Identifier   icon: current branch is detached
+TwiggyIconUnmerged          Type         icon: current branch is unmerged
 
   vim:tw=78:et:ft=help:norl:
