@@ -1200,16 +1200,6 @@ function! s:Stash(pop) abort
   endif
 endfunction
 
-"     {{{3 Revert
-function! s:Revert(bang) abort
-  let currfile = expand('%:p')
-  if a:bang
-    call s:git_cmd('reset ' . currfile, 0)
-  endif
-  call s:git_cmd('checkout ' . currfile, 0)
-  exec "normal :e " . currfile . "\<CR>"
-endfunction
-
 " {{{1 Fugitive
 function! s:close_string() abort
   if g:twiggy_close_on_fugitive_cmd
