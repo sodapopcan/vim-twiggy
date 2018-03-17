@@ -196,7 +196,7 @@ a                 Toggle grouping of local branches with slashes (/) in their
                                                 *twiggy-c*
 c                 Checkout the branch under the cursor.  If the branch is a
                   remote, create a tracking branch if one doesn't already
-                  exist.
+                  exist, otherwise, checkout in detached HEAD.
 
                                                 *twiggy-C*
 C                 Checkout the remote branch under the cursor in detached

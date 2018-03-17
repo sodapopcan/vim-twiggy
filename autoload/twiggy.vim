@@ -1001,21 +1001,25 @@ function! s:Checkout(track) abort
   let current_branch = s:get_current_branch()
   let switch_branch = s:branch_under_cursor()
 
-  if current_branch ==# switch_branch.name
+  if a:track && current_branch ==# switch_branch.fullname
     echo "Already on " . current_branch
   else
     redraw
     echo 'Moving from ' . current_branch . ' to ' . switch_branch.fullname . '...'
-    if a:track && !switch_branch.is_local
+    if a:track && !switch_branch.is_local " tracking and branch is remote
       if index(map(split(s:git_cmd('branch --list', 0), '\n'), 'v:val[2:]'), switch_branch.name) >= 0
-        call s:git_cmd('checkout ' . switch_branch.name, 0)
+        " Checkout remote in detached HEAD
+        call s:git_cmd('checkout ' . switch_branch.fullname, 0)
       else
-        echom "Set up a new track branch"
+        " Create a new tracking branch
         call s:git_cmd('checkout -b ' . switch_branch.name . ' ' . switch_branch.fullname , 0)
       endif
-    else
-      let detach = switch_branch.is_local ? '' : '--detach '
-      call s:git_cmd('checkout ' . detach . switch_branch.fullname, 0)
+    elseif !a:track && !switch_branch.is_local " not tracking and branch is remote
+      call s:git_cmd('checkout ' . switch_branch.fullname, 0)
+    elseif !a:track && switch_branch.is_local " not tracking and branch is local
+      call s:git_cmd('checkout ' . switch_branch.tracking, 0)
+    else " tracking and branch is local
+      call s:git_cmd('checkout ' . switch_branch.fullname, 0)
     endif
   endif
 
