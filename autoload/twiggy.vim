@@ -391,7 +391,7 @@ function! s:get_current_branch() abort
   return s:git_cmd('branch --list | grep \*', 0)[2:-2]
 endfunction
 
-"   branch_exists
+"   {{{2 branch_exists
 function! s:branch_exists(branch) abort
   call s:git_cmd('show-ref --verify --quiet refs/heads/' . a:branch, 0)
   return !v:shell_error
@@ -687,6 +687,7 @@ function! s:traverse_groups(motion) abort
   endif
 endfunction
 
+"     {{{3 jump_to_current_branch
 function! s:jump_to_current_branch() abort
   call search(s:icons.current)
 endfunction
@@ -913,10 +914,6 @@ function! s:Refresh() abort
     let t:twiggy_git_dir = b:git_dir
     let t:twiggy_git_cmd = fugitive#buffer().repo().git_command()
     call s:buffocus(t:twiggy_bufnr)
-    " if t:twiggy_git_dir ==# b:git_dir
-    "   unlet t:refreshing
-    "   return
-    " endif
   endif
   call s:Render()
   unlet t:refreshing
