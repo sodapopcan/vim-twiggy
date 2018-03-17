@@ -724,7 +724,7 @@ function! s:Render() abort
     else
       exec 'silent keepalt' g:twiggy_split_position g:twiggy_num_columns . 'vsplit' fname
     endif
-    setlocal filetype=twiggy buftype=nofile
+    setlocal filetype=twiggy buftype=nofile bufhidden=delete
     setlocal nonumber nowrap lisp
     let t:twiggy_bufnr = bufnr('')
   endif
