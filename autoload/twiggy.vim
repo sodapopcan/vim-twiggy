@@ -50,7 +50,6 @@ let s:branch_line_refs         = {}
 let s:last_branch_under_cursor = {}
 let s:last_output              = ''
 let s:git_flags                = ''
-let s:git_mode                 = ''
 
 let s:sorted      = 0
 let s:git_cmd_run = 0
@@ -163,7 +162,7 @@ function! s:parse_branch(branch, type) abort
 
   let branch.decoration = ' '
   if branch.current
-    let branch.decoration = s:git_mode !=# 'normal' ? s:icons.unmerged : s:icons.current
+    let branch.decoration = t:twiggy_git_mode !=# 'normal' ? s:icons.unmerged : s:icons.current
   endif
 
   let detached = match(a:branch, '\v^*\ \((\w+ )?detached at \w+\/[a-zA-Z]+\)')
@@ -471,7 +470,7 @@ function! s:standard_view() abort
     if !has_key(groups[branch.type], branch.group)
       let groups[branch.type][branch.group] = {}
       if branch.group ==# 'local'
-        let group_name = (s:git_mode == 'normal') ? 'local' : s:git_mode
+        let group_name = (t:twiggy_git_mode == 'normal') ? 'local' : t:twiggy_git_mode
       elseif branch.type ==# 'remote'
         let group_name = 'r:' . branch.group
       else
@@ -739,6 +738,7 @@ function! s:Render() abort
         \   unlet t:twiggy_bufnr |
         \   unlet t:twiggy_git_dir |
         \   unlet t:twiggy_git_cmd |
+        \   unlet t:twiggy_git_mode |
         \ endif
 
   if s:no_commits()
@@ -750,7 +750,7 @@ function! s:Render() abort
     return
   endif
 
-  let s:git_mode = s:get_git_mode()
+  let t:twiggy_git_mode = s:get_git_mode()
 
   let output = []
   if s:showing_full_ui()
@@ -814,9 +814,9 @@ function! s:Render() abort
   call s:mapping('gI',      'CycleSort',        [1,-1])
   call s:mapping('a',       'ToggleSlashSort',  [])
 
-  if s:git_mode ==# 'rebasing'
+  if t:twiggy_git_mode ==# 'rebasing'
     call s:mapping('u', 'Abort', ['rebase'])
-  elseif s:git_mode ==# 'merging'
+  elseif t:twiggy_git_mode ==# 'merging'
     call s:mapping('u', 'Abort', ['merge'])
   else
     nnoremap <buffer> <silent> u :echo 'Nothing to abort'<CR>
