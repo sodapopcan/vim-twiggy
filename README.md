@@ -8,7 +8,7 @@ Twiggy is a [fugitive](https://github.com/tpope/vim-fugitive) extension that
 loads, decorates and sorts(!) git branches into an interactive buffer.  It
 provides basic merge and rebase support, stashing, and some other goodies.
 
-Twiggy is *not* a simplified branching abstraction.  It is a convenience tool
+Twiggy is not a simplified branching abstraction.  It is a convenience tool
 for experienced git users.
 
 <img src="https://raw.githubusercontent.com/sodapopcan/-/master/twiggy-preview.png" width=1500>
@@ -36,9 +36,9 @@ useful!  So is sorting remotes by date.  If you really wanted to, you could
 make this your default with the following in your vimrc:
 
 ```vim
-  let g:twiggy_group_locals_by_slash = 0
-  let g:twiggy_local_branch_sort = 'mru'
-  let g:twiggy_remote_branch_sort = 'date'
+let g:twiggy_group_locals_by_slash = 0
+let g:twiggy_local_branch_sort = 'mru'
+let g:twiggy_remote_branch_sort = 'date'
 ```
 
 In any event, these are settings you may want to play around with.  Your last
@@ -48,14 +48,15 @@ settings will be remembered until you close Vim.
 
 With your cursor on a branch, `m` merges it into the current branch.  With your
 cursor on a local branch, `M` will merge its tracking branch into the current
-branch.  Use `r` and `R` for rebasing.  `F` fetches the branch under the cursor,
-`V` pulls.
+branch.  Use `r` and `R` for rebasing.  `F` fetches the branch under the cursor.
 
 `u` aborts a merge or rebase.
 
 ### And finally...
 
 `^` to push (also sets the upstream).
+
+`V` to pull.
 
 `dd` to delete a branch.  You will be prompted if it's unmerged.
 
@@ -65,18 +66,19 @@ Type `q` to quit.
 
 `:help twiggy` for plenty more.
 
+### Example fetch and merge workflow
+
+Press `F` on the current branch to fetch from the upstream.  Without moving your cursor, press `C` to checkout the remote branch in detached HEAD.  If everything looks good, move your cursor back to the original branch and press `c` to checkout, then press `M` to merge the upstream changes.
+
 ## Installation
 
-I personally recommend [vim-plug](https://github.com/junegunn/vim-plug), but
-[NeoBundle](https://github.com/Shougo/neobundle.vim),
-[Vundle](https://github.com/gmarik/Vundle.vim) or
-[pathogen](https://github.com/tpope/vim-pathogen)
-are all fine options as well.
+Use vim's built-in package support or your favourite package manager. [There](https://github.com/junegunn/vim-plug) [sure](https://github.com/Shougo/neobundle.vim) [are](https://github.com/VundleVim/Vundle.vim) [a](https://github.com/tpope/vim-pathogen) [lot](https://github.com/Shougo/dein.vim) [of](https://github.com/k-takata/minpac) [options](http://vimhelp.appspot.com/repeat.txt.html#packages) 😳
 
-&hellip;and now [dein](https://github.com/Shougo/dein.vim) and
-[minipac](https://github.com/k-takata/minpac) too&mdash;oh my.
-
-You __must__ have [fugitive](https://github.com/tpope/vim-fugitive) installed!
+My personal favourite is [vim-plug](https://github.com/junegunn/vim-plug):
+```
+Plug 'tpope/vim-fugitive'
+Plug 'sodapopcan/vim-twiggy'
+```
 
 ## About
 
