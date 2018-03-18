@@ -566,6 +566,7 @@ function! s:quickhelp_view() abort
   call add(output, 'u     abort merge/rebase')
   call add(output, '^     push')
   call add(output, 'g^    push (prompted)')
+  call add(output, ',     rename')
   call add(output, 'dd    delete')
   if g:twiggy_enable_remote_delete
     call add(output, 'd^    delete from server')
@@ -806,6 +807,7 @@ function! s:Render() abort
   call s:mapping('R',       'Rebase',           [1])
   call s:mapping('^',       'Push',             [0])
   call s:mapping('g^',      'Push',             [1])
+  call s:mapping(',',       'Rename',           [])
   call s:mapping('<<',      'Stash',            [0])
   call s:mapping('>>',      'Stash',            [1])
   call s:mapping('i',       'CycleSort',        [0,1])
@@ -904,7 +906,7 @@ function! s:Quickhelp() abort
   setlocal nomodifiable
 
   syntax clear
-  syntax match TwiggyQuickhelpMapping "\v%<7c[A-Za-z\-\?\^\<\>]"
+  syntax match TwiggyQuickhelpMapping "\v%<7c[A-Za-z\-\?\^\<\>,]"
   highlight link TwiggyQuickhelpMapping Identifier
   syntax match TwiggyQuickhelpSpecial "\v\`[a-zA-Z]+\`"
   highlight link TwiggyQuickhelpSpecial Identifier
@@ -1198,6 +1200,16 @@ function! TwiggyCompleteRemotes(A,L,P) abort
   endfor
 
   return ''
+endfunction
+
+"     {{{3 Rename
+function! s:Rename() abort
+  let branch = s:branch_under_cursor()
+
+  let new_name = input("Rename " . branch.fullname . " to: ")
+  redraw
+  echo "Renaming \"" . branch.fullname . "\" to \"" . new_name . "\"... "
+  call s:git_cmd("branch -m " . branch.fullname . " " . new_name, 0)
 endfunction
 
 "     {{{3 Stash
