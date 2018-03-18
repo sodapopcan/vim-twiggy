@@ -620,7 +620,7 @@ function! s:RenderOutputBuffer() abort
   normal! ddgg
 
   setlocal nomodified nomodifiable noswapfile nowrap nonumber
-  setlocal buftype=nofile
+  setlocal buftype=nofile bufhidden=delete
   let s:last_output = ''
 
   syntax clear
@@ -629,8 +629,8 @@ function! s:RenderOutputBuffer() abort
   syntax match TwiggyOutputFile "\v^\t(.*)"
   highlight link TwiggyOutputFile Constant
 
-  nnoremap <buffer> q :bdelete<CR>
-  nnoremap <buffer> Q :bdelete<CR>:call <SID>Close()<CR>
+  nnoremap <buffer> q :quit<CR>
+  nnoremap <buffer> Q :quit<CR>:call <SID>Close()<CR>
 endfunction
 
 "   {{{2 Confirm
@@ -723,7 +723,7 @@ function! s:Render() abort
     else
       exec 'silent keepalt' g:twiggy_split_position g:twiggy_num_columns . 'vsplit' fname
     endif
-    setlocal filetype=twiggy buftype=nofile
+    setlocal filetype=twiggy buftype=nofile bufhidden=delete
     setlocal nonumber nowrap lisp
     let t:twiggy_bufnr = bufnr('')
   endif
@@ -965,7 +965,7 @@ endfunction
 
 "     {{{3 Close
 function! s:Close() abort
-  bdelete!
+  quit
   redraw | echo ''
 endfunction
 
