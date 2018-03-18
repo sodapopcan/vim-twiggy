@@ -595,7 +595,7 @@ endfunction
 function! s:show_branch_details() abort
   let line = line('.')
   if has_key(s:branch_line_refs, line)
-    let max_len = &columns - 8
+    let max_len = &columns - 16
     let details = s:branch_line_refs[line].details
     if len(details) > max_len
       let details = details[0:max_len] . '...'
