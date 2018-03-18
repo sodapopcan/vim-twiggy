@@ -233,6 +233,12 @@ M                 Merge the branch under the cursor's remote into the current
                   current one, press f to update its remote, then press M to
                   merge off the remote.
 
+                                                *twiggy-gm*
+gm                Like m, but with --no-ff
+
+                                                *twiggy-gM*
+gm                Like M, but with --no-ff
+
                                                 *twiggy-r*
 r                 Rebase the current branch off the branch under the cursor.
 

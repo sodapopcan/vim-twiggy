@@ -561,6 +561,8 @@ function! s:quickhelp_view() abort
   call add(output, 'V     pull')
   call add(output, 'm     merge')
   call add(output, 'M     merge remote')
+  call add(output, 'gm    `m` --no-ff')
+  call add(output, 'gM    `M` --no-ff')
   call add(output, 'r     rebase')
   call add(output, 'R     rebase remote')
   call add(output, 'u     abort merge/rebase')
@@ -801,8 +803,10 @@ function! s:Render() abort
   call s:mapping('dd',      'Delete',           [])
   call s:mapping('F',       'Fetch',            [0])
   call s:mapping('V',       'Pull',             [])
-  call s:mapping('m',       'Merge',            [0])
-  call s:mapping('M',       'Merge',            [1])
+  call s:mapping('m',       'Merge',            [0, ''])
+  call s:mapping('M',       'Merge',            [1, ''])
+  call s:mapping('gm',      'Merge',            [0, '--no-ff'])
+  call s:mapping('gM',      'Merge',            [1, '--no-ff'])
   call s:mapping('r',       'Rebase',           [0])
   call s:mapping('R',       'Rebase',           [1])
   call s:mapping('^',       'Push',             [0])
@@ -1098,7 +1102,7 @@ function! s:Pull() abort
 endfunction
 
 "     {{{3 Merge
-function! s:Merge(remote) abort
+function! s:Merge(remote, flags) abort
   let branch = s:branch_under_cursor()
 
   if a:remote
@@ -1106,14 +1110,14 @@ function! s:Merge(remote) abort
       let v:warningmsg = 'No tracking branch for ' . branch.fullname
       return 1
     else
-      call s:git_cmd('merge ' . s:git_flags . ' ' . branch.tracking, 1)
+      call s:git_cmd('merge ' . a:flags . ' ' . s:git_flags . ' ' . branch.tracking, 1)
     endif
   else
     if branch.name ==# s:get_current_branch()
       let v:warningmsg = 'Can''t merge into self'
       return 1
     else
-      call s:git_cmd('merge ' . s:git_flags . ' ' . branch.fullname, 1)
+      call s:git_cmd('merge ' . a:flags . ' ' . s:git_flags . ' ' . branch.fullname, 1)
     endif
   endif
 
