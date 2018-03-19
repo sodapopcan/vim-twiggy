@@ -22,12 +22,12 @@ Please:
   Yeeeah, your call on this one... just something to be aware of.  Personally, I don't code
   this way anymore, but I'm maintaining it in this project.
 
-Most importantly:
+I will not accept your PR unless you:
 
 - **Squash your commits into *one* atomic commit**
 
-  Unless you are adding an epic feature, but please get in touch with me first if you are
-  planning on/have an idea for one.
+  This is technically unnecessary if you are adding an epic feature, but please get in touch
+  with me before doing anything like that.
   
 - **Write a good commit message**
 
