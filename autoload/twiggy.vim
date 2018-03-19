@@ -819,10 +819,10 @@ function! s:Render() abort
   call s:mapping(',',       'Rename',           [])
   call s:mapping('<<',      'Stash',            [0])
   call s:mapping('>>',      'Stash',            [1])
-  call s:mapping('i',       'CycleSort',        [0,1])
-  call s:mapping('I',       'CycleSort',        [0,-1])
-  call s:mapping('gi',      'CycleSort',        [1,1])
-  call s:mapping('gI',      'CycleSort',        [1,-1])
+  call s:mapping('i',       'CycleSort',        [0, 1])
+  call s:mapping('I',       'CycleSort',        [0, -1])
+  call s:mapping('gi',      'CycleSort',        [1, 1])
+  call s:mapping('gI',      'CycleSort',        [1, -1])
   call s:mapping('a',       'ToggleSlashSort',  [])
 
   if t:twiggy_git_mode ==# 'rebasing'
