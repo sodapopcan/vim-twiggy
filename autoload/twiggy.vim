@@ -784,11 +784,13 @@ function! s:Render() abort
     autocmd BufReadPost,BufEnter,BufLeave,VimResized twiggy://* call <SID>Refresh()
   augroup END
 
-  nnoremap <buffer> <silent> j     :<C-U>call <SID>traverse_branches('j')<CR>
-  nnoremap <buffer> <silent> k     :<C-U>call <SID>traverse_branches('k')<CR>
-  nnoremap <buffer> <silent> <C-N> :<C-U>call <SID>traverse_groups('j')<CR>
-  nnoremap <buffer> <silent> <C-P> :<C-U>call <SID>traverse_groups('k')<CR>
-  nnoremap <buffer> <silent> J     :<C-U>call <SID>jump_to_current_branch()<CR>
+  nnoremap <buffer> <silent> j      :<C-U>call <SID>traverse_branches('j')<CR>
+  nnoremap <buffer> <silent> k      :<C-U>call <SID>traverse_branches('k')<CR>
+  nnoremap <buffer> <silent> <Down> :<C-U>call <SID>traverse_branches('j')<CR>
+  nnoremap <buffer> <silent> <Up>   :<C-U>call <SID>traverse_branches('k')<CR>
+  nnoremap <buffer> <silent> <C-N>  :<C-U>call <SID>traverse_groups('j')<CR>
+  nnoremap <buffer> <silent> <C-P>  :<C-U>call <SID>traverse_groups('k')<CR>
+  nnoremap <buffer> <silent> J      :<C-U>call <SID>jump_to_current_branch()<CR>
   if s:showing_full_ui()
     nnoremap <buffer> <silent> gg    :normal! 4gg<CR>
   else
