@@ -85,6 +85,7 @@ let g:twiggy_remote_branch_sort     = get(g:,'twiggy_remote_branch_sort',     'a
 let g:twiggy_remote_branch_sorts    = get(g:,'twiggy_remote_branch_sorts',    ['alpha', 'date']                                        )
 let g:twiggy_group_locals_by_slash  = get(g:,'twiggy_group_locals_by_slash',  1                                                        )
 let g:twiggy_set_upstream           = get(g:,'twiggy_set_upstream',           1                                                        )
+let g:twiggy_prompted_force_push    = get(g:,'twiggy_prompted_force_push',    1                                                        )
 let g:twiggy_enable_remote_delete   = get(g:,'twiggy_enable_remote_delete',   0                                                        )
 let g:twiggy_use_dispatch           = get(g:,'twiggy_use_dispatch',           exists('g:loaded_dispatch') && g:loaded_dispatch ? 1 : 0 )
 let g:twiggy_close_on_fugitive_cmd  = get(g:,'twiggy_close_on_fugitive_cmd',  0                                                        )
@@ -568,6 +569,7 @@ function! s:quickhelp_view() abort
   call add(output, 'u     abort merge/rebase')
   call add(output, '^     push')
   call add(output, 'g^    push (prompted)')
+  call add(output, '!^    force push')
   call add(output, ',     rename')
   call add(output, 'dd    delete')
   if g:twiggy_enable_remote_delete
@@ -809,8 +811,9 @@ function! s:Render() abort
   call s:mapping('gM',      'Merge',            [1, '--no-ff'])
   call s:mapping('r',       'Rebase',           [0])
   call s:mapping('R',       'Rebase',           [1])
-  call s:mapping('^',       'Push',             [0])
-  call s:mapping('g^',      'Push',             [1])
+  call s:mapping('^',       'Push',             [0, 0])
+  call s:mapping('g^',      'Push',             [1, 0])
+  call s:mapping('!^',      'Push',             [0, 1])
   call s:mapping(',',       'Rename',           [])
   call s:mapping('<<',      'Stash',            [0])
   call s:mapping('>>',      'Stash',            [1])
@@ -910,7 +913,7 @@ function! s:Quickhelp() abort
   setlocal nomodifiable
 
   syntax clear
-  syntax match TwiggyQuickhelpMapping "\v%<7c[A-Za-z\-\?\^\<\>,]"
+  syntax match TwiggyQuickhelpMapping "\v%<7c[A-Za-z\-\?\^\<\>!,]"
   highlight link TwiggyQuickhelpMapping Identifier
   syntax match TwiggyQuickhelpSpecial "\v\`[a-zA-Z]+\`"
   highlight link TwiggyQuickhelpSpecial Identifier
@@ -1156,7 +1159,7 @@ function! s:Abort(type) abort
 endfunction
 
 "     {{{3 Push
-function! s:Push(choose_upstream) abort
+function! s:Push(choose_upstream, force) abort
   let branch = s:branch_under_cursor()
 
   if !branch.is_local
@@ -1166,10 +1169,14 @@ function! s:Push(choose_upstream) abort
 
   let remote_groups = split(s:git_cmd('remote', 0), "\n")
 
-  let flag = ''
+  let flags = ''
+  if a:force
+    let flags .= ' --force'
+  end
+
   if branch.tracking ==# '' && !a:choose_upstream
     if g:twiggy_set_upstream
-      let flag = '-u'
+      let flags .= ' -u'
     endif
     if len(remote_groups) > 1
       redraw
@@ -1190,7 +1197,13 @@ function! s:Push(choose_upstream) abort
     let v:warningmsg = "Remote does not exist"
     return 1
   else
-    call s:git_cmd('push ' . flag . ' ' . s:git_flags . ' ' . group . ' ' . branch.fullname, 1)
+    let cmd = 'push ' . flags . ' ' . s:git_flags . ' ' . group . ' ' . branch.fullname
+    if !a:force || !g:twiggy_prompted_force_push
+      call s:git_cmd(cmd, 1)
+    else
+      return s:Confirm("Force push to " . branch.tracking . "?",
+            \ "s:git_cmd('" . cmd . "', 1)", 0)
+    endif
   endif
 
   return 0

@@ -145,6 +145,12 @@ a each branch.
 >
   let g:twiggy_set_upstream = 0
 <
+                                                *'prompted_force_push'*
+Default: 1
+Prompts to make sure you really want to force push.  Turn this off with:
+>
+  let g:twiggy_prompted_force_push = 0
+<
                                                 *'enable_quickhelp'*
 Default: 1
 Enables |twiggy-?| for quickhelp.  To turn it off:
@@ -261,6 +267,12 @@ u                 Abort a merge or rebase
                                                 *twiggy-g^*
 g^                Prompt to specify the remote repo before pushing.
 
+                                                *twiggy-!^*
+!^                Force push.  This is prompted by default.  Turn this
+                  behaviour off with:
+>
+                    let g:twiggy_prompted_force_push = 0
+<
                   Naming~
                                                 *twiggy-,*
 ,                 Rename the branch under the cursor.
