@@ -1,15 +1,12 @@
 # twiggy.vim
 
-Maintain your bearings while branching with git
+Maintain your bearings while branching with Git
 
 ## About
 
 Twiggy is a [fugitive](https://github.com/tpope/vim-fugitive) extension that
 loads, decorates and sorts(!) git branches into an interactive buffer.  It
 provides basic merge and rebase support, stashing, and some other goodies.
-
-Twiggy is not a simplified branching abstraction.  It is a convenience tool
-for experienced git users.
 
 <img src="https://raw.githubusercontent.com/sodapopcan/-/master/twiggy-preview.png" width=1500>
 
@@ -22,8 +19,9 @@ between groups.  As your cursor moves, information about the branch under the
 cursor will be echoed to the command prompt.
 
 To checkout a branch, hit `c`.  If the branch is remote and a tracking branch
-doesn't yet exist for it, one will be created.  `C` works the same way only it
-will checkout a remote branch in detached HEAD.  You can also use `o` and `O`.
+doesn't yet exist for it, one will be created.  `C` will checkout a remote
+branch in detached HEAD... even if your cursor on the local version!
+You can also use `o` and `O`.
 `<CR>` (Enter) is an alias for `c`.
 
 #### Sorting
@@ -35,7 +33,7 @@ Sorting locals by most-recently-used and __not__ grouping them by slash is super
 useful!  So is sorting remotes by date.  If you really wanted to, you could
 make this your default with the following in your vimrc:
 
-```vim
+```viml
 let g:twiggy_group_locals_by_slash = 0
 let g:twiggy_local_branch_sort = 'mru'
 let g:twiggy_remote_branch_sort = 'date'
@@ -47,7 +45,7 @@ settings will be remembered until you close Vim.
 ### Merging and Rebasing
 
 With your cursor on a branch, `m` merges it into the current branch.  With your
-cursor on a local branch, `M` will merge its tracking branch into the current
+cursor on a local branch, `M` will merge its tracked remote into the current
 branch.  Use `r` and `R` for rebasing.  `F` fetches the branch under the cursor.
 
 `u` aborts a merge or rebase.
@@ -68,14 +66,24 @@ Type `q` to quit.
 
 ### Example fetch and merge workflow
 
-Press `F` on the current branch to fetch from the upstream.  Without moving your cursor, press `C` to checkout the remote branch in detached HEAD.  If everything looks good, move your cursor back to the original branch and press `c` to checkout, then press `M` to merge the upstream changes.
+Press `F` on the current branch to fetch from the upstream.  Without moving
+your cursor, press `C` to checkout the remote branch in detached HEAD.  If
+everything looks good, move your cursor back to the original branch and press
+`c` to checkout, then press `M` to merge the upstream changes.
 
 ## Installation
 
-Use vim's built-in package support or your favourite package manager. [There](https://github.com/junegunn/vim-plug) [sure](https://github.com/Shougo/neobundle.vim) [are](https://github.com/VundleVim/Vundle.vim) [a](https://github.com/tpope/vim-pathogen) [lot](https://github.com/Shougo/dein.vim) [of](https://github.com/k-takata/minpac) [options](http://vimhelp.appspot.com/repeat.txt.html#packages) 😳
+Use vim's built-in package support or your favourite package manager.
 
-My personal favourite is [vim-plug](https://github.com/junegunn/vim-plug):
-```
+[There](https://github.com/junegunn/vim-plug) [sure](https://github.com/Shougo/neobundle.vim)
+[are](https://github.com/VundleVim/Vundle.vim) [a](https://github.com/tpope/vim-pathogen)
+[lot](https://github.com/Shougo/dein.vim)
+[of](https://github.com/k-takata/minpac)
+[options](http://vimhelp.appspot.com/repeat.txt.html#packages)
+[😳](http://www.shrugguy.com/)
+
+My personal fave is [vim-plug](https://github.com/junegunn/vim-plug):
+```viml
 Plug 'tpope/vim-fugitive'
 Plug 'sodapopcan/vim-twiggy'
 ```
