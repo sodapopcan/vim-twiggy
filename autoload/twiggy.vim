@@ -727,6 +727,7 @@ function! s:Render() abort
   setlocal nomodified nomodifiable noswapfile
 
   exec "normal! " . s:init_line . "gg"
+  normal! 0
 
   augroup twiggy
     autocmd!
