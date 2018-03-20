@@ -138,6 +138,10 @@ The split method used to show the twiggy buffer.  Can be |leftabove|,
 <
 Twiggy only allows a verticle split.
 
+                                                *'git_log_command'*
+Default: ''
+The command to use for the `gl` mapping.  See |twiggy-git-log|.
+
                                                 *'set_upstream'*
 Default: 1
 Whether or not to automatically set the upstream the first time you push
@@ -291,7 +295,21 @@ d^                If the branch under the cursor is remote, this will prompt
                   >
                     let g:twiggy_enable_remote_delete = 1
 <
+                  Git Log~
+                                                *twiggy-git-log*
+gl                Twiggy is all about branching, not commit history, but it
+                  can piggyback off of any plugin that defines a command that
+                  accepts a branch name.  You could even define your own, but
+                  I recommend either of:
 
+                    gv.vim - https://github.com/junegunn/gv.vim
+                    gitv   - https://github.com/gregsexton/gitv
+
+                  Whatever you choose, you have to let twiggy know about it by
+                  putting the following in your vimrc:
+>
+                    let g:twiggy_git_log_command = 'GV'
+<
                   Stashing~
                                                 *twiggy->>*
 <<                `git stash`

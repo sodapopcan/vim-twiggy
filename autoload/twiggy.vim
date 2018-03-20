@@ -90,6 +90,7 @@ let g:twiggy_use_dispatch           = get(g:,'twiggy_use_dispatch',           ex
 let g:twiggy_close_on_fugitive_cmd  = get(g:,'twiggy_close_on_fugitive_cmd',  0                                                        )
 let g:twiggy_enable_quickhelp       = get(g:,'twiggy_enable_quickhelp',       1                                                        )
 let g:twiggy_show_full_ui           = get(g:,'twiggy_show_full_ui',           g:twiggy_enable_quickhelp                                )
+let g:twiggy_git_log_command        = get(g:,'twiggy_git_log_command',        ''                                                       )
 
 "   {{{2 show_full_ui
 function! s:showing_full_ui()
@@ -521,6 +522,9 @@ function! s:quickhelp_view() abort
   call add(output, 'g^    push (prompted)')
   call add(output, '!^    force push')
   call add(output, 'V     pull')
+  if g:twiggy_git_log_command !=# ''
+    call add(output, 'gl    git log')
+  endif
   call add(output, ',     rename')
   call add(output, 'dd    delete')
   if g:twiggy_enable_remote_delete
@@ -774,6 +778,11 @@ function! s:Render() abort
   call s:mapping('gi',      'CycleSort',        [1, 1])
   call s:mapping('gI',      'CycleSort',        [1, -1])
   call s:mapping('a',       'ToggleSlashSort',  [])
+
+  if g:twiggy_git_log_command !=# ''
+    nnoremap <buffer> gl :exec ':' . g:twiggy_git_log_command .
+          \ ' ' . <SID>branch_under_cursor().fullname<CR>
+  endif
 
   if t:twiggy_git_mode ==# 'rebasing'
     call s:mapping('u', 'Abort', ['rebase'])

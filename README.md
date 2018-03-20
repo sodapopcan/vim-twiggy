@@ -71,6 +71,22 @@ your cursor, press `C` to checkout the remote branch in detached HEAD.  If
 everything looks good, move your cursor back to the original branch and press
 `c` to checkout, then press `M` to merge the upstream changes.
 
+### Git Log
+
+Install a commit browser that implements a command that accepts args for `git log`,
+or at the very least, accepts a branch name as an argument.
+I recommend either
+[gv.vim](https://github.com/junegunn/gv.vim) or
+[gitv](https://github.com/gregsexton/gitv).
+
+Now let twiggy know about it:
+
+```viml
+let g:twiggy_git_log_command = 'GV' " or 'Gitv' if you chose gitv
+```
+
+Now `gl` will call `:GV <branch-your-cursor-is-on><CR>`
+
 ## Installation
 
 Use vim's built-in package support or your favourite package manager.
