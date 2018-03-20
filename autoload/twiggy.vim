@@ -49,7 +49,6 @@ let s:mappings                 = {}
 let s:branch_line_refs         = {}
 let s:last_branch_under_cursor = {}
 let s:last_output              = ''
-let s:git_flags                = ''
 
 let s:sorted      = 0
 let s:git_cmd_run = 0
@@ -150,7 +149,6 @@ function! s:call(mapping) abort
     call s:Render()
     call s:RenderOutputBuffer()
   endif
-  let s:git_flags = ''
 endfunction
 
 
@@ -226,53 +224,6 @@ function! s:parse_branch(branch, type) abort
 
   return branch
 endfunction
-
-
-" {{{1 Option Parser
-function! s:OptionParser() abort
-  let terminators = ['m', 'M', 'r', 'R', 'F', '^']
-  let options = {
-        \ 'a': 'all',
-        \ 'f': 'ff',
-        \ '!': 'force',
-        \ 'o': 'only',
-        \ 's': 'squash',
-        \ 't': 'tags'
-        \  }
-  let chosen_options = []
-
-  redraw | echo '**DEPRECATED**: git <cmd> '
-
-  while 1
-    let option = nr2char(getchar())
-    let last_input_was_no = len(chosen_options) > 0 && chosen_options[-1] ==# '--no'
-
-    if index(terminators, option) >= 0
-      let s:git_flags = join(chosen_options)
-      return s:call(option)
-    elseif option ==# 'n' && !last_input_was_no
-      call add(chosen_options, '--no')
-    elseif option ==? "\<c-w>" && len(chosen_options) > 0
-      call remove(chosen_options, -1)
-    elseif !has_key(options, option)
-      call s:Render()
-      return 0
-    elseif option ==# 'o' && len(chosen_options) > 0 && chosen_options[-1] ==# '--ff'
-      let chosen_options[-1] .= '-' . options[option]
-    else
-      if has_key(options, option)
-        if last_input_was_no
-          let chosen_options[-1] .= '-' . options[option]
-        else
-          call add(chosen_options, '--' . options[option])
-        endif
-      endif
-    endif
-
-    redraw | echo '**DEPRECATED**: git <cmd> ' . join(chosen_options) . ' '
-  endwhile
-endfunction
-
 
 " {{{1 Git
 "   {{{2 no_commits
@@ -797,8 +748,6 @@ function! s:Render() abort
     nnoremap <buffer> <silent> gg    :normal! 2gg<CR>
   endif
 
-  nnoremap <buffer>          s     :<C-U>call <SID>OptionParser()<CR>
-
   call s:mapping('<CR>',    'Checkout',         [1])
   call s:mapping('c',       'Checkout',         [1])
   call s:mapping('C',       'Checkout',         [0])
@@ -1091,7 +1040,7 @@ function! s:Fetch(pull) abort
   let branch = s:branch_under_cursor()
   if branch.tracking !=# ''
     let parts = split(branch.tracking, '/')
-    call s:git_cmd(cmd . ' ' . s:git_flags . parts[0] . ' ' . join(parts[1:], '/') .
+    call s:git_cmd(cmd . ' ' . parts[0] . ' ' . join(parts[1:], '/') .
           \ ':refs/remotes/' . parts[0] . '/' . branch.fullname, 1)
   else
     redraw
@@ -1115,14 +1064,14 @@ function! s:Merge(remote, flags) abort
       let v:warningmsg = 'No tracking branch for ' . branch.fullname
       return 1
     else
-      call s:git_cmd('merge ' . a:flags . ' ' . s:git_flags . ' ' . branch.tracking, 1)
+      call s:git_cmd('merge ' . a:flags . ' ' . ' ' . branch.tracking, 1)
     endif
   else
     if branch.name ==# s:get_current_branch()
       let v:warningmsg = 'Can''t merge into self'
       return 1
     else
-      call s:git_cmd('merge ' . a:flags . ' ' . s:git_flags . ' ' . branch.fullname, 1)
+      call s:git_cmd('merge ' . a:flags . ' ' . ' ' . branch.fullname, 1)
     endif
   endif
 
@@ -1138,14 +1087,14 @@ function! s:Rebase(remote) abort
       let v:warningmsg = 'No tracking branch for ' . branch.name
       return 1
     else
-      call s:git_cmd('rebase ' . s:git_flags . ' ' . branch.tracking, 1)
+      call s:git_cmd('rebase ' . ' ' . branch.tracking, 1)
     endif
   else
     if branch.fullname ==# s:get_current_branch()
       let v:warningmsg = 'Can''t rebase off of self'
       return 1
     else
-      call s:git_cmd('rebase ' . s:git_flags . ' ' . branch.fullname, 1)
+      call s:git_cmd('rebase ' . ' ' . branch.fullname, 1)
     endif
   endif
 
@@ -1199,7 +1148,7 @@ function! s:Push(choose_upstream, force) abort
     let v:warningmsg = "Remote does not exist"
     return 1
   else
-    let cmd = 'push ' . flags . ' ' . s:git_flags . ' ' . group . ' ' . branch.fullname
+    let cmd = 'push ' . flags . ' ' . group . ' ' . branch.fullname
     if !a:force || !g:twiggy_prompted_force_push
       call s:git_cmd(cmd, 1)
     else

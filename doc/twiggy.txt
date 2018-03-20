@@ -310,53 +310,6 @@ Q                 Quit all twiggy buffers (including the error buffer)
 ?                 Open the quickhelp
 
 
-
-EXPERIMENTAL CODE BLOAT                        *twiggy-cmd*
-
-** DEPRECATION NOTICE ***********************************************
-* This was a fun experiment but it's convoluted and I never use it. *
-* I will removing it completely at some point in the near future.   *
-*********************************************************************
-
-Pressing s while in the twiggy buffer will start a sort of command prompt that
-looks like this:
->
-  git <cmd>
-<
-You can use this prompt to pass a limited set of options to merge, rebase and
-fetch mappings.
-
-You can construct options with the following mappings:
->
-  a: all
-  f: ff
-  !: force
-  o: only
-  s: squash
-  t: tags
-  n: no (prefix)
-<
-To finish the command, you may use any of the mappings for |fetch|, |merge|,
-|rebase| and |push|.
-
-For example, pressing snf would bring up the following:
->
-  git <cmd> --no-ff
-<
-You could then complete the command by pressing m which would merge the branch
-under the cursor into the current branch with the --no-ff option.
-
-<C-U> and <C-W> work as expected while in this mode.
-
-To abort, press any key that isn't a valid terminator mapping (r, R, m, M, f
-or F).  I'd suggest <ESC>.
-
-WARNING!  As implied by the header, this whole thing is more of a fun
-experiment; At least for the time-being.  I don't use this a whole lot myself.
-Also, IT DOES NO FORM OF VALIDATION.  So typing 'snor' is going to run 'git
-rebase --only' or `git fetch --no-force` which are just wrong.
-
-
 SYNTAX                                        *twiggy-syntax*
 
 Twiggy provides a handful of syntax groups for your customization kicks.
