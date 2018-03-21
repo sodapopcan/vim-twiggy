@@ -119,6 +119,14 @@ function! s:system(cmd, bg) abort
   endif
 endfunction
 
+"   {{{2 attn
+function! s:attn() abort
+  if exists('t:twiggy_git_mode') &&
+        \ index(['rebase', 'merge'], t:twiggy_git_mode) >= 0
+    return 1
+  endif
+  return 0
+endfunction
 
 "   {{{2 gitize
 function! s:gitize(cmd) abort
@@ -148,6 +156,10 @@ function! s:call(mapping) abort
     call s:ErrorMsg()
   else
     call s:Render()
+    if s:attn()
+      wincmd p
+      Gstatus
+    endif
     call s:RenderOutputBuffer()
   endif
 endfunction
@@ -251,11 +263,11 @@ endfunction
 "   {{{2 branch_status
 function! s:get_git_mode() abort
   if isdirectory(t:twiggy_git_dir . '/rebase-apply')
-    return 'rebasing'
+    return 'rebase'
   elseif filereadable(t:twiggy_git_dir . '/MERGE_HEAD')
-    return 'merging'
+    return 'merge'
   elseif s:git_cmd('diff --shortstat --diff-filter=U | tail -1', 0) !=# ''
-    return 'merging'
+    return 'merge'
   else
     return 'normal'
   endif
@@ -550,6 +562,28 @@ function! s:quickhelp_view() abort
   return output
 endfunction
 
+"   {{{2 rebase_view
+function! s:rebase_view() abort
+  return [
+        \ "rebase in progress",
+        \ "",
+        \ "from this window:",
+        \ "  c to continue",
+        \ "  s to skip",
+        \ "  a to abort"
+        \ ]
+endfunction
+
+"   {{{2 merge_view
+function! s:merge_view() abort
+  return [
+        \ "merge in progress",
+        \ "",
+        \ "from this window:",
+        \ "  a to abort"
+        \ ]
+endfunction
+
 "   {{{2 Branch Details
 function! s:show_branch_details() abort
   let line = line('.')
@@ -713,22 +747,54 @@ function! s:Render() abort
   let t:twiggy_git_mode = s:get_git_mode()
 
   let output = []
-  if s:showing_full_ui()
+
+  if s:showing_full_ui() && !s:attn()
     " We don't need to manually add a second empty line here since
     " s:standard_view() will automatically add one.
     call extend(output, ["press ? for help"])
   endif
-  call extend(output, s:standard_view())
+  if s:attn()
+    let view = "s:" . t:twiggy_git_mode . "_view"
+    call extend(output, call(view, []))
+  else
+    call extend(output, s:standard_view())
+  end
   set modifiable
   silent 1,$delete _
   call append(0, output)
   normal! G
   delete _
   normal! gg
-  call s:show_branch_details()
-  let s:total_lines = len(output)
 
   setlocal nomodified nomodifiable noswapfile
+
+  if s:attn()
+    if t:twiggy_git_mode ==# 'rebase'
+      call s:mapping('c', 'Continue', ['rebase'])
+      call s:mapping('s', 'Skip', ['rebase'])
+      call s:mapping('a', 'Abort', ['rebase'])
+      call s:mapping('u', 'Abort', ['rebase']) " Historical
+    elseif t:twiggy_git_mode ==# 'merge'
+      call s:mapping('a', 'Abort', ['merge'])
+      call s:mapping('u', 'Abort', ['merge']) " Historical
+    endif
+
+    syntax match TwiggyAttnModeMapping "\v%3c(s|c|a)"
+    highlight link TwiggyAttnModeMapping Identifier
+
+    syntax match TwiggyAttnModeTitle "\v^(rebase|merge) in progress"
+    highlight link TwiggyAttnModeTitle Type
+
+    syntax match TwiggyAttnModeInstruction "\v^from this window:"
+    highlight link TwiggyAttnModeInstruction String
+
+    normal! 0
+
+    return
+  endif
+
+  call s:show_branch_details()
+  let s:total_lines = len(output)
 
   exec "normal! " . s:init_line . "gg"
   normal! 0
@@ -784,14 +850,6 @@ function! s:Render() abort
           \ ' ' . <SID>branch_under_cursor().fullname<CR>
   endif
 
-  if t:twiggy_git_mode ==# 'rebasing'
-    call s:mapping('u', 'Abort', ['rebase'])
-  elseif t:twiggy_git_mode ==# 'merging'
-    call s:mapping('u', 'Abort', ['merge'])
-  else
-    nnoremap <buffer> <silent> u :echo 'Nothing to abort'<CR>
-  endif
-
   if g:twiggy_enable_remote_delete
     call s:mapping('d^',      'DeleteRemote',     [])
   endif
@@ -826,9 +884,6 @@ function! s:Render() abort
 
   syntax match TwiggySortText '\v[[a-z]+]'
   highlight default link TwiggySortText Comment
-
-  syntax match TwiggyBranchStatus "\v^(rebasing|merging)"
-  highlight link TwiggyBranchStatus DiffDelete
 
   if exists('s:branches_not_in_reflog') && len(s:branches_not_in_reflog)
     exec "syntax match TwiggyNotInReflog '" .
@@ -1111,6 +1166,15 @@ function! s:Rebase(remote) abort
   return 0
 endfunction
 
+"     {{{3 Continue Rebase 
+function! s:Continue(_) abort
+  call s:git_cmd('rebase --continue')
+endfunction
+
+"     {{{3 Skip Rebase 
+function! s:Skip(_) abort
+  call s:git_cmd('rebase --skip')
+endfunction
 
 "     {{{3 Merge/Rebase Abort
 function! s:Abort(type) abort
