@@ -120,9 +120,9 @@ function! s:system(cmd, bg) abort
 endfunction
 
 "   {{{2 attn
-function! s:attn() abort
+function! s:attn_mode() abort
   if exists('t:twiggy_git_mode') &&
-        \ index(['rebase', 'merge'], t:twiggy_git_mode) >= 0
+        \ index(['rebase', 'merge', 'cherry-pick'], t:twiggy_git_mode) >= 0
     return 1
   endif
   return 0
@@ -156,7 +156,7 @@ function! s:call(mapping) abort
     call s:ErrorMsg()
   else
     call s:Render()
-    if s:attn()
+    if s:attn_mode()
       wincmd p
       Gstatus
     endif
@@ -266,6 +266,8 @@ function! s:get_git_mode() abort
     return 'rebase'
   elseif filereadable(t:twiggy_git_dir . '/MERGE_HEAD')
     return 'merge'
+  elseif filereadable(t:twiggy_git_dir . '/CHERRY_PICK_HEAD')
+    return 'cherry-pick'
   elseif s:git_cmd('diff --shortstat --diff-filter=U | tail -1', 0) !=# ''
     return 'merge'
   else
@@ -584,6 +586,17 @@ function! s:merge_view() abort
         \ ]
 endfunction
 
+"   {{{2 cherry_pick_view
+function! s:cherry_pick_view() abort
+  return [
+        \ "cherry pick in progress",
+        \ "",
+        \ "from this window:",
+        \ "  c to continue",
+        \ "  a to abort"
+        \ ]
+endfunction
+
 "   {{{2 Branch Details
 function! s:show_branch_details() abort
   let line = line('.')
@@ -748,13 +761,14 @@ function! s:Render() abort
 
   let output = []
 
-  if s:showing_full_ui() && !s:attn()
+  if s:showing_full_ui() && !s:attn_mode()
     " We don't need to manually add a second empty line here since
     " s:standard_view() will automatically add one.
     call extend(output, ["press ? for help"])
   endif
-  if s:attn()
-    let view = "s:" . t:twiggy_git_mode . "_view"
+
+  if s:attn_mode()
+    let view = "s:" . s:sub(t:twiggy_git_mode, '-', '_') . "_view"
     call extend(output, call(view, []))
   else
     call extend(output, s:standard_view())
@@ -768,21 +782,22 @@ function! s:Render() abort
 
   setlocal nomodified nomodifiable noswapfile
 
-  if s:attn()
+  if s:attn_mode()
     if t:twiggy_git_mode ==# 'rebase'
       call s:mapping('c', 'Continue', ['rebase'])
-      call s:mapping('s', 'Skip', ['rebase'])
+      call s:mapping('s', 'Skip', [])
       call s:mapping('a', 'Abort', ['rebase'])
-      call s:mapping('u', 'Abort', ['rebase']) " Historical
     elseif t:twiggy_git_mode ==# 'merge'
       call s:mapping('a', 'Abort', ['merge'])
-      call s:mapping('u', 'Abort', ['merge']) " Historical
+    elseif t:twiggy_git_mode ==# 'cherry-pick'
+      call s:mapping('s', 'Continue', ['cherry-pick'])
+      call s:mapping('a', 'Abort', ['cherry-pick'])
     endif
 
     syntax match TwiggyAttnModeMapping "\v%3c(s|c|a)"
     highlight link TwiggyAttnModeMapping Identifier
 
-    syntax match TwiggyAttnModeTitle "\v^(rebase|merge) in progress"
+    syntax match TwiggyAttnModeTitle "\v^(rebase|merge|cherry pick) in progress"
     highlight link TwiggyAttnModeTitle Type
 
     syntax match TwiggyAttnModeInstruction "\v^from this window:"
@@ -1167,13 +1182,13 @@ function! s:Rebase(remote) abort
 endfunction
 
 "     {{{3 Continue Rebase 
-function! s:Continue(_) abort
-  call s:git_cmd('rebase --continue')
+function! s:Continue(type) abort
+  call s:git_cmd(a:type . ' --continue', 1)
 endfunction
 
 "     {{{3 Skip Rebase 
-function! s:Skip(_) abort
-  call s:git_cmd('rebase --skip')
+function! s:Skip() abort
+  call s:git_cmd('rebase --skip', 1)
 endfunction
 
 "     {{{3 Merge/Rebase Abort
