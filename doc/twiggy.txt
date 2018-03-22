@@ -261,10 +261,6 @@ r                 Rebase the current branch off the branch under the cursor.
 R                 Rebase the current branch off the branch under the
                   cursor's remote (if it has one).
 
-                                                *twiggy-u*
-                                                *twiggy-abort*
-u                 Abort a merge or rebase
-
                   Pushing~
                                                 *twiggy-^*
 ^                 Push the local branch under the cursor (think of it as an

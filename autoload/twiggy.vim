@@ -540,7 +540,6 @@ function! s:quickhelp_view() abort
   call add(output, 'gM    `M` --no-ff')
   call add(output, 'r     rebase')
   call add(output, 'R     rebase remote')
-  call add(output, 'u     abort merge/rebase')
   call add(output, '^     push')
   call add(output, 'g^    push (prompted)')
   call add(output, '!^    force push')
