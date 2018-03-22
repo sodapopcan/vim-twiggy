@@ -271,14 +271,14 @@ endfunction
 
 "   {{{2 branch_status
 function! s:get_git_mode() abort
-  if isdirectory(t:twiggy_git_dir . '/rebase-apply')
+  if isdirectory(t:twiggy_git_dir . '/rebase-apply') ||
+        \ isdirectory(t:twiggy_git_dir . '/rebase-merge')
     return 'rebase'
-  elseif filereadable(t:twiggy_git_dir . '/MERGE_HEAD')
+  elseif s:fexists(t:twiggy_git_dir . '/MERGE_HEAD') ||
+        \ s:git_cmd('diff --shortstat --diff-filter=U | tail -1', 0) !=# ''
     return 'merge'
-  elseif filereadable(t:twiggy_git_dir . '/CHERRY_PICK_HEAD')
+  elseif s:fexists(t:twiggy_git_dir . '/CHERRY_PICK_HEAD')
     return 'cherry-pick'
-  elseif s:git_cmd('diff --shortstat --diff-filter=U | tail -1', 0) !=# ''
-    return 'merge'
   else
     return 'normal'
   endif
