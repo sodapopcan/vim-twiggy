@@ -29,6 +29,11 @@ function! s:gsub(str,pat,rep) abort
   return substitute(a:str, '\v\C'.a:pat, a:rep, 'g')
 endfunction
 
+"   {{{2 fexists
+function! s:fexists(file)
+  return !empty(glob(a:file))
+endfunction
+
 "   {{{2 mapping
 " Create local mappings in the twiggy buffer
 function! s:mapping(mapping, fn, args) abort
@@ -49,6 +54,7 @@ let s:mappings                 = {}
 let s:branch_line_refs         = {}
 let s:last_branch_under_cursor = {}
 let s:last_output              = ''
+let s:requires_buf_refresh     = 1
 
 let s:sorted      = 0
 let s:git_cmd_run = 0
@@ -91,6 +97,7 @@ let g:twiggy_close_on_fugitive_cmd  = get(g:,'twiggy_close_on_fugitive_cmd',  0 
 let g:twiggy_enable_quickhelp       = get(g:,'twiggy_enable_quickhelp',       1                                                        )
 let g:twiggy_show_full_ui           = get(g:,'twiggy_show_full_ui',           g:twiggy_enable_quickhelp                                )
 let g:twiggy_git_log_command        = get(g:,'twiggy_git_log_command',        ''                                                       )
+let g:twiggy_refresh_buffers        = get(g:,'twiggy_refresh_buffers',        1                                                        )
 
 "   {{{2 show_full_ui
 function! s:showing_full_ui()
@@ -156,6 +163,8 @@ function! s:call(mapping) abort
     call s:ErrorMsg()
   else
     call s:Render()
+    call s:refresh_buffers()
+    call <SID>buffocus(t:twiggy_bufnr)
     if s:attn_mode()
       wincmd p
       Gstatus
@@ -710,6 +719,28 @@ function! s:jump_to_current_branch() abort
   call search(s:icons.current)
 endfunction
 
+"     {{{3 bufrefresh
+function! s:bufrefresh()
+  if &ft ==# 'gitcommit'
+    Gstatus
+  elseif &modifiable && &buftype ==# ''
+    try
+      silent edit
+    catch
+    endtry
+  endif
+endfunction
+
+"     {{{3 refresh_buffers
+function! s:refresh_buffers()
+  if g:twiggy_refresh_buffers
+    if s:requires_buf_refresh
+      windo call <SID>bufrefresh()
+    endif
+    let s:requires_buf_refresh = 1
+  endif
+endfunction
+
 "   {{{2 Main
 "     {{{3 Render
 function! s:Render() abort
@@ -1207,6 +1238,8 @@ function! s:Push(choose_upstream, force) abort
     return 1
   endif
 
+  let s:requires_buf_refresh = 0
+
   let remote_groups = split(s:git_cmd('remote', 0), "\n")
 
   let flags = ''
@@ -1261,8 +1294,9 @@ endfunction
 
 "     {{{3 Rename
 function! s:Rename() abort
-  let branch = s:branch_under_cursor()
+  let s:requires_buf_refresh = 0
 
+  let branch = s:branch_under_cursor()
   let new_name = input("Rename " . branch.fullname . " to: ")
   redraw
   echo "Renaming \"" . branch.fullname . "\" to \"" . new_name . "\"... "

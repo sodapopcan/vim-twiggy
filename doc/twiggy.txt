@@ -149,6 +149,14 @@ a each branch.
 >
   let g:twiggy_set_upstream = 0
 <
+                                                *'refresh_buffers'*
+Default: 1
+After any file-altering git operation has run, twiggy will refresh (call :edit
+on) all visible buffers in the current tab.  To suppress this behaviour, set
+the following: 
+>
+  let g:twiggy_refresh_buffers = 0
+<
                                                 *'prompted_force_push'*
 Default: 1
 Prompts to make sure you really want to force push.  Turn this off with:
