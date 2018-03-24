@@ -849,7 +849,7 @@ function! s:Render() abort
     autocmd!
     autocmd CursorMoved twiggy://* call s:show_branch_details()
     autocmd CursorMoved twiggy://* call s:update_last_branch_under_cursor()
-    autocmd BufReadPost,BufEnter,BufLeave,VimResized twiggy://* call <SID>Refresh()
+    autocmd BufReadPost,BufEnter,VimResized twiggy://* call <SID>Refresh()
   augroup END
 
   nnoremap <buffer> <silent> j      :<C-U>call <SID>traverse_branches('j')<CR>
