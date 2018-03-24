@@ -136,7 +136,7 @@ The split method used to show the twiggy buffer.  Can be |leftabove|,
 >
   let g:twiggy_split_method = 'botright'
 <
-Twiggy only allows a verticle split.
+Twiggy only allows a vertical split.
 
                                                 *'git_log_command'*
 Default: ''

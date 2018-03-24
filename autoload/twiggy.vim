@@ -1160,7 +1160,7 @@ function! s:Fetch(pull) abort
   return 0
 endfunction
 
-"     {{{3 Push
+"     {{{3 Pull
 function! s:Pull() abort
   return s:Fetch(1)
 endfunction
