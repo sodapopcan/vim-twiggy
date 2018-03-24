@@ -842,7 +842,7 @@ function! s:Render() abort
     augroup twiggy
       autocmd!
       autocmd BufLeave twiggy://* let g:twiggy_ping_fugitive = 1
-      autocmd FileType gitcommit
+      autocmd BufEnter .git/index
             \ | if exists('g:twiggy_ping_fugitive')
             \ |   wincmd w
             \ |   wincmd p
