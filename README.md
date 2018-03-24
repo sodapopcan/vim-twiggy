@@ -77,7 +77,7 @@ Twiggy itself is only concerned with branching, but it does have very warm
 feelings toward the following plugins:
 
 * [gv.vim](https://github.com/junegunn/gv.vim)
-* [gitv](https://github.com/gregsexton/gitv).
+* [gitv](https://github.com/gregsexton/gitv)
 
 Install one of them and you will get the following mappings:
 
