@@ -73,19 +73,17 @@ everything looks good, move your cursor back to the original branch and press
 
 ### Git Log
 
-Install a commit browser that implements a command that accepts args for `git log`,
-or at the very least, accepts a branch name as an argument.
-I recommend either
-[gv.vim](https://github.com/junegunn/gv.vim) or
-[gitv](https://github.com/gregsexton/gitv).
+Twiggy itself is only concerned with branching, but it does have very warm
+feelings toward the following plugins:
 
-Now let twiggy know about it:
+* [gv.vim](https://github.com/junegunn/gv.vim)
+* [gitv](https://github.com/gregsexton/gitv).
 
-```viml
-let g:twiggy_git_log_command = 'GV' " or 'Gitv' if you chose gitv
-```
+Install one of them and you will get the following mappings:
 
-Now `gl` will call `:GV <branch-your-cursor-is-on><CR>`
+`gl` show commits for the branch under the cursor
+
+`gL` show range of commits from branch under the cursor to the current one
 
 ## Installation
 

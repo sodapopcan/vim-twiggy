@@ -300,20 +300,22 @@ d^                If the branch under the cursor is remote, this will prompt
                     let g:twiggy_enable_remote_delete = 1
 <
                   Git Log~
-                                                *twiggy-git-log*
-gl                Twiggy is all about branching, not commit history, but it
-                  can piggyback off of any plugin that defines a command that
-                  accepts a branch name.  You could even define your own, but
-                  I recommend either of:
+
+                  Twiggy is all about branching, not commit history.
+                  But if you install one of these two plugins:
 
                     gv.vim - https://github.com/junegunn/gv.vim
                     gitv   - https://github.com/gregsexton/gitv
 
-                  Whatever you choose, you have to let twiggy know about it by
-                  putting the following in your vimrc:
->
-                    let g:twiggy_git_log_command = 'GV'
-<
+                  ...you will get the following mappings:
+
+                                                *twiggy-log*
+gl                Git log on the branch under the cursor
+
+                                                *twiggy-log-range*
+gL                Git log on the range of the commits between the branch 
+                  under the cursor and the current branch
+
                   Stashing~
                                                 *twiggy->>*
 <<                `git stash`

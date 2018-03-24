@@ -546,6 +546,7 @@ function! s:quickhelp_view() abort
   call add(output, 'V     pull')
   if g:twiggy_git_log_command !=# ''
     call add(output, 'gl    git log')
+    call add(output, 'gl    git log')
   endif
   call add(output, ',     rename')
   call add(output, 'dd    delete')
@@ -890,9 +891,17 @@ function! s:Render() abort
   call s:mapping('gI',      'CycleSort',        [1, -1])
   call s:mapping('a',       'ToggleSlashSort',  [])
 
+  if g:twiggy_git_log_command ==# ''
+    if exists(':GV')
+      let g:twiggy_git_log_command  = 'GV'
+    elseif exists(':Gitv')
+      let g:twiggy_git_log_command = 'Gitv'
+    endif
+  endif
+
   if g:twiggy_git_log_command !=# ''
-    nnoremap <buffer> gl :exec ':' . g:twiggy_git_log_command .
-          \ ' ' . <SID>branch_under_cursor().fullname<CR>
+    nnoremap <buffer> gl :exec ':' . g:twiggy_git_log_command . ' ' . <SID>branch_under_cursor().fullname<CR>
+    nnoremap <buffer> gL :exec ':' . g:twiggy_git_log_command . ' ' . <SID>branch_under_cursor().fullname . '..'<CR>
   endif
 
   if g:twiggy_enable_remote_delete
