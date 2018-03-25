@@ -547,7 +547,7 @@ function! s:quickhelp_view() abort
   call add(output, 'V     pull')
   if g:twiggy_git_log_command !=# ''
     call add(output, 'gl    git log')
-    call add(output, 'gl    git log')
+    call add(output, 'gL    git log `..`')
   endif
   call add(output, ',     rename')
   call add(output, 'dd    delete')
