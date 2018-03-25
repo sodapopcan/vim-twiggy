@@ -60,6 +60,8 @@ let s:requires_buf_refresh     = 1
 let s:sorted      = 0
 let s:git_cmd_run = 0
 
+let s:vim8 = has('patch-8.0.0039') && exists('*job_start')
+
 " {{{1 Icons
 if exists('g:twiggy_icons')
       \ && type(g:twiggy_icons) == 3
@@ -93,7 +95,6 @@ let g:twiggy_group_locals_by_slash  = get(g:,'twiggy_group_locals_by_slash',  1 
 let g:twiggy_set_upstream           = get(g:,'twiggy_set_upstream',           1                                                        )
 let g:twiggy_prompted_force_push    = get(g:,'twiggy_prompted_force_push',    1                                                        )
 let g:twiggy_enable_remote_delete   = get(g:,'twiggy_enable_remote_delete',   0                                                        )
-let g:twiggy_use_dispatch           = get(g:,'twiggy_use_dispatch',           exists('g:loaded_dispatch') && g:loaded_dispatch ? 1 : 0 )
 let g:twiggy_close_on_fugitive_cmd  = get(g:,'twiggy_close_on_fugitive_cmd',  0                                                        )
 let g:twiggy_enable_quickhelp       = get(g:,'twiggy_enable_quickhelp',       1                                                        )
 let g:twiggy_show_full_ui           = get(g:,'twiggy_show_full_ui',           g:twiggy_enable_quickhelp                                )
@@ -106,19 +107,42 @@ function! s:showing_full_ui()
 endfunction
 
 " {{{1 System
+"   {{{2 job_done
+function! s:job_done(ch, msg)
+  call s:Refresh()
+endfunction
+
+function! s:job_error(cg, msg)
+  echom a:msg
+endfunction
+
 "   {{{2 cmd
 function! s:system(cmd, bg) abort
-  let command = a:cmd
-
   if a:bg
-    if exists('g:loaded_dispatch') && g:loaded_dispatch &&
-          \ g:twiggy_use_dispatch
-      exec ':Dispatch ' . command
-    else
-      exec ':!' . command
+    let linenr = line('.')
+    let cnt = 0
+    let spinner = [' ', '\.', ':', '\.']
+    let spinnerlen = len(spinner)
+    if s:vim8
+      let job = job_start(['sh', '-c', a:cmd], {
+            \ 'out_cb': function('s:job_done'),
+            \ 'err_cb': function('s:job_error'),
+            \ 'mode': 'nl',
+            \ })
+      set modifiable
+      echo "Hang in there... ctrl-c to abort (not recommended)"
+      while job_status(job) ==# 'run'
+        redraw
+        let line = s:sub(getline('.'), '%2v.', spinner[cnt % spinnerlen])
+        call setline(linenr, line)
+        sleep 100m
+        let cnt = cnt + 1
+      endwhile
+      set nomodifiable
     endif
+      exec ':!' . a:cmd
   else
-    let output = system(command)
+    let output = system(a:cmd)
     if v:shell_error
       let s:last_output = output
     endif
