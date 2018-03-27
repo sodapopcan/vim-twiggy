@@ -61,6 +61,9 @@ let s:sorted      = 0
 let s:git_cmd_run = 0
 
 let s:vim8 = has('patch-8.0.0039') && exists('*job_start')
+let s:is_win = has('win32') || has('win64')
+let s:nvim = has('nvim-0.2') || (has('nvim') && exists('*jobwait') && !s:is_win)
+let s:use_job = s:vim8 || s:nvim
 
 " {{{1 Icons
 if exists('g:twiggy_icons')
@@ -109,12 +112,17 @@ endfunction
 " {{{1 System
 "   {{{2 job_done
 function! s:job_done(ch, msg)
+  let s:running = 0
   call s:Refresh()
 endfunction
 
-function! s:job_error(cg, msg)
+function! s:job_error(ch, msg)
+  let s:running = 0
+  call s:Refresh()
   echom a:msg
 endfunction
+
+let s:running = 0
 
 "   {{{2 cmd
 function! s:system(cmd, bg) abort
@@ -123,24 +131,49 @@ function! s:system(cmd, bg) abort
     let cnt = 0
     let spinner = [' ', '\.', ':', '\.']
     let spinnerlen = len(spinner)
-    if s:vim8
-      let job = job_start(['sh', '-c', a:cmd], {
-            \ 'out_cb': function('s:job_done'),
-            \ 'err_cb': function('s:job_error'),
-            \ 'mode': 'nl',
-            \ })
+    if s:use_job
       set modifiable
       echo "Hang in there... ctrl-c to abort (not recommended)"
-      while job_status(job) ==# 'run'
-        redraw
-        let line = s:sub(getline('.'), '%2v.', spinner[cnt % spinnerlen])
-        call setline(linenr, line)
-        sleep 100m
-        let cnt = cnt + 1
-      endwhile
+      syntax clear
+      syntax match TwiggyJobRunning "\v*"
+      highlight link Normal Comment
+      if s:vim8
+        let job = job_start(['sh', '-c', a:cmd], {
+              \ 'out_cb': function('s:job_done'),
+              \ 'err_cb': function('s:job_error'),
+              \ 'mode': 'nl',
+              \ })
+        while job_status(job) ==# 'run'
+          redraw
+          let line = s:sub(getline('.'), '%2v.', spinner[cnt % spinnerlen])
+          call setline(linenr, line)
+          sleep 100m
+          let cnt = cnt + 1
+        endwhile
+      elseif s:nvim
+        let job = jobstart(['sh', '-c', "sleep 5 &&".a:cmd], {
+              \ 'on_stdout': function('s:job_done'),
+              \ 'on_exit': function('s:job_error'),
+              \ 'mode': 'nl',
+              \ })
+        let s:running = 1
+        " while s:running
+        while s:running
+          if !s:running
+            break
+            redraw
+          endif
+          redraw
+          let line = s:sub(getline('.'), '%2v.', spinner[cnt % spinnerlen])
+          call setline(linenr, line)
+          sleep 100m
+          let cnt = cnt + 1
+        endwhile
+      endif
       set nomodifiable
-    endif
+    else
       exec ':!' . a:cmd
+    endif
   else
     let output = system(a:cmd)
     if v:shell_error
@@ -750,6 +783,7 @@ function! s:bufrefresh()
     Gstatus
   elseif &modifiable && &buftype ==# ''
     try
+      echom "here"
       silent edit
     catch
     endtry
