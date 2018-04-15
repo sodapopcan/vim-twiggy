@@ -118,7 +118,7 @@ function! s:system(cmd, bg) abort
       exec ':!' . command
     endif
   else
-    let output = system(command)
+    let output = systemlist(command)
     if v:shell_error
       let s:last_output = output
     endif
@@ -257,13 +257,13 @@ endfunction
 
 "   {{{2 dirty_tree
 function! s:dirty_tree() abort
-  return s:git_cmd('diff --shortstat', 0) !=# ''
+  return !empty(s:git_cmd('diff --shortstat', 0))
 endfunction
 
 "   {{{2 _git_branch_vv
 function! s:_git_branch_vv(type) abort
   let branches = []
-  for branch in split(s:git_cmd('branch --' . a:type . ' -vv --no-color', 0), '\v\n')
+  for branch in s:git_cmd('branch --' . a:type . ' -vv --no-color', 0)
     call add(branches, s:parse_branch(branch, a:type))
   endfor
 
@@ -276,7 +276,7 @@ function! s:get_git_mode() abort
         \ isdirectory(t:twiggy_git_dir . '/rebase-merge')
     return 'rebase'
   elseif s:fexists(t:twiggy_git_dir . '/MERGE_HEAD') ||
-        \ s:git_cmd('diff --shortstat --diff-filter=U | tail -1', 0) !=# ''
+        \ !empty(s:git_cmd('diff --shortstat --diff-filter=U | tail -1', 0))
     return 'merge'
   elseif s:fexists(t:twiggy_git_dir . '/CHERRY_PICK_HEAD')
     return 'cherry-pick'
@@ -361,7 +361,7 @@ function! twiggy#get_branches() abort
       let remote_refs[branch.fullname] = branch
     endfor
 
-    for remote in split(s:git_cmd('remote', 0), '\v\n')
+    for remote in s:git_cmd('remote', 0)
       for branch_name in s:get_by_commiter_date('remotes/' . remote)
         if has_key(remote_refs, branch_name)
           call add(remotes_sorted, remote_refs[branch_name])
@@ -376,7 +376,7 @@ endfunction
 
 "   {{{2 get_current_branch
 function! s:get_current_branch() abort
-  return s:git_cmd('branch --list | grep \*', 0)[2:-2]
+  return s:git_cmd('branch --list | grep \*', 0)[0][2:-2]
 endfunction
 
 "   {{{2 branch_exists
@@ -401,13 +401,13 @@ function! s:get_uniq_branch_names_from_reflog() abort
   let cmd.= "<(" . s:gitize('reflog') . " | awk -F\" \" '/checkout: moving from/ { print $8 }' | "
   let cmd.= "awk " . shellescape('!f[$0]++') . ")"
 
-  return split(s:system(cmd, 0), '\v\n')
+  return s:system(cmd, 0)
 endfunction
 
 "   {{{2 get_merged_branches
 " I'm sure there is a better plumbing command to figure this out
 function! s:get_merged_branches() abort
-  return map(split(s:git_cmd('branch --list --merged', 0), '\n'), 'v:val[2:]')
+  return map(s:git_cmd('branch --list --merged', 0), '\n')
 endfunction
 
 "   {{{2 get_by_committer_date
@@ -416,7 +416,7 @@ function! s:get_by_commiter_date(type) abort
         \ "for-each-ref --sort=-committerdate --format='%(refname)' " .
         \ "refs/" . a:type . " | sed 's/refs\\/" .
         \ s:sub(a:type, '/', '\\/') . "\\///g'")
-  return split(s:system(cmd, 0), '\v\n')
+  return s:system(cmd, 0)
 endfunction
 
 "   {{{2 update_last_branch_under_cursor
@@ -627,7 +627,7 @@ function! s:RenderOutputBuffer() abort
     return
   endif
   silent keepalt botright new TwiggyOutput
-  let output = split(s:last_output, '\v\n')
+  let output = s:last_output
   let height = len(output)
   if height < 5 | let height = 5 | endif
   exec 'resize ' . height
@@ -1111,7 +1111,7 @@ function! s:Checkout(track) abort
     redraw
     echo 'Moving from ' . current_branch . ' to ' . switch_branch.fullname . '...'
     if a:track && !switch_branch.is_local " tracking and branch is remote
-      if index(map(split(s:git_cmd('branch --list', 0), '\n'), 'v:val[2:]'), switch_branch.name) >= 0
+      if index(map(s:git_cmd('branch --list', 0), 'v:val[2:]'), switch_branch.name) >= 0
         " Checkout remote in detached HEAD
         call s:git_cmd('checkout ' . switch_branch.fullname, 0)
       else
@@ -1262,7 +1262,7 @@ function! s:Push(choose_upstream, force) abort
 
   let s:requires_buf_refresh = 0
 
-  let remote_groups = split(s:git_cmd('remote', 0), "\n")
+  let remote_groups = s:git_cmd('remote', 0)
 
   let flags = ''
   if a:force
@@ -1305,7 +1305,7 @@ function! s:Push(choose_upstream, force) abort
 endfunction
 
 function! TwiggyCompleteRemotes(A,L,P) abort
-  for remote in split(s:git_cmd('remote', 0), '\v\n')
+  for remote in s:git_cmd('remote', 0)
     if match(remote, '\v^' . a:A) >= 0
       return remote
     endif
