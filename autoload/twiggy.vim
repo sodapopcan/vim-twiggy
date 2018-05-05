@@ -54,7 +54,7 @@ let s:init_line                = 0
 let s:mappings                 = {}
 let s:branch_line_refs         = {}
 let s:last_branch_under_cursor = {}
-let s:last_output              = ''
+let s:last_output              = []
 let s:requires_buf_refresh     = 1
 
 let s:sorted      = 0
@@ -376,7 +376,7 @@ endfunction
 
 "   {{{2 get_current_branch
 function! s:get_current_branch() abort
-  return s:git_cmd('branch --list | grep \*', 0)[0][2:-2]
+  return s:git_cmd('rev-parse --abbrev-ref HEAD', 0)[0]
 endfunction
 
 "   {{{2 branch_exists
@@ -623,7 +623,7 @@ endfunction
 
 "   {{{2 Stdout/Stderr Buffer
 function! s:RenderOutputBuffer() abort
-  if s:last_output ==# ''
+  if empty(s:last_output)
     return
   endif
   silent keepalt botright new TwiggyOutput
@@ -638,7 +638,7 @@ function! s:RenderOutputBuffer() abort
 
   setlocal nomodified nomodifiable noswapfile nowrap nonumber
   setlocal buftype=nofile bufhidden=delete
-  let s:last_output = ''
+  let s:last_output = []
 
   syntax clear
   syntax match TwiggyOutputText "\v^[^ ](.*)"
@@ -1147,7 +1147,7 @@ function! s:Delete() abort
     call s:git_cmd('branch -d ' . branch.fullname, 0)
     if v:shell_error
       " blow out last output to suppress error buffer
-      let s:last_output = ''
+      let s:last_output = []
       return s:Confirm(
             \ 'UNMERGED!  Force-delete local branch ' . branch.fullname . '?',
             \ "s:git_cmd('branch -D " . branch.fullname . "', 0)", 0)
