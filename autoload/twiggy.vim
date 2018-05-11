@@ -190,7 +190,10 @@ function! s:parse_branch(branch, type) abort
   let detached = match(a:branch, '\v^*\ \((\w+ )?detached at \w+\/[a-zA-Z]+\)')
 
   let remote_details = matchstr(a:branch, '\v\[[^\[]+\]')
-  let branch.tracking = matchstr(remote_details, '\v[^ \:\]]+', 1)
+  let branch.tracking = ''
+  if a:type ==# 'list'
+    let branch.tracking = matchstr(remote_details, '\v[^ \:\]]+', 1)
+  endif
   let branch.remote =  branch.tracking != '' ? split(branch.tracking, '/')[0] : ''
   if branch.tracking !=# ''
     if match(remote_details, '\vahead [0-9]+\, behind [0-9]') >= 0
