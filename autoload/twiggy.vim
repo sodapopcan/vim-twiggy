@@ -160,6 +160,7 @@ endfunction
 "   {{{2 call
 function! s:call(mapping) abort
   let key = s:encode_mapping(a:mapping)
+  echom type(key)
   if call('s:' . s:mappings[key][0], s:mappings[key][1])
     call s:ErrorMsg()
   else
@@ -1164,12 +1165,12 @@ function! s:Delete() abort
       let s:last_output = []
       return s:Confirm(
             \ 'UNMERGED!  Force-delete local branch ' . branch.fullname . '?',
-            \ "s:git_cmd('branch -D " . branch.fullname . "', 0)", 0)
+            \ "s:git_cmd('branch -D " . branch.fullname . "', 0)[0]", 0)
     endif
   else
     return s:Confirm(
           \ 'Delete remote branch ' . branch.fullname . '?',
-          \ "s:git_cmd('branch -d -r " . branch.fullname . "', 0)", 0)
+          \ "s:git_cmd('branch -d -r " . branch.fullname . "', 0)[0]", 0)
   endif
 endfunction
 
@@ -1178,7 +1179,7 @@ function! s:DeleteRemote() abort
 
   return s:Confirm(
         \ 'WARNING! Delete branch ' . branch.name . ' from remote repo: ' . branch.group . '?',
-        \ "s:git_cmd('push " . branch.group . " :" . branch.name . "', 1)", 0)
+        \ "s:git_cmd('push " . branch.group . " :" . branch.name . "', 1)[0]", 0)
 endfunction
 
 "     {{{3 Fetch
