@@ -260,8 +260,7 @@ endfunction
 " {{{1 Git
 "   {{{2 no_commits
 function! s:no_commits() abort
-  call s:git_cmd('rev-list -n 1 --all &> /dev/null', 0)
-  return v:shell_error
+  return s:gsub(s:git_cmd('rev-list -n 1 --all | wc -l', 0)[0], ' ', '') ==# '0'
 endfunction
 
 "   {{{2 dirty_tree
