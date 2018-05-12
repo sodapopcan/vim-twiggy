@@ -1067,7 +1067,7 @@ endfunction
 
 "   {{{2 Sorting
 "     {{{3 Helpers
-function s:sort_branches(type, int)
+function! s:sort_branches(type, int)
   exec "let sorts     = g:twiggy_" . a:type . "_branch_sorts"
   exec "let sort_name = g:twiggy_" . a:type . "_branch_sort"
   let max_index = len(sorts) - a:int
