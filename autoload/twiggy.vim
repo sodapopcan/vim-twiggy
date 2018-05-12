@@ -1287,6 +1287,10 @@ function! s:Push(choose_upstream, force) abort
     if len(remote_groups) > 1
       redraw
       let group = input("Push to which remote?: ", '', "custom,TwiggyCompleteRemotes")
+    elseif len(remote_groups) == 0
+      redraw
+      echo "There are no remotes to push to"
+      return 1
     else
       let group = remote_groups[0]
     endif
