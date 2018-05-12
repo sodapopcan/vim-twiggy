@@ -782,10 +782,10 @@ function! s:Render() abort
 
   autocmd! BufWinLeave twiggy://*
         \ if exists('t:twiggy_bufnr') |
-        \   unlet t:twiggy_bufnr |
-        \   unlet t:twiggy_git_dir |
-        \   unlet t:twiggy_git_cmd |
-        \   unlet t:twiggy_git_mode |
+        \   unlet! t:twiggy_bufnr |
+        \   unlet! t:twiggy_git_dir |
+        \   unlet! t:twiggy_git_cmd |
+        \   unlet! t:twiggy_git_mode |
         \   unlet! t:twiggy_ping_fugitive |
         \ endif
 
