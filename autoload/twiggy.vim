@@ -187,7 +187,8 @@ function! s:parse_branch(branch, type) abort
     let branch.decoration = t:twiggy_git_mode !=# 'normal' ? s:icons.unmerged : s:icons.current
   endif
 
-  let detached = match(a:branch, '\v^*\ \((\w+ )?detached at \w+\/[a-zA-Z]+\)')
+  " let detached = match(a:branch, '\v^*\ \((\w+ )?detached at \w+\/[a-zA-Z]+\)')
+  let detached = a:branch[2:6] ==# "(HEAD"
 
   let remote_details = matchstr(a:branch, '\v\[[^\[]+\]')
   let branch.tracking = ''
@@ -209,7 +210,7 @@ function! s:parse_branch(branch, type) abort
       let branch.status      = ''
       let branch.decoration .= s:icons.tracking
     endif
-  elseif detached >= 0
+  elseif detached
     let branch.status      = 'detached'
     let branch.decoration .= s:icons.detached
   else
@@ -217,7 +218,12 @@ function! s:parse_branch(branch, type) abort
     let branch.decoration .= ' '
   endif
 
-  let branch.fullname = matchstr(a:branch, '\v(\([^\)]+\)|^[^ ]+)', 2)
+  if detached
+    echom matchstr(a:branch, '\v[(.*?)]', 2)
+    let branch.fullname = 'HEAD:' . s:sub(matchstr(a:branch, '\v[^()]+', 2), "HEAD detached at ", '')
+  else
+    let branch.fullname = matchstr(a:branch, '\v(\([^\)]+\)|^[^ ]+)', 2)
+  endif
 
   if a:type == 'list'
     let branch.is_local = 1
@@ -235,7 +241,7 @@ function! s:parse_branch(branch, type) abort
       let branch.group = 'local'
       let branch.name = branch.fullname
     endif
-    if detached >= 0
+    if detached
       let branch.name = s:sub(s:sub(branch.name, '\(detached from ', ''), '\)', '')
     endif
   else
@@ -962,6 +968,9 @@ function! s:Render() abort
           \ "'"
     highlight default link TwiggyNotInReflog Comment
   endif
+
+  exec "syntax match TwiggyDetachedText '\\v%3vHEAD:'"
+  highlight default link TwiggyDetachedText Type
 
   if s:showing_full_ui()
     syntax match TwiggyHelpHint "\v%1l"
