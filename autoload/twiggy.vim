@@ -670,6 +670,8 @@ function! s:Confirm(prompt, cmd, abort) abort
     return -1
   elseif index(['Y', 'y', "\<cr>"], input) >= 0
     exec "return " . a:cmd
+  else
+    return -1
   endif
 
   return 0
