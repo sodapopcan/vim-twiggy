@@ -1118,6 +1118,7 @@ function! s:Checkout(track) abort
 
   if a:track && current_branch ==# switch_branch.fullname
     echo "Already on " . current_branch
+    return 1
   else
     redraw
     echo 'Moving from ' . current_branch . ' to ' . switch_branch.fullname . '...'
