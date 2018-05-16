@@ -1095,6 +1095,8 @@ endfunction
 function! s:CycleSort(alt, int) abort
   let local = s:branch_under_cursor().is_local
 
+  let s:requires_buf_refresh = 0
+
   if !a:alt
     call s:sort_branches(local ? 'local' : 'remote', a:int)
   else
