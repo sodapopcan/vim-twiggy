@@ -789,7 +789,6 @@ function! s:Render() abort
         \   unlet! t:twiggy_git_dir |
         \   unlet! t:twiggy_git_cmd |
         \   unlet! t:twiggy_git_mode |
-        \   unlet! t:twiggy_ping_fugitive |
         \ endif
 
   if s:no_commits()
@@ -848,18 +847,6 @@ function! s:Render() abort
     highlight link TwiggyAttnModeInstruction String
 
     normal! 0
-
-    " This tries to ensure that fugitive won't open files in twiggy's buffer.
-    augroup twiggy
-      autocmd!
-      autocmd BufLeave twiggy://* let g:twiggy_ping_fugitive = 1
-      autocmd BufEnter .git/index
-            \ | if exists('g:twiggy_ping_fugitive')
-            \ |   wincmd w
-            \ |   wincmd p
-            \ |   unlet g:twiggy_ping_fugitive
-            \ | endif
-    augroup END
 
     return
   endif
