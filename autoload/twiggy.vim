@@ -425,6 +425,8 @@ function! s:update_last_branch_under_cursor() abort
   endtry
 endfunction
 
+
+
 " {{{1 UI
 "   {{{2 Standard
 function! s:standard_view() abort
