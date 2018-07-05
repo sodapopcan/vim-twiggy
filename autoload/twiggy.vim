@@ -372,9 +372,10 @@ function! twiggy#get_branches() abort
 
     for remote in s:git_cmd('remote', 0)
       for branch_name in s:get_by_commiter_date('remotes/' . remote)
-        if has_key(remote_refs, branch_name)
-          call add(remotes_sorted, remote_refs[branch_name])
-          call remove(remotes, index(remotes, remote_refs[branch_name]))
+        let remote_branch_name = remote.'/'.branch_name
+        if has_key(remote_refs, remote_branch_name)
+          call add(remotes_sorted, remote_refs[remote_branch_name])
+          call remove(remotes, index(remotes, remote_refs[remote_branch_name]))
         endif
       endfor
     endfor
