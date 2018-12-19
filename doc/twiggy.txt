@@ -129,6 +129,13 @@ The width of Twiggy's buffer
 >
   let g:twiggy_num_columns = 25
 <
+                                                *'adapt_columns'*
+Default: 0
+Ensures all branch names are visible in twiggy's buffer (overrides
+|'adapt_columns'|).
+>
+  let g:twiggy_num_columns = 1
+<
                                                 *'split_method'*
 Default: 'topleft'
 The split method used to show the twiggy buffer.  Can be |leftabove|,

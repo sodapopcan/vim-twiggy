@@ -84,6 +84,7 @@ let s:icons.unmerged = s:icon_set[6]
 " {{{1 Options
 
 let g:twiggy_num_columns            = get(g:,'twiggy_num_columns',            31                                                       )
+let g:twiggy_adapt_columns          = get(g:,'twiggy_adapt_columns',          0                                                        )
 let g:twiggy_split_position         = get(g:,'twiggy_split_position',         ''                                                       )
 let g:twiggy_local_branch_sort      = get(g:,'twiggy_local_branch_sort',      'alpha'                                                  )
 let g:twiggy_local_branch_sorts     = get(g:,'twiggy_local_branch_sorts',     ['alpha', 'date', 'track', 'mru']                        )
@@ -817,6 +818,18 @@ function! s:Render() abort
   else
     call extend(output, s:standard_view())
   end
+
+  if g:twiggy_adapt_columns
+    let cols = 0
+    for line in output
+      let line_length = len(line)
+      if line_length > cols
+        let cols = line_length
+      endif
+    endfor
+    exec "vertical resize ".(cols + 3)
+  endif
+
   set modifiable
   silent 1,$delete _
   call append(0, output)
