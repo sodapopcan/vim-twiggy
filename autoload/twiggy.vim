@@ -186,7 +186,8 @@ function! s:parse_branch(branch, type) abort
 
   let branch.decoration = ' '
   if branch.current
-    let branch.decoration = t:twiggy_git_mode !=# 'normal' ? s:icons.unmerged : s:icons.current
+    let git_mode = exists('t:twiggy_git_mode') ? t:twiggy_git_mode : s:get_git_mode()
+    let branch.decoration = git_mode !=# 'normal' ? s:icons.unmerged : s:icons.current
   endif
 
   " let detached = match(a:branch, '\v^*\ \((\w+ )?detached at \w+\/[a-zA-Z]+\)')
@@ -282,13 +283,14 @@ endfunction
 
 "   {{{2 branch_status
 function! s:get_git_mode() abort
-  if isdirectory(t:twiggy_git_dir . '/rebase-apply') ||
-        \ isdirectory(t:twiggy_git_dir . '/rebase-merge')
+  let git_dir = exists('t:twiggy_git_dir') ? t:twiggy_git_dir : b:git_dir
+  if isdirectory(git_dir . '/rebase-apply') ||
+        \ isdirectory(git_dir . '/rebase-merge')
     return 'rebase'
-  elseif s:fexists(t:twiggy_git_dir . '/MERGE_HEAD') ||
+  elseif s:fexists(git_dir . '/MERGE_HEAD') ||
         \ !empty(s:git_cmd('diff --shortstat --diff-filter=U | tail -1', 0))
     return 'merge'
-  elseif s:fexists(t:twiggy_git_dir . '/CHERRY_PICK_HEAD')
+  elseif s:fexists(git_dir . '/CHERRY_PICK_HEAD')
     return 'cherry-pick'
   else
     return 'normal'
