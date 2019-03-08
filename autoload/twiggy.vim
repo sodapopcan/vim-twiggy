@@ -26,7 +26,7 @@ endfunction
 
 "   {{{2 gsub
 " Stolen right from tpope
-function! s:gsub(str,pat,rep) abort
+function! twiggy#gsub(str,pat,rep) abort
   return substitute(a:str, '\v\C'.a:pat, a:rep, 'g')
 endfunction
 
@@ -37,7 +37,7 @@ endfunction
 
 "   {{{2 mapping
 " Create local mappings in the twiggy buffer
-function! s:mapping(mapping, fn, args) abort
+function! twiggy#local_mapping(mapping, fn, args) abort
   let s:mappings[s:encode_mapping(a:mapping)] = [a:fn, a:args]
   exe "nnoremap <buffer> <silent> " .
         \ a:mapping . " :<C-U>call <SID>call('" .
@@ -71,14 +71,14 @@ else
   let s:icon_set = ['*', '=', '+', '-', '~', '%', 'x']
 endif
 
-let s:icons = {}
-let s:icons.current  = s:icon_set[0]
-let s:icons.tracking = s:icon_set[1]
-let s:icons.ahead    = s:icon_set[2]
-let s:icons.behind   = s:icon_set[3]
-let s:icons.both     = s:icon_set[4]
-let s:icons.detached = s:icon_set[5]
-let s:icons.unmerged = s:icon_set[6]
+let g:twiggy_icons = {}
+let g:twiggy_icons.current  = s:icon_set[0]
+let g:twiggy_icons.tracking = s:icon_set[1]
+let g:twiggy_icons.ahead    = s:icon_set[2]
+let g:twiggy_icons.behind   = s:icon_set[3]
+let g:twiggy_icons.both     = s:icon_set[4]
+let g:twiggy_icons.detached = s:icon_set[5]
+let g:twiggy_icons.unmerged = s:icon_set[6]
 
 
 " {{{1 Options
@@ -102,7 +102,7 @@ let g:twiggy_git_log_command        = get(g:,'twiggy_git_log_command',        ''
 let g:twiggy_refresh_buffers        = get(g:,'twiggy_refresh_buffers',        1                                                        )
 
 "   {{{2 show_full_ui
-function! s:showing_full_ui()
+function! twiggy#showing_full_ui()
   return g:twiggy_enable_quickhelp && g:twiggy_show_full_ui
 endfunction
 
@@ -129,7 +129,7 @@ function! s:system(cmd, bg) abort
 endfunction
 
 "   {{{2 attn
-function! s:attn_mode() abort
+function! twiggy#attn_mode() abort
   if exists('t:twiggy_git_mode') &&
         \ index(['rebase', 'merge', 'cherry-pick'], t:twiggy_git_mode) >= 0
     return 1
@@ -168,7 +168,7 @@ function! s:call(mapping) abort
     call s:Render()
     call s:refresh_buffers()
     call <SID>buffocus(t:twiggy_bufnr)
-    if s:attn_mode()
+    if twiggy#attn_mode()
       wincmd p
       Gstatus
     endif
@@ -187,7 +187,7 @@ function! s:parse_branch(branch, type) abort
   let branch.decoration = ' '
   if branch.current
     let git_mode = exists('t:twiggy_git_mode') ? t:twiggy_git_mode : s:get_git_mode()
-    let branch.decoration = git_mode !=# 'normal' ? s:icons.unmerged : s:icons.current
+    let branch.decoration = git_mode !=# 'normal' ? g:twiggy_icons.unmerged : g:twiggy_icons.current
   endif
 
   " let detached = match(a:branch, '\v^*\ \((\w+ )?detached at \w+\/[a-zA-Z]+\)')
@@ -202,20 +202,20 @@ function! s:parse_branch(branch, type) abort
   if branch.tracking !=# ''
     if match(remote_details, '\vahead [0-9]+\, behind [0-9]') >= 0
       let branch.status      = 'both'
-      let branch.decoration .= s:icons.both
+      let branch.decoration .= g:twiggy_icons.both
     elseif match(remote_details, '\vahead [0-9]') >= 0
       let branch.status      = 'ahead'
-      let branch.decoration .= s:icons.ahead
+      let branch.decoration .= g:twiggy_icons.ahead
     elseif match(remote_details, '\vbehind [0-9]') >= 0
       let branch.status      = 'behind'
-      let branch.decoration .= s:icons.behind
+      let branch.decoration .= g:twiggy_icons.behind
     else
       let branch.status      = ''
-      let branch.decoration .= s:icons.tracking
+      let branch.decoration .= g:twiggy_icons.tracking
     endif
   elseif detached
     let branch.status      = 'detached'
-    let branch.decoration .= s:icons.detached
+    let branch.decoration .= g:twiggy_icons.detached
   else
     let branch.status      = ''
     let branch.decoration .= ' '
@@ -263,7 +263,7 @@ endfunction
 " {{{1 Git
 "   {{{2 no_commits
 function! s:no_commits() abort
-  return s:gsub(s:git_cmd('rev-list -n 1 --all | wc -l', 0)[0], ' ', '') ==# '0'
+  return twiggy#gsub(s:git_cmd('rev-list -n 1 --all | wc -l', 0)[0], ' ', '') ==# '0'
 endfunction
 
 "   {{{2 dirty_tree
@@ -303,14 +303,14 @@ function! twiggy#get_branches() abort
   let locals_sorted = []
 
   let reflog = s:get_uniq_branch_names_from_reflog()
-  let s:branches_not_in_reflog = []
+  let b:twiggy_branches_not_in_reflog = []
 
   " Index locals by branch name for fast look-up while sorting
   let local_refs = {}
   for local in locals
     let local_refs[local.fullname] = local
     if index(reflog, local.name) < 0
-      call add(s:branches_not_in_reflog, local.name)
+      call add(b:twiggy_branches_not_in_reflog, local.name)
     endif
   endfor
 
@@ -388,7 +388,7 @@ function! twiggy#get_branches() abort
 endfunction
 
 "   {{{2 get_current_branch
-function! s:get_current_branch() abort
+function! twiggy#get_current_branch() abort
   return s:git_cmd('rev-parse --abbrev-ref HEAD', 0)[0]
 endfunction
 
@@ -399,7 +399,7 @@ function! s:branch_exists(branch) abort
 endfunction
 
 "   {{{2 branch_under_cursor
-function! s:branch_under_cursor() abort
+function! twiggy#branch_under_cursor() abort
   let line = line('.')
   if has_key(s:branch_line_refs, line)
     return s:branch_line_refs[line]
@@ -433,10 +433,10 @@ function! s:get_by_commiter_date(type) abort
 endfunction
 
 "   {{{2 update_last_branch_under_cursor
-function! s:update_last_branch_under_cursor() abort
+function! twiggy#update_last_branch_under_cursor() abort
   " Yeah, gonna swallow the exception here
   try
-    let s:last_branch_under_cursor = s:branch_under_cursor()
+    let s:last_branch_under_cursor = twiggy#branch_under_cursor()
   catch
     return
   endtry
@@ -482,7 +482,7 @@ function! s:standard_view() abort
   let output = []
   " Starting the line at 1 will cause an empty line to be added if the
   " quickhelp hint is showing.
-  let line   = s:showing_full_ui() ? 1 : 0
+  let line   = twiggy#showing_full_ui() ? 1 : 0
 
   for group_type in ['local', 'remote']
     for group_ref in group_refs[group_type]
@@ -621,7 +621,7 @@ function! s:cherry_pick_view() abort
 endfunction
 
 "   {{{2 Branch Details
-function! s:show_branch_details() abort
+function! twiggy#show_branch_details() abort
   let line = line('.')
   if has_key(s:branch_line_refs, line)
     let max_len = &columns - 16
@@ -648,19 +648,9 @@ function! s:RenderOutputBuffer() abort
   setlocal modifiable
   call append(0, output)
   normal! ddgg
-
-  setlocal nomodified nomodifiable noswapfile nowrap nonumber
-  setlocal buftype=nofile bufhidden=delete
+  setlocal nomodified nomodifiable
+  setfiletype twiggy-output
   let s:last_output = []
-
-  syntax clear
-  syntax match TwiggyOutputText "\v^[^ ](.*)"
-  highlight link TwiggyOutputText  Comment
-  syntax match TwiggyOutputFile "\v^\t(.*)"
-  highlight link TwiggyOutputFile Constant
-
-  nnoremap <buffer> q :quit<CR>
-  nnoremap <buffer> Q :quit<CR>:call <SID>Close()<CR>
 endfunction
 
 "   {{{2 Confirm
@@ -701,10 +691,10 @@ endfunction
 " {{{1 Plugin
 "   {{{2 Navigation
 "     {{{3 traverse_branches
-function! s:traverse_branches(motion) abort
+function! twiggy#traverse_branches(motion) abort
   execute "normal! " . a:motion
   let current_line = line('.')
-  let border_line = s:showing_full_ui() ? 3 : 1
+  let border_line = twiggy#showing_full_ui() ? 3 : 1
   if current_line ==# s:total_lines && a:motion ==# 'j'
     return
   elseif (a:motion ==# 'k' && current_line <=# border_line)
@@ -717,7 +707,7 @@ function! s:traverse_branches(motion) abort
 endfunction
 
 "     {{{3 traverse_groups
-function! s:traverse_groups(motion) abort
+function! twiggy#traverse_groups(motion) abort
   if a:motion ==# 'j'
     if search('\v^[A-Za-z]', 'W')
       normal! j
@@ -731,8 +721,8 @@ function! s:traverse_groups(motion) abort
 endfunction
 
 "     {{{3 jump_to_current_branch
-function! s:jump_to_current_branch() abort
-  call search(s:icons.current)
+function! twiggy#jump_to_current_branch() abort
+  call search(g:twiggy_icons.current)
 endfunction
 
 "     {{{3 bufrefresh
@@ -772,35 +762,21 @@ function! s:Render() abort
 
   if !exists('t:twiggy_bufnr') || !(exists('t:twiggy_bufnr') && t:twiggy_bufnr ==# bufnr(''))
     let fname = 'twiggy://' . t:twiggy_git_dir . '/branches'
-    if &filetype ==# 'twiggyqh'
+    if &filetype ==# 'twiggy-help'
       exec "edit" fname
     else
       exec 'silent keepalt' g:twiggy_split_position g:twiggy_num_columns . 'vsplit' fname
     endif
-    setlocal filetype=twiggy buftype=nofile bufhidden=delete
-    setlocal nonumber nowrap lisp
+    setfiletype twiggy
     let t:twiggy_bufnr = bufnr('')
   endif
 
-  nnoremap <buffer> <silent> q :<C-U>call <SID>Close()<CR>
-  if g:twiggy_enable_quickhelp
-    nnoremap <buffer> <silent> ? :<C-U>call <SID>Quickhelp()<CR>
-  endif
-
-  autocmd! BufWinLeave twiggy://*
-        \ if exists('t:twiggy_bufnr') |
-        \   unlet! t:twiggy_bufnr |
-        \   unlet! t:twiggy_git_dir |
-        \   unlet! t:twiggy_git_cmd |
-        \   unlet! t:twiggy_git_mode |
-        \ endif
-
   if s:no_commits()
-    set modifiable
+    setlocal modifiable
     silent 1,$delete _
     call append(0, "No commits")
     delete _
-    set nomodifiable
+    setlocal nomodified nomodifiable
     return
   endif
 
@@ -808,13 +784,13 @@ function! s:Render() abort
 
   let output = []
 
-  if s:showing_full_ui() && !s:attn_mode()
+  if twiggy#showing_full_ui() && !twiggy#attn_mode()
     " We don't need to manually add a second empty line here since
     " s:standard_view() will automatically add one.
     call extend(output, ["press ? for help"])
   endif
 
-  if s:attn_mode()
+  if twiggy#attn_mode()
     let view = "s:" . s:sub(t:twiggy_git_mode, '-', '_') . "_view"
     call extend(output, call(view, []))
   else
@@ -832,92 +808,34 @@ function! s:Render() abort
     exec "vertical resize ".(cols + 3)
   endif
 
-  set modifiable
+  setlocal modifiable
   silent 1,$delete _
   call append(0, output)
   normal! G
   delete _
   normal! gg
 
-  setlocal nomodified nomodifiable noswapfile
+  setlocal nomodified nomodifiable
 
-  if s:attn_mode()
+  if twiggy#attn_mode()
     if t:twiggy_git_mode ==# 'rebase'
-      call s:mapping('c', 'Continue', ['rebase'])
-      call s:mapping('s', 'Skip', [])
-      call s:mapping('a', 'Abort', ['rebase'])
+        setfiletype twiggy-rebase
     elseif t:twiggy_git_mode ==# 'merge'
-      call s:mapping('a', 'Abort', ['merge'])
+        setfiletype twiggy-merge
     elseif t:twiggy_git_mode ==# 'cherry-pick'
-      call s:mapping('s', 'Continue', ['cherry-pick'])
-      call s:mapping('a', 'Abort', ['cherry-pick'])
+        setfiletype twiggy-cherry-pick
     endif
-
-    syntax match TwiggyAttnModeMapping "\v%3c(s|c|a)"
-    highlight link TwiggyAttnModeMapping Identifier
-
-    syntax match TwiggyAttnModeTitle "\v^(rebase|merge|cherry pick) in progress"
-    highlight link TwiggyAttnModeTitle Type
-
-    syntax match TwiggyAttnModeInstruction "\v^from this window:"
-    highlight link TwiggyAttnModeInstruction String
 
     normal! 0
 
     return
   endif
 
-  call s:show_branch_details()
+  call twiggy#show_branch_details()
   let s:total_lines = len(output)
 
   exec "normal! " . s:init_line . "gg"
   normal! 0
-
-  augroup twiggy
-    autocmd!
-    autocmd CursorMoved twiggy://* call s:show_branch_details()
-    autocmd CursorMoved twiggy://* call s:update_last_branch_under_cursor()
-    autocmd BufReadPost,BufEnter,VimResized twiggy://* call <SID>Refresh()
-  augroup END
-
-  nnoremap <buffer> <silent> j      :<C-U>call <SID>traverse_branches('j')<CR>
-  nnoremap <buffer> <silent> k      :<C-U>call <SID>traverse_branches('k')<CR>
-  nnoremap <buffer> <silent> <Down> :<C-U>call <SID>traverse_branches('j')<CR>
-  nnoremap <buffer> <silent> <Up>   :<C-U>call <SID>traverse_branches('k')<CR>
-  nnoremap <buffer> <silent> <C-N>  :<C-U>call <SID>traverse_groups('j')<CR>
-  nnoremap <buffer> <silent> <C-P>  :<C-U>call <SID>traverse_groups('k')<CR>
-  nnoremap <buffer> <silent> J      :<C-U>call <SID>jump_to_current_branch()<CR>
-  if s:showing_full_ui()
-    nnoremap <buffer> <silent> gg    :normal! 4gg<CR>
-  else
-    nnoremap <buffer> <silent> gg    :normal! 2gg<CR>
-  endif
-
-  call s:mapping('<CR>',    'Checkout',         [1])
-  call s:mapping('c',       'Checkout',         [1])
-  call s:mapping('C',       'Checkout',         [0])
-  call s:mapping('o',       'Checkout',         [1])
-  call s:mapping('O',       'Checkout',         [0])
-  call s:mapping('dd',      'Delete',           [])
-  call s:mapping('F',       'Fetch',            [0])
-  call s:mapping('m',       'Merge',            [0, ''])
-  call s:mapping('M',       'Merge',            [1, ''])
-  call s:mapping('gm',      'Merge',            [0, '--no-ff'])
-  call s:mapping('gM',      'Merge',            [1, '--no-ff'])
-  call s:mapping('r',       'Rebase',           [0])
-  call s:mapping('R',       'Rebase',           [1])
-  call s:mapping('^',       'Push',             [0, 0])
-  call s:mapping('g^',      'Push',             [1, 0])
-  call s:mapping('!^',      'Push',             [0, 1])
-  call s:mapping('V',       'Pull',             [])
-  call s:mapping(',',       'Rename',           [])
-  call s:mapping('<<',      'Stash',            [0])
-  call s:mapping('>>',      'Stash',            [1])
-  call s:mapping('i',       'CycleSort',        [0, 1])
-  call s:mapping('I',       'CycleSort',        [0, -1])
-  call s:mapping('gi',      'CycleSort',        [1, 1])
-  call s:mapping('gI',      'CycleSort',        [1, -1])
-  call s:mapping('a',       'ToggleSlashSort',  [])
 
   if g:twiggy_git_log_command ==# ''
     if exists(':GV')
@@ -926,69 +844,10 @@ function! s:Render() abort
       let g:twiggy_git_log_command = 'Gitv'
     endif
   endif
-
-  if g:twiggy_git_log_command !=# ''
-    nnoremap <buffer> gl :exec ':' . g:twiggy_git_log_command . ' ' . <SID>branch_under_cursor().fullname<CR>
-    nnoremap <buffer> gL :exec ':' . g:twiggy_git_log_command . ' ' . <SID>branch_under_cursor().fullname . '..'<CR>
-  endif
-
-  if g:twiggy_enable_remote_delete
-    call s:mapping('d^',      'DeleteRemote',     [])
-  endif
-
- " {{{ Syntax
-  syntax clear
-
-  exec "syntax match TwiggyGroup '\\v(^[^\\ " . s:icons.current . "]+)'"
-  highlight default link TwiggyGroup Type
-
-  exec "syntax match TwiggyCurrent '\\v%3v" . s:get_current_branch() . "$'"
-  highlight default link TwiggyCurrent Identifier
-
-  exec "syntax match TwiggyCurrent '\\V\\%1c" . s:icons.current . "'"
-  highlight default link TwiggyCurrent Identifier
-
-  exec "syntax match TwiggyTracking '\\V\\%2c" . s:icons.tracking . "'"
-  highlight default link TwiggyTracking String
-
-  exec "syntax match TwiggyAhead '\\V\\%2c" . s:icons.ahead . "'"
-  highlight default link TwiggyAhead Type
-
-  exec "syntax match TwiggyAheadBehind '\\V\\%2c" . s:icons.behind . "'"
-  exec "syntax match TwiggyAheadBehind '\\V\\%2c" . s:icons.both . "'"
-  highlight default link TwiggyAheadBehind Type
-
-  exec "syntax match TwiggyDetached '\\V\\%2c" . s:icons.detached . "'"
-  highlight default link TwiggyDetached Type
-
-  exec "syntax match TwiggyUnmerged '\\V\\%1c" . s:icons.unmerged . "'"
-  highlight default link TwiggyUnmerged Identifier
-
-  syntax match TwiggySortText '\v[[a-z]+]'
-  highlight default link TwiggySortText Comment
-
-  if exists('s:branches_not_in_reflog') && len(s:branches_not_in_reflog)
-    exec "syntax match TwiggyNotInReflog '" .
-          \ s:gsub(s:gsub(join(s:branches_not_in_reflog), '\(', ''), '\)', '') .
-          \ "'"
-    highlight default link TwiggyNotInReflog Comment
-  endif
-
-  exec "syntax match TwiggyDetachedText '\\v%3vHEAD:'"
-  highlight default link TwiggyDetachedText Type
-
-  if s:showing_full_ui()
-    syntax match TwiggyHelpHint "\v%1l"
-    highlight default link TwiggyHelpHint Normal
-    syntax match TwiggyHelpHintKey "\v%1l\?"
-    highlight default link TwiggyHelpHintKey Identifier
-  endif
-
-  " }}}
 endfunction
 
 "     {{{3 Quickhelp
-function! s:Quickhelp() abort
+function! twiggy#Quickhelp() abort
   if &filetype !=# 'twiggy'
     return
   endif
@@ -996,40 +855,22 @@ function! s:Quickhelp() abort
   let t:twiggy_cached_git_dir = t:twiggy_git_dir
 
   silent keepalt edit quickhelp
-  setlocal filetype=twiggyqh buftype=nofile bufhidden=delete
-  setlocal nonumber nowrap lisp
+  setfiletype twiggy-help
+
   setlocal modifiable
   silent 1,$delete _
   let b:git_dir = t:twiggy_cached_git_dir
   unlet t:twiggy_cached_git_dir
   let bufnr = bufnr('')
-
-  nnoremap <buffer> <silent> q :quit<CR>
-  nnoremap <buffer> <silent> ? :Twiggy<CR>
-
   call append(0, s:quickhelp_view())
   normal! G
   delete _
   normal! gg
-  setlocal nomodifiable
-
-  syntax clear
-  syntax match TwiggyQuickhelpMapping "\v%<7c[A-Za-z\-\?\^\<\>!,]"
-  highlight link TwiggyQuickhelpMapping Identifier
-  syntax match TwiggyQuickhelpSpecial "\v\`[a-zA-Z]+\`"
-  highlight link TwiggyQuickhelpSpecial Identifier
-  syntax match TwiggyQuickhelpHeader "\v[A-Za-z ]+\n[=]+"
-  highlight link TwiggyQuickhelpHeader String
-  syntax match TwiggyQuickhelpSectionHeader "\v[\-]+\n[a-z,\/ \:]+\n[\-]+"
-  highlight link TwiggyQuickhelpSectionHeader String
-  if g:twiggy_show_full_ui
-    syntax match TwiggyQuickhelpRecommendation "\v^\*+\n[A-Za-z\: ]+\n[a-z\:\- ]+"
-    highlight link TwiggyQuickhelpRecommendation String
-  endif
+  setlocal nomodified nomodifiable
 endfunction
 
 "     {{{3 Refresh
-function! s:Refresh() abort
+function! twiggy#Refresh() abort
   if exists('t:refreshing') || !exists('t:twiggy_bufnr') || !exists('b:git_dir')
     return
   endif
@@ -1046,12 +887,12 @@ endfunction
 "     {{{3 Branch
 function! twiggy#Branch(...) abort
   if len(a:000)
-    let current_branch = s:get_current_branch()
+    let current_branch = twiggy#get_current_branch()
     let f = s:branch_exists(a:1) ? '' : '-b '
     call s:git_cmd('checkout ' . f . join(a:000), 0)
     call s:RenderOutputBuffer()
     if exists('t:twiggy_bufnr')
-      call s:Refresh()
+      call twiggy#Refresh()
     end
     redraw
     echo 'Moved from ' . current_branch . ' to ' . a:1
@@ -1062,7 +903,7 @@ function! twiggy#Branch(...) abort
     else
       if twiggy_bufnr ==# bufnr('')
         " :Twiggy closes as well as opens if you the twiggy buffer is focused
-        call s:Close()
+        call twiggy#Close()
       else
         " If twiggy is open, :Twiggy will focus the twiggy buffer then redraw " it
         let t:twiggy_git_dir = b:git_dir
@@ -1074,7 +915,7 @@ function! twiggy#Branch(...) abort
 endfunction
 
 "     {{{3 Close
-function! s:Close() abort
+function! twiggy#Close() abort
   quit
   redraw | echo ''
 endfunction
@@ -1096,7 +937,7 @@ endfunction
 
 "     {{{3 Cycle
 function! s:CycleSort(alt, int) abort
-  let local = s:branch_under_cursor().is_local
+  let local = twiggy#branch_under_cursor().is_local
 
   let s:requires_buf_refresh = 0
 
@@ -1121,8 +962,8 @@ endfunction
 "   {{{2 Git
 "     {{{3 Checkout
 function! s:Checkout(track) abort
-  let current_branch = s:get_current_branch()
-  let switch_branch = s:branch_under_cursor()
+  let current_branch = twiggy#get_current_branch()
+  let switch_branch = twiggy#branch_under_cursor()
 
   if a:track && current_branch ==# switch_branch.fullname
     echo "Already on " . current_branch
@@ -1155,9 +996,9 @@ endfunction
 
 "     {{{3 Delete
 function! s:Delete() abort
-  let branch = s:branch_under_cursor()
+  let branch = twiggy#branch_under_cursor()
 
-  if branch.fullname ==# s:get_current_branch()
+  if branch.fullname ==# twiggy#get_current_branch()
     return
   endif
 
@@ -1180,7 +1021,7 @@ function! s:Delete() abort
 endfunction
 
 function! s:DeleteRemote() abort
-  let branch = s:branch_under_cursor()
+  let branch = twiggy#branch_under_cursor()
 
   return s:Confirm(
         \ 'WARNING! Delete branch ' . branch.name . ' from remote repo: ' . branch.group . '?',
@@ -1190,7 +1031,7 @@ endfunction
 "     {{{3 Fetch
 function! s:Fetch(pull) abort
   let cmd = a:pull ? 'pull' : 'fetch'
-  let branch = s:branch_under_cursor()
+  let branch = twiggy#branch_under_cursor()
   if branch.tracking !=# ''
     let parts = split(branch.tracking, '/')
     call s:git_cmd(cmd . ' ' . parts[0] . ' ' . join(parts[1:], '/') .
@@ -1210,7 +1051,7 @@ endfunction
 
 "     {{{3 Merge
 function! s:Merge(remote, flags) abort
-  let branch = s:branch_under_cursor()
+  let branch = twiggy#branch_under_cursor()
 
   if a:remote
     if branch.tracking ==# ''
@@ -1220,7 +1061,7 @@ function! s:Merge(remote, flags) abort
       call s:git_cmd('merge ' . a:flags . ' ' . ' ' . branch.tracking, 1)
     endif
   else
-    if branch.name ==# s:get_current_branch()
+    if branch.name ==# twiggy#get_current_branch()
       let v:warningmsg = 'Can''t merge into self'
       return 1
     else
@@ -1233,7 +1074,7 @@ endfunction
 
 "     {{{3 Rebase
 function! s:Rebase(remote) abort
-  let branch = s:branch_under_cursor()
+  let branch = twiggy#branch_under_cursor()
 
   if a:remote
     if branch.tracking ==# ''
@@ -1243,7 +1084,7 @@ function! s:Rebase(remote) abort
       call s:git_cmd('rebase ' . ' ' . branch.tracking, 1)
     endif
   else
-    if branch.fullname ==# s:get_current_branch()
+    if branch.fullname ==# twiggy#get_current_branch()
       let v:warningmsg = 'Can''t rebase off of self'
       return 1
     else
@@ -1273,7 +1114,7 @@ endfunction
 
 "     {{{3 Push
 function! s:Push(choose_upstream, force) abort
-  let branch = s:branch_under_cursor()
+  let branch = twiggy#branch_under_cursor()
 
   if !branch.is_local
     let v:warningmsg = "Can't push a remote branch"
@@ -1342,7 +1183,7 @@ endfunction
 function! s:Rename() abort
   let s:requires_buf_refresh = 0
 
-  let branch = s:branch_under_cursor()
+  let branch = twiggy#branch_under_cursor()
   let new_name = input("Rename " . branch.fullname . " to: ")
   redraw
   echo "Renaming \"" . branch.fullname . "\" to \"" . new_name . "\"... "
@@ -1360,15 +1201,3 @@ function! s:Stash(pop) abort
   endif
 endfunction
 
-" {{{1 Fugitive
-function! s:close_string() abort
-  if g:twiggy_close_on_fugitive_cmd
-    return 'call <SID>Close()'
-  else
-    return 'wincmd w'
-  endif
-endfunction
-
-autocmd BufEnter twiggy://* exec "command! -buffer Gstatus " . <SID>close_string() . " | silent normal! :<\C-U>Gstatus\<CR>"
-autocmd BufEnter twiggy://* exec "command! -buffer Gcommit " . <SID>close_string() . " | silent normal! :<\C-U>Gcommit\<CR>"
-autocmd BufEnter twiggy://* exec "command! -buffer Gblame  " . <SID>close_string() . " | silent normal! :<\C-U>Gblame\<CR>"
