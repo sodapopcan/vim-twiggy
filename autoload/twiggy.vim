@@ -144,6 +144,10 @@ function! s:gitize(cmd) abort
   else
     let git_cmd = fugitive#repo().git_command()
   end
+  let parts = split(git_cmd, " ")
+  let worktree = "--work-tree=".s:sub(split(parts[1], "=")[1], '\v/.git$', "/")
+  call insert(parts, worktree, 1)
+  let git_cmd = join(parts, " ")
   return git_cmd . ' ' . a:cmd
 endfunction
 
