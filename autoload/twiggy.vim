@@ -656,7 +656,7 @@ function! s:RenderOutputBuffer() abort
   setlocal nomodified nomodifiable noswapfile nowrap nonumber
   setlocal buftype=nofile bufhidden=delete
   if exists('+relativenumber')
-    norelativenumber
+    setlocal norelativenumber
   endif
   let s:last_output = []
 
@@ -787,7 +787,7 @@ function! s:Render() abort
     setlocal filetype=twiggy buftype=nofile bufhidden=delete
     setlocal nonumber nowrap lisp
     if exists('+relativenumber')
-      norelativenumber
+      setlocal norelativenumber
     endif
     let t:twiggy_bufnr = bufnr('')
   endif
@@ -1009,7 +1009,7 @@ function! s:Quickhelp() abort
   setlocal filetype=twiggyqh buftype=nofile bufhidden=delete
   setlocal nonumber nowrap lisp
   if exists('+relativenumber')
-    norelativenumber
+    setlocal norelativenumber
   endif
   setlocal modifiable
   silent 1,$delete _
@@ -1267,12 +1267,12 @@ function! s:Rebase(remote) abort
   return 0
 endfunction
 
-"     {{{3 Continue Rebase 
+"     {{{3 Continue Rebase
 function! s:Continue(type) abort
   call s:git_cmd(a:type . ' --continue', 1)
 endfunction
 
-"     {{{3 Skip Rebase 
+"     {{{3 Skip Rebase
 function! s:Skip() abort
   call s:git_cmd('rebase --skip', 1)
 endfunction
