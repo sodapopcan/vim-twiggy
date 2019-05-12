@@ -653,7 +653,7 @@ function! s:RenderOutputBuffer() abort
   call append(0, output)
   normal! ddgg
 
-  setlocal nomodified nomodifiable noswapfile nowrap nonumber
+  setlocal nomodified nomodifiable noswapfile nowrap nonumber norelativenumber
   setlocal buftype=nofile bufhidden=delete
   let s:last_output = []
 
@@ -782,7 +782,7 @@ function! s:Render() abort
       exec 'silent keepalt' g:twiggy_split_position g:twiggy_num_columns . 'vsplit' fname
     endif
     setlocal filetype=twiggy buftype=nofile bufhidden=delete
-    setlocal nonumber nowrap lisp
+    setlocal nonumber norelativenumber nowrap lisp
     let t:twiggy_bufnr = bufnr('')
   endif
 
@@ -1001,7 +1001,7 @@ function! s:Quickhelp() abort
 
   silent keepalt edit quickhelp
   setlocal filetype=twiggyqh buftype=nofile bufhidden=delete
-  setlocal nonumber nowrap lisp
+  setlocal nonumber norelativenumber nowrap lisp
   setlocal modifiable
   silent 1,$delete _
   let b:git_dir = t:twiggy_cached_git_dir
