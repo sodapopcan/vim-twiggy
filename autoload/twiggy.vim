@@ -165,7 +165,6 @@ endfunction
 "   {{{2 call
 function! s:call(mapping) abort
   let key = s:encode_mapping(a:mapping)
-  echom type(key)
   if call('s:' . s:mappings[key][0], s:mappings[key][1])
     call s:ErrorMsg()
   else
