@@ -570,6 +570,7 @@ function! s:quickhelp_view() abort
   if g:twiggy_enable_remote_delete
     call add(output, 'd^    delete from server')
   endif
+  call add(output, '.     :Git <cursor> <branch>')
   call add(output, '<<    stash')
   call add(output, '>>    pop stash')
   call add(output, '----------------------------')
@@ -928,6 +929,13 @@ function! s:Render() abort
   call s:mapping('gI',      'CycleSort',        [1, -1])
   call s:mapping('a',       'ToggleSlashSort',  [])
 
+  nnoremap <buffer> <expr> . <SID>dot()
+  function! s:dot() abort
+    let branch = s:branch_under_cursor()
+
+    return ':Git  '.branch.fullname."\<C-Left>\<Left>"
+  endfunction
+
   if g:twiggy_git_log_command ==# ''
     if exists(':GV')
       let g:twiggy_git_log_command  = 'GV'
@@ -1026,7 +1034,7 @@ function! s:Quickhelp() abort
   setlocal nomodifiable
 
   syntax clear
-  syntax match TwiggyQuickhelpMapping "\v%<7c[A-Za-z\-\?\^\<\>!,]"
+  syntax match TwiggyQuickhelpMapping "\v%<7c[A-Za-z\-\?\^\<\>!,.]"
   highlight link TwiggyQuickhelpMapping Identifier
   syntax match TwiggyQuickhelpSpecial "\v\`[a-zA-Z]+\`"
   highlight link TwiggyQuickhelpSpecial Identifier

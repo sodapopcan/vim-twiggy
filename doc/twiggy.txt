@@ -306,6 +306,9 @@ d^                If the branch under the cursor is remote, this will prompt
                   >
                     let g:twiggy_enable_remote_delete = 1
 <
+.                 Start a `:Git` command line auto-populated with the branch
+                  under the cursor.
+
                   Git Log~
 
                   Twiggy is all about branching, not commit history.
