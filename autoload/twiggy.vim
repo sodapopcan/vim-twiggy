@@ -185,7 +185,9 @@ endfunction
 function! s:parse_branch(branch, type) abort
   let branch = {}
 
-  let branch.current = match(a:branch, '\v^\*') >= 0
+  let pieces = split(a:branch, "\t\t")
+
+  let branch.current = pieces[0] ==# "*"
 
   let branch.decoration = ' '
   if branch.current
@@ -193,16 +195,16 @@ function! s:parse_branch(branch, type) abort
     let branch.decoration = git_mode !=# 'normal' ? s:icons.unmerged : s:icons.current
   endif
 
-  let detached = a:branch[2:6] ==# "(HEAD"
+  let detached = match(pieces[1], "HEAD detached at") >= 0
 
-  let remote_details = matchstr(a:branch, '\v\[[^\[]+\]')
+  let remote_details = pieces[4] . ' ' . pieces[5]
   let branch.tracking = ''
   if a:type ==# 'list'
-    let branch.tracking = matchstr(remote_details, '\v[^ \:\]]+', 1)
+    let branch.tracking = pieces[4]
   endif
   let branch.remote =  branch.tracking != '' ? split(branch.tracking, '/')[0] : ''
   if branch.tracking !=# ''
-    if match(remote_details, '\vahead [0-9]+\, behind [0-9]') >= 0
+    if pieces[5] !=# ''
       let branch.status      = 'both'
       let branch.decoration .= s:icons.both
     elseif match(remote_details, '\vahead [0-9]') >= 0
@@ -224,10 +226,9 @@ function! s:parse_branch(branch, type) abort
   endif
 
   if detached
-    echom matchstr(a:branch, '\v[(.*?)]', 2)
-    let branch.fullname = 'HEAD:' . s:sub(matchstr(a:branch, '\v[^()]+', 2), "HEAD detached at ", '')
+    let branch.fullname = 'HEAD:' . s:sub(matchstr(pieces[1], '\v[^()]+'), "HEAD detached at ", '')
   else
-    let branch.fullname = matchstr(a:branch, '\v(\([^\)]+\)|^[^ ]+)', 2)
+    let branch.fullname = pieces[1]
   endif
 
   if a:type == 'list'
@@ -257,7 +258,17 @@ function! s:parse_branch(branch, type) abort
     let branch.group = branch_split[0]
   endif
 
-  let branch.details = s:sub(a:branch,  '[* ] [0-9A-Za-z_/\-]+[ ]+', '')
+  let remote_details = pieces[4]
+  if pieces[5] !=# ''
+    let remote_details = remote_details . ': ' . pieces[5][1:-2]
+  endif
+
+  if remote_details ==# ''
+    let branch.details = join([pieces[2], pieces[6]], ' ')
+  else
+    let remote_details = '['.remote_details.']'
+    let branch.details = join([pieces[2], remote_details, pieces[6]], ' ')
+  endif
 
   return branch
 endfunction
@@ -276,7 +287,16 @@ endfunction
 "   {{{2 _git_branch_vv
 function! s:_git_branch_vv(type) abort
   let branches = []
-  for branch in s:git_cmd('branch --' . a:type . ' -vv --no-color', 0)
+  let format = join([
+        \ '%(HEAD)',
+        \ '%(refname:short)',
+        \ '%(objectname:short)',
+        \ '%(push:remotename)',
+        \ '%(upstream:short)',
+        \ '%(upstream:track)',
+        \ '%(contents:subject)',
+        \ ], "\t\t")
+  for branch in s:git_cmd('branch --' . a:type . " -vv --no-color --format=$'".format."'", 0)
     call add(branches, s:parse_branch(branch, a:type))
   endfor
 
@@ -984,6 +1004,7 @@ function! s:Render() abort
   highlight default link TwiggySortText Comment
 
   if exists('s:branches_not_in_reflog') && len(s:branches_not_in_reflog)
+    return
     exec "syntax match TwiggyNotInReflog '" .
           \ s:gsub(s:gsub(join(s:branches_not_in_reflog), '\(', ''), '\)', '') .
           \ "'"
