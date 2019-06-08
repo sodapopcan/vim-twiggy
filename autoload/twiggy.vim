@@ -429,6 +429,15 @@ function! s:branch_under_cursor() abort
   return ''
 endfunction
 
+" Note: this may change
+function! TwiggyBranchUnderCursor() abort
+  if &ft !=# 'twiggy'
+    throw "Not in twiggy buffer"
+  endif
+
+  return s:branch_under_cursor()
+endfunction
+
 "   {{{2 get_uniq_branch_names_from_reflog
 " http://stackoverflow.com/questions/14062402/awk-using-a-file-to-filter-another-one-out-tr
 function! s:get_uniq_branch_names_from_reflog() abort
