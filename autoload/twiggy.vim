@@ -195,11 +195,9 @@ function! s:parse_branch(branch, type) abort
     let branch.decoration = git_mode !=# 'normal' ? s:icons.unmerged : s:icons.current
   endif
 
-  let detached = match(pieces[1], "HEAD detached at") >= 0
-
   let remote_details = pieces[4] . ' ' . pieces[5]
   let branch.tracking = ''
-  if a:type ==# 'list'
+  if a:type ==# 'heads'
     let branch.tracking = pieces[4]
   endif
   let branch.remote =  branch.tracking != '' ? split(branch.tracking, '/')[0] : ''
@@ -217,21 +215,14 @@ function! s:parse_branch(branch, type) abort
       let branch.status      = ''
       let branch.decoration .= s:icons.tracking
     endif
-  elseif detached
-    let branch.status      = 'detached'
-    let branch.decoration .= s:icons.detached
   else
     let branch.status      = ''
     let branch.decoration .= ' '
   endif
 
-  if detached
-    let branch.fullname = 'HEAD:' . s:sub(matchstr(pieces[1], '\v[^()]+'), "HEAD detached at ", '')
-  else
-    let branch.fullname = pieces[1]
-  endif
+  let branch.fullname = pieces[1]
 
-  if a:type == 'list'
+  if a:type == 'heads'
     let branch.is_local = 1
     let branch.type  = 'local'
     if g:twiggy_group_locals_by_slash
@@ -246,9 +237,6 @@ function! s:parse_branch(branch, type) abort
     else
       let branch.group = 'local'
       let branch.name = branch.fullname
-    endif
-    if detached
-      let branch.name = s:sub(s:sub(branch.name, '\(detached from ', ''), '\)', '')
     endif
   else
     let branch.is_local = 0
@@ -296,7 +284,7 @@ function! s:_git_branch_vv(type) abort
         \ '%(upstream:track)',
         \ '%(contents:subject)',
         \ ], "\t\t")
-  for branch in s:git_cmd('branch --' . a:type . " -vv --no-color --format=$'".format."'", 0)
+  for branch in s:git_cmd('for-each-ref refs/' . a:type . " --no-color --format=$'".format."'", 0)
     call add(branches, s:parse_branch(branch, a:type))
   endfor
 
@@ -321,8 +309,25 @@ endfunction
 
 "   {{{2 get_branches
 function! twiggy#get_branches() abort
-  let locals = s:_git_branch_vv('list')
+  let locals = s:_git_branch_vv('heads')
   let locals_sorted = []
+
+    let head = s:git_cmd('rev-parse --symbolic-full-name --abbrev-ref HEAD', 0)[0]
+    if head ==# "HEAD"
+      call add(locals_sorted, {
+            \ 'decoration': s:icons['detached'].' ',
+            \ 'status': 'detached',
+            \ 'fullname': 'HEAD',
+            \ 'name': 'HEAD@'.s:git_cmd('show-ref --hash=9 HEAD', 0)[0],
+            \ 'is_local': 1,
+            \ 'current': 0,
+            \ 'remote': s:git_cmd('remote', 0)[0],
+            \ 'type': 'local',
+            \ 'tracking': '',
+            \ 'details': 'detached',
+            \ 'group': 'local'
+            \  })
+    endif
 
   let reflog = s:get_uniq_branch_names_from_reflog()
   let s:branches_not_in_reflog = []
@@ -385,7 +390,7 @@ function! twiggy#get_branches() abort
 
   let locals = extend(locals_sorted, locals)
 
-  let remotes = s:_git_branch_vv('remote')
+  let remotes = s:_git_branch_vv('remotes')
   let remotes_sorted = []
 
   if g:twiggy_remote_branch_sort ==# 'date'
@@ -1020,8 +1025,8 @@ function! s:Render() abort
     highlight default link TwiggyNotInReflog Comment
   endif
 
-  exec "syntax match TwiggyDetachedText '\\v%3vHEAD:'"
-  highlight default link TwiggyDetachedText Type
+  exec "syntax match TwiggyDetachedText '\\v%3vHEAD\\@[a-z0-9]+'"
+  highlight default link TwiggyDetachedText Identifier
 
   if s:showing_full_ui()
     syntax match TwiggyHelpHint "\v%1l"
