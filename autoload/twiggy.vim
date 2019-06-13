@@ -583,6 +583,7 @@ function! s:quickhelp_view() abort
   call add(output, '<CR>  checkout')
   call add(output, 'C     checkout remote')
   call add(output, 'O     checkout remote')
+  call add(output, 'go    checkout as: <name>')
   call add(output, 'F     fetch remote')
   call add(output, 'm     merge')
   call add(output, 'M     merge remote')
@@ -941,6 +942,7 @@ function! s:Render() abort
   call s:mapping('C',       'Checkout',         [0])
   call s:mapping('o',       'Checkout',         [1])
   call s:mapping('O',       'Checkout',         [0])
+  call s:mapping('go',      'CheckoutAs',       [])
   call s:mapping('dd',      'Delete',           [])
   call s:mapping('F',       'Fetch',            [0])
   call s:mapping('m',       'Merge',            [0, ''])
@@ -1205,6 +1207,31 @@ function! s:Checkout(track) abort
   let s:last_branch_under_cursor = 0
 
   return 0
+endfunction
+
+"     {{{3 Checkout As
+function! s:CheckoutAs() abort
+  let branch = s:branch_under_cursor()
+
+  redraw
+  let new_name = input("Checkout " . branch.name . " as: ", "", "custom,TwiggyCompleteBranches")
+  if new_name !=# ""
+    if new_name ==# branch.name
+      redraw
+      echo branch.name . " already exists."
+      return 1
+    endif
+    call s:git_cmd("checkout -b " . new_name . " " . branch.fullname, 0)
+    redraw
+    echo 'Moving from ' . branch.name . ' to ' . new_name . '...'
+
+    let s:init_line = 0
+    let s:last_branch_under_cursor = 0
+
+    return 0
+  endif
+
+  return 1
 endfunction
 
 "     {{{3 Delete
