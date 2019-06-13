@@ -195,14 +195,14 @@ function! s:parse_branch(branch, type) abort
     let branch.decoration = git_mode !=# 'normal' ? s:icons.unmerged : s:icons.current
   endif
 
-  let remote_details = pieces[4] . ' ' . pieces[5]
+  let remote_details = pieces[3] . ' ' . pieces[4]
   let branch.tracking = ''
   if a:type ==# 'heads'
-    let branch.tracking = pieces[4]
+    let branch.tracking = pieces[3]
   endif
   let branch.remote =  branch.tracking != '' ? split(branch.tracking, '/')[0] : ''
   if branch.tracking !=# ''
-    if pieces[5] !=# ''
+    if pieces[4] !=# ''
       let branch.status      = 'both'
       let branch.decoration .= s:icons.both
     elseif match(remote_details, '\vahead [0-9]') >= 0
@@ -246,16 +246,16 @@ function! s:parse_branch(branch, type) abort
     let branch.group = branch_split[0]
   endif
 
-  let remote_details = pieces[4]
-  if pieces[5] !=# ''
-    let remote_details = remote_details . ': ' . pieces[5][1:-2]
+  let remote_details = pieces[3]
+  if pieces[4] !=# ''
+    let remote_details = remote_details . ': ' . pieces[4][1:-2]
   endif
 
   if remote_details ==# ''
-    let branch.details = join([pieces[2], pieces[6]], ' ')
+    let branch.details = join([pieces[2], pieces[5]], ' ')
   else
     let remote_details = '['.remote_details.']'
-    let branch.details = join([pieces[2], remote_details, pieces[6]], ' ')
+    let branch.details = join([pieces[2], remote_details, pieces[5]], ' ')
   endif
 
   return branch
@@ -279,12 +279,11 @@ function! s:_git_branch_vv(type) abort
         \ '%(HEAD)',
         \ '%(refname:short)',
         \ '%(objectname:short)',
-        \ '%(push:remotename)',
         \ '%(upstream:short)',
         \ '%(upstream:track)',
         \ '%(contents:subject)',
         \ ], "\t\t")
-  for branch in s:git_cmd('for-each-ref refs/' . a:type . " --no-color --format=$'".format."'", 0)
+  for branch in s:git_cmd('for-each-ref refs/' . a:type . " --format=$'".format."'", 0)
     call add(branches, s:parse_branch(branch, a:type))
   endfor
 
