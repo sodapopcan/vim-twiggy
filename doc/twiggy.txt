@@ -240,8 +240,11 @@ o                 Same as c
                                                 *twiggy-O*
 O                 Same as C
 
+                                                *twiggy-gc*
+gc                Prompt to checkout branch with a new name.
+
                                                 *twiggy-go*
-go                Prompt to checkout branch with a new name.
+go                Same as gc
 
                   Fetching~
                                                 *twiggy-f*
