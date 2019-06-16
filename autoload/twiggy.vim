@@ -750,6 +750,7 @@ function! s:PromptToStash() abort
         \ "s:git_cmd('stash', 0)", 1)
 endfunction
 
+"    {{{2 ErrorMsg
 function! s:ErrorMsg() abort
   if v:warningmsg !=# ''
     redraw
