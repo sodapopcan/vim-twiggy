@@ -985,10 +985,6 @@ function! s:Render() abort
     nnoremap <buffer> gL :exec ':' . g:twiggy_git_log_command . ' ' . <SID>branch_under_cursor().fullname . '..'<CR>
   endif
 
-  if g:twiggy_enable_remote_delete
-    call s:mapping('d^',      'DeleteRemote',     [])
-  endif
-
  " {{{ Syntax
   syntax clear
 
