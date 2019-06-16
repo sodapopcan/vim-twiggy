@@ -974,10 +974,10 @@ function! s:Render() abort
   call s:mapping('gM',      'Merge',            [1, '--no-ff'])
   call s:mapping('r',       'Rebase',           [0])
   call s:mapping('R',       'Rebase',           [1])
-  call s:mapping('^',       'Push',             [0, 0])
-  call s:mapping('g^',      'Push',             [1, 0])
-  call s:mapping('!^',      'Push',             [0, 1])
-  call s:mapping('V',       'Pull',             [])
+  call s:mapping('^',       'Push',             [0, 0]) " deprecated
+  call s:mapping('g^',      'Push',             [1, 0]) " deprecated 
+  call s:mapping('!^',      'Push',             [0, 1]) " deprecated
+  call s:mapping('V',       'Pull',             [])     " deprecated
   call s:mapping('P',       'Push',             [0, 0])
   call s:mapping('gP',      'Push',             [1, 0])
   call s:mapping('!P',      'Push',             [0, 1])
