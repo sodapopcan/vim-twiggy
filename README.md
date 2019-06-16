@@ -52,9 +52,9 @@ branch.  Use `r` and `R` for rebasing.  `F` fetches the branch under the cursor.
 
 ### And finally...
 
-`^` to push (also sets the upstream).
+`P` to push (also sets the upstream).
 
-`V` to pull.
+`p` to pull.
 
 `dd` to delete a branch.  You will be prompted if it's unmerged.
 

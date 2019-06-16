@@ -165,6 +165,19 @@ endfunction
 "   {{{2 call
 function! s:call(mapping) abort
   let key = s:encode_mapping(a:mapping)
+  let deprecated_mappings = {
+        \ '^': 'P',
+        \ 'g^': 'gP',
+        \ '!^': '!P',
+        \ 'V': 'p',
+        \ 'd^': 'dP'
+        \ }
+  let encoded_mapping = s:encode_mapping(a:mapping)
+  if has_key(deprecated_mappings, encoded_mapping)
+    let t:twiggy_deprecation_notice = "WARNING: `".a:mapping
+          \ ."` is deprecated and will eventually be removed.  "
+          \ ."Use `".deprecated_mappings[encoded_mapping]."` instead."
+  endif
   if call('s:' . s:mappings[key][0], s:mappings[key][1])
     call s:ErrorMsg()
   else
@@ -591,10 +604,10 @@ function! s:quickhelp_view() abort
   call add(output, 'gM    `M` --no-ff')
   call add(output, 'r     rebase')
   call add(output, 'R     rebase remote')
-  call add(output, '^     push')
-  call add(output, 'g^    push (prompted)')
-  call add(output, '!^    force push')
-  call add(output, 'V     pull')
+  call add(output, 'P     push')
+  call add(output, 'gP    push (prompted)')
+  call add(output, '!P    force push')
+  call add(output, 'p     pull')
   if g:twiggy_git_log_command !=# ''
     call add(output, 'gl    git log')
     call add(output, 'gL    git log `..`')
@@ -602,7 +615,7 @@ function! s:quickhelp_view() abort
   call add(output, ',     rename')
   call add(output, 'dd    delete')
   if g:twiggy_enable_remote_delete
-    call add(output, 'd^    delete from server')
+    call add(output, 'dP    delete from server')
   endif
   call add(output, '.     :Git <cursor> <branch>')
   call add(output, '<<    stash')
@@ -668,7 +681,16 @@ function! s:show_branch_details() abort
       let details = details[0:max_len] . '...'
     endif
     redraw
-    echo details
+    " Hacky deprecation code
+    if exists('t:twiggy_deprecation_notice')
+      redraw
+      echohl WarningMsg
+      echomsg t:twiggy_deprecation_notice
+      echohl None
+      unlet t:twiggy_deprecation_notice
+    else
+      echo details
+    endif
   end
 endfunction
 
@@ -728,7 +750,6 @@ function! s:PromptToStash() abort
         \ "s:git_cmd('stash', 0)", 1)
 endfunction
 
-"   {{{2 ErrorMsg
 function! s:ErrorMsg() abort
   if v:warningmsg !=# ''
     redraw
@@ -956,6 +977,10 @@ function! s:Render() abort
   call s:mapping('g^',      'Push',             [1, 0])
   call s:mapping('!^',      'Push',             [0, 1])
   call s:mapping('V',       'Pull',             [])
+  call s:mapping('P',       'Push',             [0, 0])
+  call s:mapping('gP',      'Push',             [1, 0])
+  call s:mapping('!P',      'Push',             [0, 1])
+  call s:mapping('p',       'Pull',             [])
   call s:mapping(',',       'Rename',           [])
   call s:mapping('<<',      'Stash',            [0])
   call s:mapping('>>',      'Stash',            [1])

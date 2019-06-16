@@ -275,24 +275,24 @@ R                 Rebase the current branch off the branch under the
                   cursor's remote (if it has one).
 
                   Pushing~
-                                                *twiggy-^*
-^                 Push the local branch under the cursor (think of it as an
+                                                *twiggy-P*
+P                 Push the local branch under the cursor (think of it as an
                   upward arrow).  It will set the upstream if it's not
                   currently set--You can turn off this behaviour with:
                   >
                     let g:twiggy_set_upstream = 0
 <
-                                                *twiggy-g^*
-g^                Prompt to specify the remote repo before pushing.
+                                                *twiggy-gP*
+gP                Prompt to specify the remote repo before pushing.
 
-                                                *twiggy-!^*
-!^                Force push.  This is prompted by default.  Turn this
+                                                *twiggy-!P*
+!P                Force push.  This is prompted by default.  Turn this
                   behaviour off with:
 >
                     let g:twiggy_prompted_force_push = 0
 <
-                                                *twiggy-V*
-V                 Pull the branch under the cursor.
+                                                *twiggy-p*
+p                 Pull the branch under the cursor.
 
                   Naming~
                                                 *twiggy-,*
@@ -304,8 +304,8 @@ dd                Delete the branch under the cursor.  If the branch isn't
                   fully merged, the prompt will warn you of this.  Press <CR>
                   or y to accept, press <Esc> or n to cancel.
 
-                                                *twiggy-d^*
-d^                If the branch under the cursor is remote, this will prompt
+                                                *twiggy-dP*
+dP                If the branch under the cursor is remote, this will prompt
                   you to delete the branch off of the remote repo.  Since this
                   can be dangerous in the wrong hands, you have to turn this
                   mapping on with:
