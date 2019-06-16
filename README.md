@@ -46,7 +46,7 @@ settings will be remembered until you close Vim.
 
 With your cursor on a branch, `m` merges it into the current branch.  With your
 cursor on a local branch, `M` will merge its tracked remote into the current
-branch.  Use `r` and `R` for rebasing.  `F` fetches the branch under the cursor.
+branch.  Use `r` and `R` for rebasing.  `f` fetches the branch under the cursor.
 
 `u` aborts a merge or rebase.
 

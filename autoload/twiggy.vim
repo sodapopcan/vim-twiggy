@@ -166,6 +166,7 @@ endfunction
 function! s:call(mapping) abort
   let key = s:encode_mapping(a:mapping)
   let deprecated_mappings = {
+        \ 'F': 'f',
         \ '^': 'P',
         \ 'g^': 'gP',
         \ '!^': '!P',
@@ -597,7 +598,7 @@ function! s:quickhelp_view() abort
   call add(output, 'O     checkout remote')
   call add(output, 'gc    checkout as: <name>')
   call add(output, 'go    checkout as: <name>')
-  call add(output, 'F     fetch remote')
+  call add(output, 'f     fetch remote')
   call add(output, 'm     merge')
   call add(output, 'M     merge remote')
   call add(output, 'gm    `m` --no-ff')
@@ -967,7 +968,8 @@ function! s:Render() abort
   call s:mapping('gc',      'CheckoutAs',       [])
   call s:mapping('go',      'CheckoutAs',       [])
   call s:mapping('dd',      'Delete',           [])
-  call s:mapping('F',       'Fetch',            [0])
+  call s:mapping('F',       'Fetch',            [0]) " deprecated
+  call s:mapping('f',       'Fetch',            [0])
   call s:mapping('m',       'Merge',            [0, ''])
   call s:mapping('M',       'Merge',            [1, ''])
   call s:mapping('gm',      'Merge',            [0, '--no-ff'])

@@ -248,7 +248,7 @@ go                Same as gc
 
                   Fetching~
                                                 *twiggy-f*
-F                 Fetch the remote for the branch under the cursor.
+f                 Fetch the remote for the branch under the cursor.
 
                   Merging and Rebasing~
                                                 *twiggy-m*
