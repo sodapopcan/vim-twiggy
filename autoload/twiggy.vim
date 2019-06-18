@@ -331,7 +331,7 @@ function! twiggy#get_branches() abort
             \ 'decoration': s:icons['detached'].' ',
             \ 'status': 'detached',
             \ 'fullname': 'HEAD',
-            \ 'name': 'HEAD@'.s:git_cmd('show-ref --hash=9 HEAD', 0)[0],
+            \ 'name': 'HEAD@'.s:git_cmd('rev-parse --revs-only --short HEAD', 0)[0],
             \ 'is_local': 1,
             \ 'current': 0,
             \ 'remote': s:git_cmd('remote', 0)[0],
