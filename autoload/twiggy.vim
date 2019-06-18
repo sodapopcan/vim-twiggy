@@ -1298,9 +1298,8 @@ function! s:Fetch(pull) abort
   let cmd = a:pull ? 'pull' : 'fetch'
   let branch = s:branch_under_cursor()
   if branch.tracking !=# ''
-    let parts = split(branch.tracking, '/')
-    call s:git_cmd(cmd . ' ' . parts[0] . ' ' . join(parts[1:], '/') .
-          \ ':refs/remotes/' . parts[0] . '/' . branch.fullname, 1)
+    let remote = split(branch.tracking, '/')[0]
+    call s:git_cmd(cmd . ' ' . remote . ' ' . branch.name, 1)
   else
     redraw
     echo branch.name . ' is not a tracking branch'
