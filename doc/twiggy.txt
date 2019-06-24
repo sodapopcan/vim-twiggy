@@ -134,7 +134,7 @@ Default: 0
 Ensures all branch names are visible in twiggy's buffer (overrides
 |'adapt_columns'|).
 >
-  let g:twiggy_num_columns = 1
+  let g:twiggy_adapt_columns = 1
 <
                                                 *'split_method'*
 Default: 'topleft'
