@@ -906,7 +906,7 @@ function! s:Render() abort
   delete _
   normal! gg
 
-  setlocal nomodified nomodifiable noswapfile
+  setlocal nomodified nomodifiable noswapfile winfixwidth
 
   if s:attn_mode()
     if t:twiggy_git_mode ==# 'rebase'
