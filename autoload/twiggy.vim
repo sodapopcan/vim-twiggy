@@ -1299,7 +1299,7 @@ function! s:Fetch(pull) abort
   let branch = s:branch_under_cursor()
   if branch.tracking !=# ''
     let remote = split(branch.tracking, '/')[0]
-    call s:git_cmd(cmd . ' ' . remote . ' ' . branch.name, 1)
+    call s:git_cmd(cmd . ' ' . remote . ' ' . branch.fullname, 1)
   else
     redraw
     echo branch.name . ' is not a tracking branch'
