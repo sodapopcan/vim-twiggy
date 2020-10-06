@@ -105,4 +105,4 @@ Plug 'sodapopcan/vim-twiggy'
 ## About
 
 If you like this plugin, please star it and vote for it on
-[vim.org](https://vim.sourceforge.io/scripts/script.php?script_id=5644)!
+[vim.org](https://www.vim.org/scripts/script.php?script_id=5643)!
