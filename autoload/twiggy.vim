@@ -86,6 +86,7 @@ let s:icons.unmerged = s:icon_set[6]
 let g:twiggy_num_columns            = get(g:,'twiggy_num_columns',            31                                                       )
 let g:twiggy_adapt_columns          = get(g:,'twiggy_adapt_columns',          0                                                        )
 let g:twiggy_split_position         = get(g:,'twiggy_split_position',         ''                                                       )
+let g:twiggy_split_method           = get(g:,'twiggy_split_method ',          ''                                                       )
 let g:twiggy_local_branch_sort      = get(g:,'twiggy_local_branch_sort',      'alpha'                                                  )
 let g:twiggy_local_branch_sorts     = get(g:,'twiggy_local_branch_sorts',     ['alpha', 'date', 'track', 'mru']                        )
 let g:twiggy_remote_branch_sort     = get(g:,'twiggy_remote_branch_sort',     'alpha'                                                  )

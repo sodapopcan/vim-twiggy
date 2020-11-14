@@ -136,12 +136,12 @@ Ensures all branch names are visible in twiggy's buffer (overrides
 >
   let g:twiggy_adapt_columns = 1
 <
-                                                *'split_method'*
-Default: 'topleft'
+                                                *'split_position'*
+Default: ''
 The split method used to show the twiggy buffer.  Can be |leftabove|,
 |rightbelow|, |topleft| or |botright|.
 >
-  let g:twiggy_split_method = 'botright'
+  let g:twiggy_split_position = 'botright'
 <
 Twiggy only allows a vertical split.
 
