@@ -166,7 +166,7 @@ the following:
 <
                                                 *'prompted_force_push'*
 Default: 1
-Prompts to make sure you really want to force push.  Turn this off with:
+Prompts to make sure you really want to force push (with lease).  Turn this off with:
 >
   let g:twiggy_prompted_force_push = 0
 <
@@ -286,8 +286,8 @@ P                 Push the local branch under the cursor (think of it as an
 gP                Prompt to specify the remote repo before pushing.
 
                                                 *twiggy-!P*
-!P                Force push.  This is prompted by default.  Turn this
-                  behaviour off with:
+!P                Force push with lease.  This is prompted by default.  Turn 
+                  this behaviour off with:
 >
                     let g:twiggy_prompted_force_push = 0
 <
