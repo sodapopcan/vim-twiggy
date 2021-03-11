@@ -608,7 +608,7 @@ function! s:quickhelp_view() abort
   call add(output, 'R     rebase remote')
   call add(output, 'P     push')
   call add(output, 'gP    push (prompted)')
-  call add(output, '!P    force push')
+  call add(output, '!P    force push (with lease)')
   call add(output, 'p     pull')
   if g:twiggy_git_log_command !=# ''
     call add(output, 'gl    git log')
@@ -1392,7 +1392,7 @@ function! s:Push(choose_upstream, force) abort
 
   let flags = ''
   if a:force
-    let flags .= ' --force'
+    let flags .= ' --force-with-lease'
   end
 
   if branch.tracking ==# '' && !a:choose_upstream
