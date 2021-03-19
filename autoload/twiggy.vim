@@ -84,9 +84,10 @@ let s:icons.unmerged = s:icon_set[6]
 " {{{1 Options
 
 let g:twiggy_num_columns            = get(g:,'twiggy_num_columns',            31                                                       )
+let g:twiggy_num_rows               = get(g:,'twiggy_num_rows',               31                                                       )
 let g:twiggy_adapt_columns          = get(g:,'twiggy_adapt_columns',          0                                                        )
+let g:twiggy_split_direction        = get(g:,'twiggy_split_direction',        'vertical'                                               )
 let g:twiggy_split_position         = get(g:,'twiggy_split_position',         ''                                                       )
-let g:twiggy_split_method           = get(g:,'twiggy_split_method ',          ''                                                       )
 let g:twiggy_local_branch_sort      = get(g:,'twiggy_local_branch_sort',      'alpha'                                                  )
 let g:twiggy_local_branch_sorts     = get(g:,'twiggy_local_branch_sorts',     ['alpha', 'date', 'track', 'mru']                        )
 let g:twiggy_remote_branch_sort     = get(g:,'twiggy_remote_branch_sort',     'alpha'                                                  )
@@ -840,7 +841,11 @@ function! s:Render() abort
     if &filetype ==# 'twiggyqh'
       exec "edit" fname
     else
-      exec 'silent keepalt' g:twiggy_split_position g:twiggy_num_columns . 'vsplit' fname
+      if g:twiggy_split_direction ==# "horizontal"
+        exec 'silent keepalt' g:twiggy_split_position g:twiggy_num_rows . 'split' fname
+      else
+        exec 'silent keepalt' g:twiggy_split_position g:twiggy_num_columns . 'vsplit' fname
+      endif
     endif
     setlocal filetype=twiggy buftype=nofile bufhidden=delete
     setlocal nonumber nowrap lisp
@@ -889,7 +894,7 @@ function! s:Render() abort
     call extend(output, s:standard_view())
   end
 
-  if g:twiggy_adapt_columns
+  if g:twiggy_adapt_columns && g:twiggy_split_direction !=# "horizontal"
     let cols = 0
     for line in output
       let line_length = len(line)

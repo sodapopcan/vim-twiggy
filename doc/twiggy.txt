@@ -125,17 +125,31 @@ OTHER OPTIONS                                   *twiggy-options*
 
                                                 *'num_columns'*
 Default: 31
-The width of Twiggy's buffer
+The width of Twiggy's buffer.  Only applies for vertical splits.
 >
   let g:twiggy_num_columns = 25
 <
+                                                *'num_rows'*
+Default: 31
+The height of Twiggy's buffer.  Only applies for horizontal splits.
+>
+  let g:twiggy_num_rows = 25
+<
+
                                                 *'adapt_columns'*
 Default: 0
 Ensures all branch names are visible in twiggy's buffer (overrides
-|'adapt_columns'|).
+|'adapt_columns'|).  Only applies for vertical splits.
 >
   let g:twiggy_adapt_columns = 1
 <
+                                                *'split_direction'*
+Default: 'vertical'
+The direction of the split.  Can be |vertical| or |horizontal|.
+>
+  let g:twiggy_split_direction = 'vertical'
+<
+
                                                 *'split_position'*
 Default: ''
 The split method used to show the twiggy buffer.  Can be |leftabove|,
@@ -143,8 +157,6 @@ The split method used to show the twiggy buffer.  Can be |leftabove|,
 >
   let g:twiggy_split_position = 'botright'
 <
-Twiggy only allows a vertical split.
-
                                                 *'git_log_command'*
 Default: ''
 The command to use for the `gl` mapping.  See |twiggy-git-log|.
