@@ -1002,7 +1002,7 @@ function! s:Render() abort
   call s:mapping('gi',      'CycleSort',        [1, 1])
   call s:mapping('gI',      'CycleSort',        [1, -1])
   call s:mapping('a',       'ToggleSlashSort',  [1])
-  call s:mapping('A',       'ToggleSlashSort',  [0])
+  call s:mapping('ga',      'ToggleSlashSort',  [0])
 
   nnoremap <buffer> <expr> . <SID>dot()
   function! s:dot() abort
