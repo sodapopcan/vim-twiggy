@@ -93,6 +93,7 @@ let g:twiggy_local_branch_sorts     = get(g:,'twiggy_local_branch_sorts',     ['
 let g:twiggy_remote_branch_sort     = get(g:,'twiggy_remote_branch_sort',     'alpha'                                                  )
 let g:twiggy_remote_branch_sorts    = get(g:,'twiggy_remote_branch_sorts',    ['alpha', 'date']                                        )
 let g:twiggy_group_locals_by_slash  = get(g:,'twiggy_group_locals_by_slash',  1                                                        )
+let g:twiggy_group_remotes_by_slash = get(g:,'twiggy_group_remotes_by_slash', 0                                                        )
 let g:twiggy_set_upstream           = get(g:,'twiggy_set_upstream',           1                                                        )
 let g:twiggy_prompted_force_push    = get(g:,'twiggy_prompted_force_push',    1                                                        )
 let g:twiggy_enable_remote_delete   = get(g:,'twiggy_enable_remote_delete',   0                                                        )
@@ -241,15 +242,10 @@ function! s:parse_branch(branch, type) abort
   if a:type == 'heads'
     let branch.is_local = 1
     let branch.type  = 'local'
-    if g:twiggy_group_locals_by_slash
-      if match(branch.fullname, '/') >= 0
-        let group = matchstr(branch.fullname, '\v[^/]*')
-        let branch.group = group
-        let branch.name = s:sub(branch.fullname, group . '/', '')
-      else
-        let branch.group = 'local'
-        let branch.name = branch.fullname
-      endif
+    if g:twiggy_group_locals_by_slash && (match(branch.fullname, '/') >= 0)
+      let group = matchstr(branch.fullname, '\v[^/]*')
+      let branch.group = group
+      let branch.name = s:sub(branch.fullname, group . '/', '')
     else
       let branch.group = 'local'
       let branch.name = branch.fullname
@@ -259,7 +255,15 @@ function! s:parse_branch(branch, type) abort
     let branch.type = 'remote'
     let branch_split = split(branch.fullname, '/')
     let branch.name  = join(branch_split[1:], '/')
-    let branch.group = branch_split[0]
+
+    if g:twiggy_group_remotes_by_slash && (match(branch.name, '/') >= 0)
+      let group = matchstr(branch.name, '\v[^/]*')
+      let branch.group = join([branch_split[0], group], '/')
+      let branch.name = s:sub(branch.name, group . '/', '')
+    else
+      let branch.group = branch_split[0]
+      let branch.name  = join(branch_split[1:], '/')
+    endif
   endif
 
   let remote_details = pieces[3]
@@ -997,7 +1001,8 @@ function! s:Render() abort
   call s:mapping('I',       'CycleSort',        [0, -1])
   call s:mapping('gi',      'CycleSort',        [1, 1])
   call s:mapping('gI',      'CycleSort',        [1, -1])
-  call s:mapping('a',       'ToggleSlashSort',  [])
+  call s:mapping('a',       'ToggleSlashSort',  [1])
+  call s:mapping('ga',      'ToggleSlashSort',  [0])
 
   nnoremap <buffer> <expr> . <SID>dot()
   function! s:dot() abort
@@ -1200,8 +1205,12 @@ function! s:CycleSort(alt, int) abort
 endfunction
 
 "     {{{3 Slash Group
-function! s:ToggleSlashSort() abort
-  let g:twiggy_group_locals_by_slash = g:twiggy_group_locals_by_slash ? 0 : 1
+function! s:ToggleSlashSort(local) abort
+  if (a:local)
+      let g:twiggy_group_locals_by_slash = g:twiggy_group_locals_by_slash ? 0 : 1
+  else
+      let g:twiggy_group_remotes_by_slash = g:twiggy_group_remotes_by_slash ? 0 : 1
+  endif
   return 0
 endfunction
 

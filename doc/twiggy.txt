@@ -119,7 +119,11 @@ default with the following:
 >
   let g:twiggy_group_locals_by_slash = 0
 <
-
+You can also use the |twiggy-ga| mapping to toggle grouping for remote branches.
+You may set this grouping to the default with the following.
+>
+  let g:twiggy_group_remotes_by_slash = 1
+<
 
 OTHER OPTIONS                                   *twiggy-options*
 
@@ -227,6 +231,10 @@ gI                Like gi, but in reverse... even though there are only two
 
                                                 *twiggy-a*
 a                 Toggle grouping of local branches with slashes (/) in their
+                  names.
+
+                                                *twiggy-ga*
+ga                Toggle grouping of remote branches with slashes (/) in their
                   names.
 
                   Checkout~
