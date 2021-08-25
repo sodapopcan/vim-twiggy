@@ -145,12 +145,8 @@ function! s:gitize(cmd) abort
   if exists('t:twiggy_bufnr') && t:twiggy_bufnr == bufnr('')
     let git_cmd = t:twiggy_git_cmd
   else
-    let git_cmd = fugitive#repo().git_command()
+    let git_cmd = FugitiveShellCommand()
   end
-  let parts = split(git_cmd, " ")
-  let worktree = "--work-tree=".s:sub(split(parts[1], "=")[1], '\v/.git$', "/")
-  call insert(parts, worktree, 1)
-  let git_cmd = join(parts, " ")
   return git_cmd . ' ' . a:cmd
 endfunction
 
@@ -834,7 +830,7 @@ function! s:Render() abort
 
   if exists('b:git_dir') && &filetype !=# 'twiggy'
     let t:twiggy_git_dir = b:git_dir
-    let t:twiggy_git_cmd = fugitive#repo().git_command()
+    let t:twiggy_git_cmd = FugitiveShellCommand()
   elseif !exists('t:twiggy_git_cmd')
     echo "Not a git repository"
     return
@@ -1128,7 +1124,7 @@ function! s:Refresh() abort
   let t:refreshing = 1
   if &filetype !=# 'twiggy'
     let t:twiggy_git_dir = b:git_dir
-    let t:twiggy_git_cmd = fugitive#repo().git_command()
+    let t:twiggy_git_cmd = FugitiveShellCommand()
     call s:buffocus(t:twiggy_bufnr)
   endif
   call s:Render()
@@ -1158,7 +1154,7 @@ function! twiggy#Branch(...) abort
       else
         " If twiggy is open, :Twiggy will focus the twiggy buffer then redraw " it
         let t:twiggy_git_dir = b:git_dir
-        let t:twiggy_git_cmd = fugitive#repo().git_command()
+        let t:twiggy_git_cmd = FugitiveShellCommand()
         call s:buffocus(t:twiggy_bufnr)
       end
     endif
