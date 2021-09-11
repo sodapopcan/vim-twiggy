@@ -370,6 +370,12 @@ Q                 Quit all twiggy buffers (including the error buffer)
 ?                 Open the quickhelp
 
 
+AUTOCOMMANDS                                    *twiggy-autocommands*
+
+                                                *User_TwiggyCheckout*
+TwiggyCheckout          After checking out a branch.
+
+
 SYNTAX                                        *twiggy-syntax*
 
 Twiggy provides a handful of syntax groups for your customization kicks.
