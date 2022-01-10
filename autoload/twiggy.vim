@@ -198,7 +198,7 @@ endfunction
 function! s:parse_branch(branch, type) abort
   let branch = {}
 
-  let pieces = split(a:branch, "\t\t")
+  let pieces = split(a:branch, "\t\t", 1)
 
   let branch.current = pieces[0] ==# "*"
 
