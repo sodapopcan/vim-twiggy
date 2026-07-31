@@ -39,7 +39,7 @@ endfunction
 " Create local mappings in the twiggy buffer
 function! s:mapping(mapping, fn, args) abort
   let s:mappings[s:encode_mapping(a:mapping)] = [a:fn, a:args]
-  exe "nnoremap <buffer> <silent> " .
+  exe "nnoremap <buffer> <silent> <nowait> " .
         \ a:mapping . " :<C-U>call <SID>call('" .
         \ s:encode_mapping(a:mapping) . "')<CR>"
 endfunction
@@ -724,8 +724,8 @@ function! s:RenderOutputBuffer() abort
   syntax match TwiggyOutputFile "\v^\t(.*)"
   highlight link TwiggyOutputFile Constant
 
-  nnoremap <buffer> q :quit<CR>
-  nnoremap <buffer> Q :quit<CR>:call <SID>Close()<CR>
+  nnoremap <buffer> <nowait> q :quit<CR>
+  nnoremap <buffer> <nowait> Q :quit<CR>:call <SID>Close()<CR>
 endfunction
 
 "   {{{2 Confirm
@@ -854,9 +854,9 @@ function! s:Render() abort
     let t:twiggy_bufnr = bufnr('')
   endif
 
-  nnoremap <buffer> <silent> q :<C-U>call <SID>Close()<CR>
+  nnoremap <buffer> <silent> <nowait> q :<C-U>call <SID>Close()<CR>
   if g:twiggy_enable_quickhelp
-    nnoremap <buffer> <silent> ? :<C-U>call <SID>Quickhelp()<CR>
+    nnoremap <buffer> <silent> <nowait> ? :<C-U>call <SID>Quickhelp()<CR>
   endif
 
   autocmd! BufWinLeave twiggy://*
@@ -952,17 +952,17 @@ function! s:Render() abort
     autocmd BufReadPost,BufEnter,VimResized twiggy://* call <SID>Refresh()
   augroup END
 
-  nnoremap <buffer> <silent> j      :<C-U>call <SID>traverse_branches('j')<CR>
-  nnoremap <buffer> <silent> k      :<C-U>call <SID>traverse_branches('k')<CR>
-  nnoremap <buffer> <silent> <Down> :<C-U>call <SID>traverse_branches('j')<CR>
-  nnoremap <buffer> <silent> <Up>   :<C-U>call <SID>traverse_branches('k')<CR>
-  nnoremap <buffer> <silent> <C-N>  :<C-U>call <SID>traverse_groups('j')<CR>
-  nnoremap <buffer> <silent> <C-P>  :<C-U>call <SID>traverse_groups('k')<CR>
-  nnoremap <buffer> <silent> J      :<C-U>call <SID>jump_to_current_branch()<CR>
+  nnoremap <buffer> <silent> <nowait> j      :<C-U>call <SID>traverse_branches('j')<CR>
+  nnoremap <buffer> <silent> <nowait> k      :<C-U>call <SID>traverse_branches('k')<CR>
+  nnoremap <buffer> <silent> <nowait> <Down> :<C-U>call <SID>traverse_branches('j')<CR>
+  nnoremap <buffer> <silent> <nowait> <Up>   :<C-U>call <SID>traverse_branches('k')<CR>
+  nnoremap <buffer> <silent> <nowait> <C-N>  :<C-U>call <SID>traverse_groups('j')<CR>
+  nnoremap <buffer> <silent> <nowait> <C-P>  :<C-U>call <SID>traverse_groups('k')<CR>
+  nnoremap <buffer> <silent> <nowait> J      :<C-U>call <SID>jump_to_current_branch()<CR>
   if s:showing_full_ui()
-    nnoremap <buffer> <silent> gg    :normal! 4gg<CR>
+    nnoremap <buffer> <silent> <nowait> gg    :normal! 4gg<CR>
   else
-    nnoremap <buffer> <silent> gg    :normal! 2gg<CR>
+    nnoremap <buffer> <silent> <nowait> gg    :normal! 2gg<CR>
   endif
 
   call s:mapping('<CR>',    'Checkout',         [1])
@@ -1002,7 +1002,7 @@ function! s:Render() abort
   call s:mapping('a',       'ToggleSlashSort',  [1])
   call s:mapping('ga',      'ToggleSlashSort',  [0])
 
-  nnoremap <buffer> <expr> . <SID>dot()
+  nnoremap <buffer> <nowait> <expr> . <SID>dot()
   function! s:dot() abort
     let branch = s:branch_under_cursor()
 
@@ -1018,8 +1018,8 @@ function! s:Render() abort
   endif
 
   if g:twiggy_git_log_command !=# ''
-    nnoremap <buffer> gl :exec ':' . g:twiggy_git_log_command . ' ' . <SID>branch_under_cursor().fullname<CR>
-    nnoremap <buffer> gL :exec ':' . g:twiggy_git_log_command . ' ' . <SID>branch_under_cursor().fullname . '..'<CR>
+    nnoremap <buffer> <nowait> gl :exec ':' . g:twiggy_git_log_command . ' ' . <SID>branch_under_cursor().fullname<CR>
+    nnoremap <buffer> <nowait> gL :exec ':' . g:twiggy_git_log_command . ' ' . <SID>branch_under_cursor().fullname . '..'<CR>
   endif
 
  " {{{ Syntax
@@ -1093,8 +1093,8 @@ function! s:Quickhelp() abort
   unlet t:twiggy_cached_git_dir
   let bufnr = bufnr('')
 
-  nnoremap <buffer> <silent> q :quit<CR>
-  nnoremap <buffer> <silent> ? :Twiggy<CR>
+  nnoremap <buffer> <silent> <nowait> q :quit<CR>
+  nnoremap <buffer> <silent> <nowait> ? :Twiggy<CR>
 
   call append(0, s:quickhelp_view())
   normal! G
